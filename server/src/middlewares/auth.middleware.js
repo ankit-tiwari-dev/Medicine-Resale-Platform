@@ -28,7 +28,11 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
 
 export const verifyRole = (...roles) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
+        const userRole = req.user.role;
+        // If the route requires 'user' role, 'rider' can also access it (Dual-Capability)
+        const authorizedRoles = roles.includes('user') ? [...roles, 'rider'] : roles;
+
+        if (!authorizedRoles.includes(userRole)) {
             throw new ApiError(403, "You are not authorized to perform this action");
         }
         next();

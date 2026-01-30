@@ -46,6 +46,11 @@ export const createOrder = asyncHandler(async (req, res) => {
         throw new ApiError(400, `Some medicines are not available: ${unavailable.map(m => m.name).join(", ")}`);
     }
 
+    const selfPurchase = medicines.filter(m => m.sellerId.toString() === req.user._id.toString());
+    if (selfPurchase.length > 0) {
+        throw new ApiError(400, `You cannot purchase your own medicine: ${selfPurchase.map(m => m.name).join(", ")}`);
+    }
+
     // Group by seller
     const sellerGroups = groupItemsBySeller(medicines);
 

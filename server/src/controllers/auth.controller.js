@@ -182,6 +182,18 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 });
 
+export const googleAuth = asyncHandler(async (req, res) => {
+    const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: [
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email'
+        ],
+        prompt: 'consent'
+    });
+    res.redirect(url);
+});
+
 export const googleAuthCallback = asyncHandler(async (req, res) => {
     try {
         const { code } = req.query;

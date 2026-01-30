@@ -24,6 +24,10 @@ export const addToCart = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Medicine is not available for purchase");
     }
 
+    if (medicine.sellerId.toString() === req.user._id.toString()) {
+        throw new ApiError(400, "You cannot purchase your own medicine");
+    }
+
     const cart = await getOrCreateCart(req.user._id);
 
     // Check if item already exists in cart
