@@ -97,6 +97,7 @@ describe('Medicine Resale Platform - Complete User Flow', () => {
             .post('/api/v1/medicines/upload')
             .set('Authorization', `Bearer ${sellerToken}`)
             .field('description', 'Test medicine description')
+            .field('forceMock', 'true')
             .attach('images', Buffer.from('fake-image-content'), 'medicine.jpg');
 
         expect(res.statusCode).toBe(201);
@@ -170,7 +171,9 @@ describe('Medicine Resale Platform - Complete User Flow', () => {
             });
 
         expect(buyRes.statusCode).toBe(201);
-        expect(buyRes.body.data.status).toBe('pending');
+        // Expect array of orders
+        expect(Array.isArray(buyRes.body.data)).toBe(true);
+        expect(buyRes.body.data[0].status).toBe('pending');
 
         const medicine = await Medicine.findById(medicineId);
         expect(medicine.status).toBe('sold');
@@ -182,15 +185,15 @@ describe('Medicine Resale Platform - Complete User Flow', () => {
             .post('/api/v1/wallet/withdraw')
             .set('Authorization', `Bearer ${sellerToken}`)
             .send({
-                amount: 100,
+                amount: 10,
                 bankDetails: 'HDFC 123456789'
             });
 
         expect(withdrawRes.statusCode).toBe(201);
 
         const wallet = await Wallet.findOne({ userId: sellerId });
-        // Initial credit was 80% of mock MRP (500) = 400.
-        // Withdraw 100.
-        expect(wallet.balance).toBe(300);
+        // Initial credit was 80% of mock MRP (100) = 80.
+        // Withdraw 10.
+        expect(wallet.balance).toBe(70);
     });
 });
