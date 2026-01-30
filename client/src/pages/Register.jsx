@@ -200,6 +200,13 @@ const Register = () => {
                             Log In
                         </Link>
                     </p>
+
+                    <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+                        <p className="text-gray-500 text-sm font-medium">Work with us?</p>
+                        <Link to="/register-rider" className="text-teal-600 font-bold text-sm hover:underline">
+                            Join as Rider
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
