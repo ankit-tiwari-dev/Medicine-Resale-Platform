@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, Phone, ArrowRight, Loader2, CheckCircle, Truck, ShieldCheck, CreditCard } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowRight, Loader2, Truck, CreditCard } from 'lucide-react';
 import symbol from '../assets/symbol.png';
-import bgImage from '../assets/pexels-antonella-traversaro-445347-1138746.jpg';
 
 const RiderRegister = () => {
     const [formData, setFormData] = useState({
@@ -30,168 +29,154 @@ const RiderRegister = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-white font-sans text-gray-900">
-            {/* Left Side: Branding */}
-            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#003232]">
-                <div className="absolute inset-0 z-0">
-                    <img
-                        src={bgImage}
-                        alt="MedAImart"
-                        className="w-full h-full object-cover opacity-10"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#003232] via-[#003232]/95 to-[#32aeb1]/20" />
+        <div className="min-h-screen flex bg-white font-sans text-slate-800">
+            {/* Left Side: Branding (40% width) */}
+            <div className="hidden lg:flex lg:w-[40%] relative bg-[#022c22] overflow-hidden flex-col justify-between p-16 text-white">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-teal-900/40 via-[#022c22] to-[#022c22] opacity-70" />
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full" />
                 </div>
 
-                <div className="relative z-10 w-full min-h-full flex flex-col justify-start pt-24 px-20">
-                    <div className="flex items-center gap-4 mb-12">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
-                            <img src={symbol} alt="Logo" className="w-full h-full object-contain p-2" />
-                        </div>
-                        <span className="text-4xl font-extrabold text-white tracking-tight">
-                            Med<span className="text-teal-400">AI</span>mart
-                        </span>
+                <div className="relative z-10">
+                    <div className="inline-block px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-bold uppercase tracking-wider mb-8">
+                        Earn with Us
                     </div>
+                </div>
 
-                    <h2 className="text-5xl font-bold text-white leading-tight mb-8">
-                        Become a <br />
-                        <span className="text-teal-400">MedAImart Rider</span>
-                    </h2>
+                <div className="relative z-10">
+                    <h1 className="text-6xl font-bold tracking-tight leading-[1.1] mb-6 font-serif">
+                        Deliver <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-emerald-400">Trust</span>
+                    </h1>
+                    <p className="text-lg text-teal-100/60 font-light max-w-sm leading-relaxed">
+                        Become a logistics partner. Flexible hours, weekly payouts, and a mission that matters.
+                    </p>
+                </div>
 
-                    <div className="space-y-6 text-teal-50/80">
-                        <div className="flex items-center gap-4">
-                            <Truck className="w-6 h-6 text-teal-400" />
-                            <span className="text-lg font-medium">Deliver health, earn trust and profit</span>
+                <div className="relative z-10">
+                    <div className="flex gap-4">
+                        <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-teal-50">
+                            Weekly Payouts
                         </div>
-                        <div className="flex items-center gap-4">
-                            <ShieldCheck className="w-6 h-6 text-teal-400" />
-                            <span className="text-lg font-medium">Flexible hours & weekly payouts</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <CheckCircle className="w-6 h-6 text-teal-400" />
-                            <span className="text-lg font-medium">Be part of the Re-Pharmacy revolution</span>
+                        <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium text-teal-50">
+                            Zero Joining Fee
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Right Side: Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-20 bg-gray-50/50">
-                <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-black text-gray-900 mb-2">Drive with Us</h1>
-                        <p className="text-gray-500 font-medium">Enter your details to register as a rider.</p>
+            {/* Right Side: Form (60% width) */}
+            <div className="w-full lg:w-[60%] flex items-center justify-center p-6 lg:p-12 bg-white">
+                <div className="w-full max-w-[420px]">
+
+                    <div className="text-center mb-10">
+                        <div className="flex justify-center mb-6">
+                            <div className="flex items-center gap-2">
+                                <img src={symbol} alt="Logo" className="w-8 h-8 object-contain" />
+                                <span className="text-xl font-bold text-slate-900 tracking-tight">MedAImart</span>
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-2">Drive with MedAImart</h2>
+                        <p className="text-slate-500 text-sm">Sign up as a rider today</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+
                         <div className="grid grid-cols-2 gap-3 mb-2">
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, vehicleType: 'bike' })}
-                                className={`py-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 ${formData.vehicleType === 'bike' ? 'border-[#32aeb1] bg-[#32aeb1]/5 text-[#32aeb1]' : 'border-gray-50 bg-gray-50 text-gray-400'}`}
+                                className={`py-3 rounded-lg border font-semibold text-sm transition-all flex items-center justify-center gap-2 ${formData.vehicleType === 'bike' ? 'border-teal-500 bg-teal-50 text-teal-800' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}
                             >
                                 <Truck className="w-4 h-4" /> Bike
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setFormData({ ...formData, vehicleType: 'car' })}
-                                className={`py-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 ${formData.vehicleType === 'car' ? 'border-[#32aeb1] bg-[#32aeb1]/5 text-[#32aeb1]' : 'border-gray-50 bg-gray-50 text-gray-400'}`}
+                                className={`py-3 rounded-lg border font-semibold text-sm transition-all flex items-center justify-center gap-2 ${formData.vehicleType === 'car' ? 'border-teal-500 bg-teal-50 text-teal-800' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}
                             >
                                 <Truck className="w-4 h-4" /> Car
                             </button>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Full Name</label>
-                            <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-slate-700">Full Name</label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full h-11 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all"
+                                placeholder="Full Name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-slate-700">Email Address</label>
+                            <input
+                                type="email"
+                                required
+                                className="w-full h-11 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all"
+                                placeholder="Email Address"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-slate-700">Phone</label>
+                                <input
+                                    type="tel"
+                                    required
+                                    className="w-full h-11 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all"
+                                    placeholder="Phone"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-slate-700">License #</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#32aeb1]/20 outline-none transition-all font-semibold"
-                                    placeholder="Full Name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full h-11 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all"
+                                    placeholder="License"
+                                    value={formData.licenseNumber}
+                                    onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Email</label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="email"
-                                    required
-                                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#32aeb1]/20 outline-none transition-all font-semibold"
-                                    placeholder="Email Address"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Phone</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="tel"
-                                        required
-                                        className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#32aeb1]/20 outline-none transition-all font-semibold"
-                                        placeholder="Phone"
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">License #</label>
-                                <div className="relative">
-                                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#32aeb1]/20 outline-none transition-all font-semibold"
-                                        placeholder="License"
-                                        value={formData.licenseNumber}
-                                        onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="password"
-                                    required
-                                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#32aeb1]/20 outline-none transition-all font-semibold"
-                                    placeholder="••••••••"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                />
-                            </div>
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-semibold text-slate-700">Password</label>
+                            <input
+                                type="password"
+                                required
+                                className="w-full h-11 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all"
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
                         </div>
 
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full h-13 bg-[#32aeb1] hover:bg-[#2a9396] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-teal-500/20 active:scale-[0.98] disabled:opacity-70 mt-6"
+                            className="w-full h-12 bg-[#32aeb1] hover:bg-[#2a9396] text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] disabled:opacity-70 mt-4"
                         >
-                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Register as Rider'}
-                            {!isSubmitting && <ArrowRight className="w-5 h-5" />}
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Register Rider'}
                         </button>
                     </form>
 
-                    <p className="text-center text-gray-500 mt-8 font-medium">
-                        Looking for the customer site?{' '}
-                        <Link to="/register" className="text-[#32aeb1] font-bold hover:underline">
-                            Sign up here
-                        </Link>
-                    </p>
+                    <div className="mt-8 text-center border-t border-slate-100 pt-6">
+                        <p className="text-sm text-slate-500">
+                            Want to buy medicine?{' '}
+                            <Link to="/register" className="font-bold text-teal-600 hover:text-teal-700 hover:underline">
+                                Buyer Sign up
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

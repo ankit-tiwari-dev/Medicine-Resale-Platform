@@ -11,3 +11,6 @@ client/node_modules/
 server/node_modules/
 client/.env*
 server/.env*
+server/tests/
+server/scripts/
+server/jest.config.js

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, X, ScanLine, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import api from '../services/api';
 import toast from 'react-hot-toast';
 

@@ -4,91 +4,179 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { MIN_EXPIRY_DAYS } from "../constants.js";
 import cloudinary from "../config/cloudinary.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios";
 
-const extractMedicineDetails = async (files, forceMock = false) => {
+/*
+const extractMedicineDetailsKaggle = async (files, forceMock = false) => {
     try {
-        // 1. Check for manual mock or missing key
-        if (!process.env.GEMINI_API_KEY || forceMock) {
+        const rawUrl = process.env.KAGGLE_TUNNEL_URL?.trim();
+
+        // 1. Check for manual mock or missing URL
+        if (!rawUrl || forceMock) {
+            console.log("AI Extraction: Falling back to Mock data (URL missing or forceMock enabled)");
             return {
                 name: "Mock Medicine " + Math.floor(Math.random() * 100),
                 expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
                 batchNumber: "MOCK-BATCH",
                 mrp: 100,
-                aiNote: "Manual Mock Mode"
+                aiNote: forceMock ? "Manual Mock Mode" : "Kaggle Tunnel URL missing (Mock Fallback)"
             };
         }
-
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const prompt = `Extract medicine details from image. Return ONLY JSON: {"name": "string", "expiryDate": "YYYY-MM-DD", "batchNumber": "string", "mrp": number}`;
-        // 1. Verified Model Names from API Check
-        const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-2.5-flash"];
-
-        // 2. Add a helper for cleaner JSON parsing
-        const extractJson = (text) => {
-            try {
-                const jsonMatch = text.match(/\{[\s\S]*\}/);
-                return jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-            } catch (e) {
-                return null;
-            }
-        };
-
-        let result = null;
-        let lastError = null;
 
         const file = files[0];
+        const imageBase64 = file.buffer.toString("base64");
 
-        for (const modelName of modelsToTry) {
-            try {
-                // console.log(`Attempting AI extraction with model: ${modelName}`);
-                const model = genAI.getGenerativeModel({ model: modelName });
+        // Clean the tunnel URL
+        const baseUrl = rawUrl.replace(/\/api\/chat\/?$/, "").replace(/\/$/, "");
+        console.log("AI Extraction: Base URL used for Axios:", baseUrl);
 
-                result = await model.generateContent([
-                    prompt,
-                    { inlineData: { data: file.buffer.toString("base64"), mimeType: file.mimetype } }
-                ]);
+        console.log("AI Extraction: Sending request to Kaggle (Localtunnel + Ollama)...");
 
-                if (result) break;
-            } catch (err) {
-                lastError = err;
-                if (err.message.includes("429")) {
-                    console.warn(`Quota exceeded for ${modelName}. Trying next model...`);
-                } else {
-                    console.warn(`Model ${modelName} failed:`, err.message);
-                }
+        const response = await axios.post(`${baseUrl}/api/chat`, {
+            model: "llama3.2-vision:11b",
+            messages: [{
+                role: "user",
+                content: `Persona: You are a professional pharmaceutical OCR scanner.
+        Task: Extract data from the provided medicine label.
+        Rules:
+        1. Locate the 'Medicine Name' (usually the largest text).
+        2. Find 'Batch No' or 'Lot No'.
+        3. Find 'Expiry Date' or 'EXP'.
+        4. Find 'MRP' or 'Price'.
+        5. If text is blurry, look for date patterns (MM/YYYY or DD/MM/YY).
+        6. Return ONLY a JSON object. No conversation. No markdown blocks.
+        
+        Expected Format:
+        {"medicine_name": "", "batch_no": "", "expiry_date": "YYYY-MM-DD", "mrp": 0.0}`,
+                images: [imageBase64]
+            }],
+            stream: false,
+            format: "json",
+            options: {
+                temperature: 0,
+                num_ctx: 2048
             }
-        }
+        }, {
+            headers: { 'bypass-tunnel-reminder': 'true' },
+            timeout: 120000
+        });
 
-        // 3. Graceful Fallback instead of throwing a hard Error
-        if (!result) {
-            console.error("ALL AI MODELS FAILED OR QUOTA EXCEEDED");
+        const aiContent = response.data.message.content;
+        const extracted = typeof aiContent === 'string' ? JSON.parse(aiContent) : aiContent;
+
+        const finalData = {
+            name: extracted.medicine_name || extracted["Medicine Name"] || extracted.name || "Unknown Medicine",
+
+            expiryDate: (extracted.expiry_date || extracted["Expiry Date"] || extracted.expiryDate)
+                ? new Date(extracted.expiry_date || extracted["Expiry Date"] || extracted.expiryDate)
+                : null,
+
+            batchNumber: extracted.batch_no || extracted["Batch Number"] || extracted.batchNumber || "N/A",
+
+            mrp: Number(extracted.mrp || extracted.MRP || extracted["MRP"]) || 0,
+
+            aiNote: "Processed via Llama 3.2-Vision"
+        };
+
+        console.log("AI Extraction: Successfully processed image.");
+        return finalData;
+
+    } catch (error) {
+        console.error("AI Logic Error (Llama/Localtunnel):", error.response?.data || error.message);
+        return {
+            name: "Manual Entry Required",
+            expiryDate: null,
+            batchNumber: "N/A",
+            mrp: 0,
+            aiError: error.message,
+            aiNote: "AI extraction failed. Please enter details manually."
+        };
+    }
+};
+*/
+
+const extractMedicineDetails = async (files, forceMock = false) => {
+    try {
+        const apiKey = process.env.GROQ_API_KEY;
+
+        if (!apiKey || forceMock) {
+            console.log("AI Extraction: Falling back to Mock data (API Key missing or forceMock enabled)");
             return {
-                name: "Pending Verification",
-                expiryDate: null,
-                batchNumber: "MANUAL_ENTRY_REQUIRED",
-                mrp: 0,
-                aiNote: "AI Quota exceeded. Please enter details manually."
+                name: "Mock Medicine " + Math.floor(Math.random() * 100),
+                expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+                batchNumber: "MOCK-BATCH",
+                mrp: 100,
+                aiNote: forceMock ? "Manual Mock Mode" : "Groq API Key missing (Mock Fallback)"
             };
         }
 
-        const response = await result.response;
-        const text = response.text().replace(/```json|```/g, "").trim();
-        const extracted = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+        const file = files[0];
+        const imageBase64 = file.buffer.toString("base64");
 
-        return {
-            name: extracted.name || "Unknown Medicine",
-            expiryDate: extracted.expiryDate ? new Date(extracted.expiryDate) : null,
-            batchNumber: extracted.batchNumber || "N/A",
-            mrp: Number(extracted.mrp) || 0,
-            aiNote: "Successfully extracted"
+        console.log("AI Extraction: Sending request to Groq Llama 3.2 Vision...");
+
+        const response = await axios.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            {
+                                type: "text",
+                                text: "Extract Medicine Name, Batch Number, Expiry Date (YYYY-MM-DD), and MRP into a JSON object. Return ONLY JSON."
+                            },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: `data:image/jpeg;base64,${imageBase64}`,
+                                },
+                            },
+                        ],
+                    },
+                ],
+                response_format: { type: "json_object" },
+                temperature: 0,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    "Content-Type": "application/json",
+                },
+                timeout: 60000 
+            }
+        );
+
+        const extracted = response.data.choices[0].message.content;
+        const data = typeof extracted === 'string' ? JSON.parse(extracted) : extracted;
+
+        const finalData = {
+            name: data.medicine_name || data["Medicine Name"] || data.name || "Unknown Medicine",
+            expiryDate: (data.expiry_date || data["Expiry Date"] || data.expiryDate)
+                ? new Date(data.expiry_date || data["Expiry Date"] || data.expiryDate)
+                : null,
+            batchNumber: data.batch_no || data.batch_number || data["Batch Number"] || data.batchNumber || "N/A",
+            mrp: Number(data.mrp || data.MRP || data["MRP"]) || 0,
+            aiNote: "Processed via Groq Llama 3.2 Vision"
         };
 
+        console.log("AI Extraction: Successfully processed image.");
+        return finalData;
+
     } catch (error) {
-        console.error("AI Logic Error:", error.message);
-        return { name: "Manual Entry", expiryDate: null, batchNumber: "N/A", mrp: 0, aiError: error.message };
+        console.error("AI Logic Error (Groq):", error.response?.data || error.message);
+        return {
+            name: "Manual Entry Required",
+            expiryDate: null,
+            batchNumber: "N/A",
+            mrp: 0,
+            aiError: error.message,
+            aiNote: "AI extraction failed. Please enter details manually."
+        };
     }
 };
+
 
 const uploadToCloudinary = (buffer, filename) => {
     if (process.env.NODE_ENV === 'test') {
