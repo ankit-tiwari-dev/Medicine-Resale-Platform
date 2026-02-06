@@ -17,6 +17,12 @@ const groupItemsBySeller = (items) => {
     return groups;
 };
 
+const buildStatusHistoryEntry = (status, by = "system") => ({
+    status,
+    at: new Date(),
+    by
+});
+
 export const createOrder = asyncHandler(async (req, res) => {
     // Accepts medicineId (single buy) OR items (array of IDs)
     // If buy from cart, frontend can send items array
@@ -72,7 +78,8 @@ export const createOrder = asyncHandler(async (req, res) => {
             orderItems,
             amount: totalAmount,
             shippingAddress,
-            status: 'pending'
+            status: 'pending',
+            statusHistory: [buildStatusHistoryEntry('pending', 'system')]
         });
 
         createdOrders.push(order);
@@ -122,5 +129,59 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, order, "Order details fetched successfully")
+    );
+});
+
+export const getOrderTracking = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const order = await Order.findById(id)
+        .select("status statusHistory deliveredAt shippedAt createdAt updatedAt buyerId sellerId")
+        .populate("sellerId", "name email")
+        .populate("buyerId", "name email");
+
+    if (!order) {
+        throw new ApiError(404, "Order not found");
+    }
+
+    if (order.buyerId._id.toString() !== req.user._id.toString() &&
+        order.sellerId._id.toString() !== req.user._id.toString() &&
+        req.user.role !== 'admin') {
+        throw new ApiError(403, "Unauthorized access to order tracking");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, order, "Order tracking fetched successfully")
+    );
+});
+
+export const confirmDelivery = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) {
+        throw new ApiError(404, "Order not found");
+    }
+
+    if (order.buyerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Only the buyer can confirm delivery");
+    }
+
+    if (order.status === 'delivered') {
+        throw new ApiError(400, "Order is already delivered");
+    }
+
+    if (order.status === 'cancelled') {
+        throw new ApiError(400, "Cancelled orders cannot be delivered");
+    }
+
+    order.status = 'delivered';
+    order.deliveredAt = new Date();
+    order.statusHistory = order.statusHistory || [];
+    order.statusHistory.push(buildStatusHistoryEntry('delivered', 'buyer'));
+
+    await order.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, order, "Order marked as delivered")
     );
 });

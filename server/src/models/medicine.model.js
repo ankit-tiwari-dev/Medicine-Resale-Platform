@@ -41,6 +41,10 @@ const medicineSchema = new mongoose.Schema(
             ref: 'User'
         },
         pickupLocation: String,
+        pickupCoordinates: {
+            lat: Number,
+            lng: Number
+        },
         description: {
             type: String,
             trim: true

@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
+import { MIN_EXPIRY_DAYS } from "../constants.js";
 import cloudinary from "../config/cloudinary.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -109,6 +110,28 @@ const uploadToCloudinary = (buffer, filename) => {
     });
 };
 
+const getExpiryValidationError = (expiryDate) => {
+    if (!expiryDate) return null;
+    const date = new Date(expiryDate);
+    if (Number.isNaN(date.getTime())) {
+        return "Invalid expiry date format";
+    }
+    const now = new Date();
+    const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return "Medicine is expired";
+    if (diffDays < MIN_EXPIRY_DAYS) {
+        return `Expiry must be at least ${MIN_EXPIRY_DAYS} days from today`;
+    }
+    return null;
+};
+
+const buildPickupLocation = (user) => {
+    const address = user?.address;
+    if (!address) return undefined;
+    const parts = [address.street, address.city, address.pincode].filter(Boolean);
+    return parts.length ? parts.join(", ") : undefined;
+};
+
 export const uploadMedicine = asyncHandler(async (req, res) => {
     if (!req.files || req.files.length === 0) {
         throw new ApiError(400, "At least one medicine image is required");
@@ -124,13 +147,23 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
 
     const extractedData = await extractMedicineDetails(req.files, forceMock === 'true' || forceMock === true);
 
+    const expiryError = getExpiryValidationError(extractedData?.expiryDate);
+    if (expiryError) {
+        throw new ApiError(400, expiryError);
+    }
+
+    const pickupLocation = buildPickupLocation(req.user);
+    const pickupCoordinates = req.user?.address?.coordinates;
+
     const medicine = await Medicine.create({
         sellerId: req.user._id,
         images: imageUrls,
         extractedData,
         description,
         price: (extractedData.mrp || 0) * 0.8,
-        status: 'uploaded'
+        status: 'uploaded',
+        pickupLocation,
+        pickupCoordinates
     });
 
     return res.status(201).json(
@@ -210,7 +243,13 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
     }
 
     if (name) medicine.extractedData.name = name;
-    if (expiryDate) medicine.extractedData.expiryDate = expiryDate;
+    if (expiryDate) {
+        const expiryError = getExpiryValidationError(expiryDate);
+        if (expiryError) {
+            throw new ApiError(400, expiryError);
+        }
+        medicine.extractedData.expiryDate = expiryDate;
+    }
     if (batchNumber) medicine.extractedData.batchNumber = batchNumber;
     if (price) medicine.price = price;
     if (description) medicine.description = description;

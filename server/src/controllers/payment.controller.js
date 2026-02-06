@@ -78,6 +78,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
                         razorpayPaymentId: razorpay_payment_id,
                         razorpaySignature: razorpay_signature,
                         status: 'paid'
+                    },
+                    $push: {
+                        statusHistory: {
+                            status: 'paid',
+                            at: new Date(),
+                            by: 'payment'
+                        }
                     }
                 }
             );

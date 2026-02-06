@@ -46,6 +46,29 @@ const orderSchema = new mongoose.Schema(
             enum: ["pending", "completed", "failed", "refunded"],
             default: "pending"
         },
+        deliveredAt: {
+            type: Date
+        },
+        shippedAt: {
+            type: Date
+        },
+        statusHistory: [
+            {
+                status: {
+                    type: String,
+                    enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+                    required: true
+                },
+                at: {
+                    type: Date,
+                    default: Date.now
+                },
+                by: {
+                    type: String,
+                    default: "system"
+                }
+            }
+        ],
     },
     {
         timestamps: true

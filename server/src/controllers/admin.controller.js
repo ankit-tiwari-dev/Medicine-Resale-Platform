@@ -402,6 +402,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     if (status === 'delivered') {
         order.deliveredAt = new Date();
     }
+    if (status === 'shipped') {
+        order.shippedAt = new Date();
+    }
+    order.statusHistory = order.statusHistory || [];
+    order.statusHistory.push({
+        status,
+        at: new Date(),
+        by: "admin"
+    });
     await order.save();
 
     await AdminLog.create({
