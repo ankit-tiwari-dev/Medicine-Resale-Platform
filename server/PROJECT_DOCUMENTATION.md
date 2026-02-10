@@ -53,6 +53,7 @@ This platform enables users to upload unused medicines for resale. The system us
 - View assigned collection tasks
 - Upload proof of collection
 - View rider stats (pending pickups, collected total)
+- **KYC Verification**: Production-ready Aadhaar (OTP based), PAN, and Driving License verification against government records.
 
 ## AI Integration
 - Gemini models used to extract structured data from medicine images

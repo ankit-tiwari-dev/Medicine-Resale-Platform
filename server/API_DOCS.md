@@ -232,7 +232,10 @@ Auth conventions
 
 ---
 
+---
+
 ## Admin (`/admin`)
+**Auth**: `admin` role required.
 
 ### Medicines
 - `GET /admin/medicines` (query: `status`)
@@ -241,57 +244,46 @@ Auth conventions
   { "action": "approve", "reason": "Images clear and details match" }
   ```
 
-### Riders
-- `GET /admin/riders`
+### Riders & Collection
+- `GET /admin/riders`: List available riders.
 - `POST /admin/assign-rider`
   ```json
-  { "medicineId": "64f0c2e2c7a1c9b1c2f9d123", "riderId": "64f0c2e2c7a1c9b1c2f9d777" }
+  { "medicineId": "ID", "riderId": "ID" }
   ```
-- `POST /admin/approve-collection`
+- `POST /admin/approve-collection`: Credits seller wallet.
   ```json
-  { "medicineId": "64f0c2e2c7a1c9b1c2f9d123" }
+  { "medicineId": "ID" }
   ```
+
+### User & Order Management
+- `GET /admin/users` (query: `role`, `page`, `limit`)
+- `PATCH /admin/users/:id`: Update role/status.
+- `GET /admin/orders`: List all orders.
+- `PATCH /admin/orders/:id/status`: Update status (e.g., `shipped`).
 
 ### Withdrawals
 - `GET /admin/withdrawals` (query: `status`)
-- `POST /admin/withdrawals/:id/approve`
+- `POST /admin/withdrawals/:id/approve`: Approves bank transfer.
 - `POST /admin/withdrawals/:id/reject`
-  ```json
-  { "reason": "Bank details incomplete" }
-  ```
 
-### Users
-- `GET /admin/users` (query: `role`, `page`, `limit`)
-- `PATCH /admin/users/:id`
-  ```json
-  { "role": "rider", "isVerified": true }
-  ```
-- `DELETE /admin/users/:id`
-
-### Orders
-- `GET /admin/orders` (query: `status`)
-- `PATCH /admin/orders/:id/status`
-  ```json
-  { "status": "shipped" }
-  ```
-
-### System
-- `GET /admin/logs`
-- `GET /admin/stats`
+### System Monitoring
+- `GET /admin/logs`: view activity history.
+- `GET /admin/stats`: Overview of system performance.
 
 ---
 
 ## Wallet (`/wallet`)
-- `GET /wallet/balance`
-- `GET /wallet/transactions`
-- `POST /wallet/withdraw`
+**Auth**: `seller/buyer` authenticated.
+
+- `GET /wallet/balance`: View current balance and held amount.
+- `GET /wallet/transactions`: View full history (credits/debits).
+- `POST /wallet/withdraw`: Request a bank withdrawal.
   ```json
   {
     "amount": 500,
     "bankDetails": {
-      "accountNumber": "1234567890",
-      "ifsc": "HDFC0001234",
-      "accountName": "Asha Patel"
+      "accountNumber": "123456789",
+      "ifsc": "IFSC001"
     }
   }
   ```
@@ -299,8 +291,93 @@ Auth conventions
 ---
 
 ## Rider (`/rider`)
-- `GET /rider/tasks` (query: `history=true`)
-- `GET /rider/stats`
-- `POST /rider/confirm-collection`
-  - `Content-Type: multipart/form-data`
-  - Fields: `medicineId` (text), `proof` (file)
+
+**Base URL path**: `/rider`
+**Auth**: `Authorization: Bearer <token>` required. User must have `rider` role.
+
+### Get Assigned Tasks
+- **URL**: `/rider/tasks`
+- **Method**: `GET`
+- **Query Params**: `history=true` (optional, shows completed tasks)
+- **Response**: Array of Medicine objects with seller details.
+
+### Get Rider Stats
+- **URL**: `/rider/stats`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  {
+      "success": true,
+      "data": {
+          "totalCollected": 5,
+          "pendingPickups": 2
+      }
+  }
+  ```
+
+### Confirm Collection
+- **URL**: `/rider/confirm-collection`
+- **Method**: `POST`
+- **Headers**: `Content-Type: multipart/form-data`
+- **Body**:
+  - `medicineId` (text): ID of the medicine collected
+  - `proof` (file): Image of the medicine in rider's hand
+- **Response**: Updated medicine object.
+
+---
+
+### KYC Verification (Identity - Offline Flow)
+
+Riders must complete these steps to be verified. The flow uses **Digital Aadhaar QR** and **OCR** for PAN/DL.
+
+#### 1. Upload Document Photos
+- **URL**: `/kyc/upload-docs`
+- **Method**: `POST`
+- **Headers**: `Content-Type: multipart/form-data`
+- **Body**:
+  - `aadharFront` (file)
+  - `aadharBack` (file)
+  - `panFront` (file)
+  - `panBack` (file)
+  - `licenseFront` (file)
+  - `licenseBack` (file)
+  - `selfie` (file): Live photo of the rider's face
+- **Response**: URLs of the uploaded proofs.
+
+#### 2. Verify Aadhaar via Secure QR
+- **URL**: `/kyc/verify-aadhar-qr`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  { "qrData": "20510656815277038..." } 
+  ```
+- **Notes**: 
+  - Extract the "long decimal string" from the secure QR.
+  - **Cross-Verification**: The system will automatically OCR the `aadharFront` and match the Name/DOB with the QR data. If they don't match, it returns a `document_mismatch` error.
+
+#### 3. Extract PAN & DL Details (OCR)
+- **URL**: `/kyc/verify-ocr`
+- **Method**: `POST`
+- **Response**: 
+  ```json
+  {
+    "extractedData": {
+      "pan": { "panNumber": "ABCDE1234F" },
+      "license": { "licenseNumber": "DL-04-202300..." }
+    }
+  }
+  ```
+- **Notes**: Automatically processes the previously uploaded `panPhoto` and `licensePhoto` using AI.
+
+#### 4. Final Consent
+- **URL**: `/kyc/submit-consent`
+- **Method**: `POST`
+- **Body**: `{ "consentGiven": true }`
+- **Response**: Status changed to `verified_pending_admin`.
+
+---
+
+### DigiLocker Flow (Alternative)
+- `GET /kyc/digilocker/url`: Generates auth URL.
+- `GET /kyc/digilocker/callback`: Handles verification callback.
+

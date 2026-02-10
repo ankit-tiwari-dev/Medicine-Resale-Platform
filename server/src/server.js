@@ -23,6 +23,7 @@ import riderRouter from "./routes/rider.routes.js";
 import orderRouter from "./routes/order.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 import cartRouter from "./routes/cart.routes.js";
+import kycRouter from "./routes/kyc.routes.js";
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/medicines', medicineRouter);
@@ -32,18 +33,19 @@ app.use("/api/v1/rider", riderRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/kyc", kycRouter);
 
 app.use((err, req, res, next) => {
-  if (process.env.NODE_ENV === 'test') {
-    console.error("ERROR HANDLER STACK:", err.stack);
-  } else {
-    console.error("ERROR HANDLER:", err.message);
-  }
-
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Something went wrong!';
   const errors = err.errors || [];
   const data = err.data || null;
+
+  if (process.env.NODE_ENV === 'test') {
+    console.error("ERROR HANDLER STACK:", err.stack);
+  } else {
+    console.error("ERROR HANDLER - Status:", statusCode, "Message:", message);
+  }
 
   res.status(statusCode).json({
     success: false,

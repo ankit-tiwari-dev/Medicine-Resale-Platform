@@ -11,7 +11,7 @@
   "author": "Ankit Tiwari",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.13.4",
+    "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
@@ -24,7 +24,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

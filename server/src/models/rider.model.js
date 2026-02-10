@@ -22,7 +22,7 @@ const riderSchema = new mongoose.Schema(
         },
         assignedTasks: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Medicine" // Currently riders are assigned Medicines for collection
+            ref: "Medicine"
         }],
         completedTasks: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -32,7 +32,72 @@ const riderSchema = new mongoose.Schema(
             type: Number,
             default: 0
         },
-        licenseNumber: String,
+        aadharNumber: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+        panNumber: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+        licenseNumber: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+        verificationStatus: {
+            type: String,
+            enum: ["pending", "verified", "rejected", "verified_pending_admin", "document_mismatch"],
+            default: "pending"
+        },
+        documents: {
+            aadharFront: String,
+            aadharBack: String,
+            panFront: String,
+            panBack: String,
+            licenseFront: String,
+            licenseBack: String,
+            selfie: String
+        },
+        extractedData: {
+            aadhar: {
+                fullName: String,
+                dob: String,
+                gender: String,
+                pincode: String,
+                state: String,
+                district: String,
+                vtc: String,
+                maskedAadhar: String,
+                profileImage: String,
+                isCrossVerified: {
+                    type: Boolean,
+                    default: false
+                },
+                verifiedAt: Date
+            },
+            pan: {
+                panNumber: String,
+                fullName: String,
+                verifiedAt: Date
+            },
+            license: {
+                licenseNumber: String,
+                fullName: String,
+                dob: String,
+                verifiedAt: Date
+            }
+        },
+        consent: {
+            isGiven: {
+                type: Boolean,
+                default: false
+            },
+            timestamp: Date,
+            ipAddress: String
+        },
         vehicleDetails: {
             type: String,
             model: String

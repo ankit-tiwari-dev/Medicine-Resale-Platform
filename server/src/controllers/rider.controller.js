@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { Rider } from "../models/rider.model.js";
 import cloudinary from "../config/cloudinary.js";
+// import { kycService } from "../utils/kyc.service.js";
+
 
 // Helper to upload buffer to cloudinary
 const uploadToCloudinary = (buffer, filename) => {
@@ -31,10 +33,8 @@ export const getMyTasks = asyncHandler(async (req, res) => {
     const filter = { riderId: req.user._id };
 
     if (history === 'true') {
-        // Show completed tasks
         filter.status = { $in: ['collected', 'listed', 'sold'] };
     } else {
-        // Default: Show pending tasks
         filter.status = 'pickup_assigned';
     }
 
@@ -62,14 +62,12 @@ export const confirmCollection = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not assigned to this medicine");
     }
 
-    // Upload proof to cloudinary
     const proofUrl = await uploadToCloudinary(req.file.buffer, req.file.originalname);
 
     medicine.status = 'collected';
     medicine.pickupProof = proofUrl;
     await medicine.save();
 
-    // Update rider tasks
     const rider = await Rider.findOne({ userId: req.user._id });
     if (rider) {
         rider.assignedTasks = rider.assignedTasks.filter(id => id.toString() !== medicineId.toString());
@@ -97,3 +95,6 @@ export const getRiderStats = asyncHandler(async (req, res) => {
         new ApiResponse(200, { totalCollected, pendingPickups }, "Rider stats fetched successfully")
     );
 });
+
+
+
