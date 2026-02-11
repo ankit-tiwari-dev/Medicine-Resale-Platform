@@ -17,6 +17,11 @@ const medicineSchema = new mongoose.Schema(
             batchNumber: String,
             mrp: Number
         },
+        stock: {
+            type: Number,
+            default: 1,
+            required: true
+        },
         adminVerified: {
             type: Boolean,
             default: false

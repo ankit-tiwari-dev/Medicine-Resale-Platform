@@ -124,6 +124,7 @@ Auth conventions
 - **Body**:
   - `images` (files, up to 5)
   - `description` (text, optional)
+  - `stock` (number, default: 1)
   - `forceMock` (boolean or "true" to force AI mock)
 - **Validation**:
   - If expiry date is extracted, it must be at least 30 days in the future.
@@ -144,6 +145,7 @@ Auth conventions
     "expiryDate": "2027-12-31",
     "batchNumber": "BATCH-9821",
     "price": 120,
+    "stock": 10,
     "description": "Blister pack, sealed"
   }
   ```

@@ -121,7 +121,7 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         throw new ApiError(400, "At least one medicine image is required");
     }
 
-    const { description, forceMock } = req.body;
+    const { description, forceMock, stock } = req.body;
 
     const uploadPromises = req.files.map(file =>
         uploadToCloudinary(file.buffer, "medicine-resale-platform", file.originalname)
@@ -143,6 +143,7 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         sellerId: req.user._id,
         images: imageUrls,
         extractedData,
+        stock: Number(stock) || 1,
         description,
         price: (extractedData.mrp || 0) * 0.8,
         status: 'uploaded',
@@ -230,7 +231,7 @@ export const getMedicines = asyncHandler(async (req, res) => {
 
 export const updateMedicineDetails = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, expiryDate, batchNumber, price, description } = req.body;
+    const { name, expiryDate, batchNumber, price, description, stock } = req.body;
 
     const medicine = await Medicine.findById(id);
 
@@ -253,6 +254,7 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
     if (batchNumber) medicine.extractedData.batchNumber = batchNumber;
     if (price) medicine.price = price;
     if (description) medicine.description = description;
+    if (stock !== undefined) medicine.stock = Number(stock);
 
     if (name || expiryDate || batchNumber) {
         medicine.adminVerified = false;
