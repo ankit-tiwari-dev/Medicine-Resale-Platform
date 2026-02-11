@@ -15,7 +15,7 @@ Tech Stack
 This platform enables users to upload unused medicines for resale. The system uses AI to extract key details (name, expiry date, batch number, price) from uploaded images. Admins verify medicines, assign riders for collection, and approve collection so the seller wallet is credited. Buyers can browse verified listings, add to cart, and purchase medicines.
 
 ## User Panel Features
-- Registration, login, OTP verification
+- Registration, login, OTP verification, Resend OTP
 - Upload medicine images
 - AI extraction of:
   - Medicine name

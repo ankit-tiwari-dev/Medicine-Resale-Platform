@@ -5,9 +5,9 @@ services:
     build: .
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      - PORT=5000
-      - MONGODB_URI=mongodb://mongo:27017/medicine-resale
       - NODE_ENV=development
       # Add other secrets here or use .env file
     depends_on:

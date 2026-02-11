@@ -60,6 +60,16 @@ Auth conventions
   { "userId": "64f0c2e2c7a1c9b1c2f9d001", "userOtp": "123456" }
   ```
 
+### Resend OTP
+- **URL**: `/auth/resend-otp`
+- **Method**: `POST`
+- **Role**: Public
+- **Body**:
+  ```json
+  { "email": "asha@example.com" }
+  ```
+- **Response**: `{ success: true, message: "A new verification code has been sent to your email." }`
+
 ### Refresh Access Token
 - **URL**: `/auth/refresh-token`
 - **Method**: `POST`

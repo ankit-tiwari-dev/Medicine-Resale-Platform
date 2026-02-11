@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerLocal, googleAuth, googleAuthCallback, verifyOTP, loginLocal, logoutUser, refreshAccessToken } from '../controllers/auth.controller.js';
+import { registerLocal, googleAuth, googleAuthCallback, verifyOTP, loginLocal, logoutUser, refreshAccessToken, resendOTP } from '../controllers/auth.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/register', registerLocal);
 router.post('/verify-otp', verifyOTP);
 router.post('/login', loginLocal);
+router.post('/resend-otp', resendOTP);
 router.post('/refresh-token', refreshAccessToken);
 router.post('/logout', verifyJWT, logoutUser);
 router.get('/google', googleAuth);

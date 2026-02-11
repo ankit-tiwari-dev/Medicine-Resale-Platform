@@ -282,3 +282,37 @@ export const registerLocal = asyncHandler(async (req, res) => {
 
     res.status(201).json(new ApiResponse(201, { userId: user._id }, "Registration successful. Please verify your email."));
 });
+
+export const resendOTP = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(400, "This account is already verified. Please login.");
+    }
+
+    const randomOTP = crypto.randomInt(100000, 999999).toString();
+    const hashedOTP = await bcrypt.hash(randomOTP, 10);
+
+    user.otp = hashedOTP;
+    user.otpExpires = Date.now() + 600000; // 10 minutes
+    await user.save();
+
+    try {
+        await sendOTP(email, randomOTP);
+    } catch (emailError) {
+        console.error('Failed to resend OTP email:', emailError.message);
+        throw new ApiError(500, "Failed to send verification email. Please try again later.");
+    }
+
+    res.status(200).json(new ApiResponse(200, {}, "A new verification code has been sent to your email."));
+});
