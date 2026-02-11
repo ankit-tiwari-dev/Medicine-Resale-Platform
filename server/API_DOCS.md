@@ -122,7 +122,7 @@ Auth conventions
 - **Role**: Seller/User
 - **Headers**: `Content-Type: multipart/form-data`
 - **Body**:
-  - `images` (files, up to 5)
+  - `image` (file, exactly 1)
   - `description` (text, optional)
   - `stock` (number, default: 1)
   - `forceMock` (boolean or "true" to force AI mock)

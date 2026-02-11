@@ -13,7 +13,7 @@ router.get("/", getMedicines);
 router.use(verifyJWT);
 
 // Upload medicine (User)
-router.post("/upload", upload.array("images", 5), uploadMedicine);
+router.post("/upload", upload.single("image"), uploadMedicine);
 
 // Get my uploaded medicines (User)
 router.get("/my-medicines", getMyMedicines);

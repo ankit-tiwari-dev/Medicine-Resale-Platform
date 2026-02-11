@@ -9,7 +9,7 @@ import axios from "axios";
 
 
 
-const extractMedicineDetails = async (files, forceMock = false) => {
+const extractMedicineDetails = async (file, forceMock = false) => {
     try {
         const apiKey = process.env.GROQ_API_KEY;
 
@@ -24,7 +24,6 @@ const extractMedicineDetails = async (files, forceMock = false) => {
             };
         }
 
-        const file = files[0];
         const imageBase64 = file.buffer.toString("base64");
 
         console.log("AI Extraction: Sending request to Groq Llama 3.2 Vision...");
@@ -117,19 +116,15 @@ const buildPickupLocation = (user) => {
 };
 
 export const uploadMedicine = asyncHandler(async (req, res) => {
-    if (!req.files || req.files.length === 0) {
-        throw new ApiError(400, "At least one medicine image is required");
+    if (!req.file) {
+        throw new ApiError(400, "Medicine image is required");
     }
 
     const { description, forceMock, stock } = req.body;
 
-    const uploadPromises = req.files.map(file =>
-        uploadToCloudinary(file.buffer, "medicine-resale-platform", file.originalname)
-    );
+    const imageUrl = await uploadToCloudinary(req.file.buffer, "medicine-resale-platform", req.file.originalname);
 
-    const imageUrls = await Promise.all(uploadPromises);
-
-    const extractedData = await extractMedicineDetails(req.files, forceMock === 'true' || forceMock === true);
+    const extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
 
     const expiryError = getExpiryValidationError(extractedData?.expiryDate);
     if (expiryError) {
@@ -141,7 +136,7 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
 
     const medicine = await Medicine.create({
         sellerId: req.user._id,
-        images: imageUrls,
+        image: imageUrl,
         extractedData,
         stock: Number(stock) || 1,
         description,
