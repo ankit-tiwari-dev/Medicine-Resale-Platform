@@ -22,14 +22,27 @@ const orderSchema = new mongoose.Schema(
                 price: {
                     type: Number,
                     required: true
+                },
+                isReviewed: {
+                    type: Boolean,
+                    default: false
                 }
             }
         ],
         amount: Number,
         status: {
             type: String,
-            enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+            enum: ["pending", "paid", "shipped", "delivered", "cancelled", "disputed"],
             default: "pending"
+        },
+        disputeStatus: {
+            type: String,
+            enum: ["none", "pending", "investigating", "resolved", "rejected"],
+            default: "none"
+        },
+        disputeId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Dispute"
         },
         shippingAddress: String,
         razorpayOrderId: {
@@ -56,7 +69,7 @@ const orderSchema = new mongoose.Schema(
             {
                 status: {
                     type: String,
-                    enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+                    enum: ["pending", "paid", "shipped", "delivered", "cancelled", "disputed"],
                     required: true
                 },
                 at: {

@@ -38,10 +38,16 @@ A robust offline verification system that requires **Zero External API Costs**:
 - **Secure Checkout**: Integrated with **Razorpay** for seamless payments.
 - **Delivery Confirmation**: One-click delivery confirmation to release funds.
 
-### Admin Panel
-- **Verification Dashboard**: Approve listings, review KYC documents, and monitor system health.
-- **Rider Management**: Assign collection tasks and review collection proofs.
-- **Financial Control**: Approve or reject withdrawal requests with reason audit logs.
+### 3. Startup Readiness & Security
+To ensure a 100% production-ready launch, we have implemented enterprise-grade guardrails:
+- **Rate Limiting**: Protects against DDoS and brute-force on Login, OTP, and KYC endpoints.
+- **Request ID Tracing**: Every request is assigned a unique `X-Request-ID` for professional audit logging.
+- **NoSQL & XSS Sanitization**: Automatically blocks injection attacks and malicious scripts.
+- **Inventory Reservation (Cart TTL)**: Medicines are "locked" for 15 minutes once added to a cart, preventing double-buy conflicts.
+
+### 4. Marketplace Trust (Disputes & Reviews)
+- **Buyer Protection**: Buyers can raise disputes for wrong or expired medicines.
+- **Peer-to-Peer Ratings**: A transparent review system for medicines and sellers to build community trust.
 
 ### Rider Panel
 - **Task Management**: Real-time pickup assignments with seller location details.

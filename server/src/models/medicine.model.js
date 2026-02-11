@@ -56,11 +56,21 @@ const medicineSchema = new mongoose.Schema(
             type: String,
             enum: ['pending', 'paid', 'failed'],
             default: 'pending'
+        },
+        reservedUntil: {
+            type: Date
+        },
+        reservedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }
     },
     {
         timestamps: true
     }
 );
+
+// Text index for fuzzy search
+medicineSchema.index({ "extractedData.name": "text", "description": "text" });
 
 export const Medicine = mongoose.model('Medicine', medicineSchema);

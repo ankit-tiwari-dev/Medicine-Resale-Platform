@@ -234,6 +234,31 @@ Auth conventions
 
 ---
 
+## Security & Production Guardrails
+- **Global Rate Limit**: 100 requests per 15 minutes.
+- **Auth Rate Limit**: 10 requests per hour (Login/OTP).
+- **KYC Rate Limit**: 5 attempts per day.
+- **Request ID**: Check the `X-Request-ID` response header for professional audit tracing.
+- **Sanitization**: All inputs are sanitized against NoSQL injection and XSS.
+
+---
+
+## Disputes (`/disputes`)
+- `POST /disputes/raise`: Raise a dispute for a delivered order.
+  - `Body`: `orderId`, `reason`, `description`, `evidence` (files)
+- `GET /disputes/`: List disputes (Role-based views).
+- `POST /disputes/:disputeId/resolve` (Admin only): Resolve or Reject a dispute.
+
+---
+
+## Reviews (`/reviews`)
+- `POST /reviews/add`: Review a purchased medicine.
+  - `Body`: `orderId`, `medicineId`, `rating`, `comment`
+- `GET /reviews/seller/:sellerId`: View average rating and history.
+- `GET /reviews/medicine/:medicineId`: View specific medicine reviews.
+
+---
+
 ## Admin (`/admin`)
 **Auth**: `admin` role required.
 

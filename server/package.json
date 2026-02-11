@@ -20,12 +20,18 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.2.1",
     "googleapis": "^170.1.0",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
+    "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "razorpay": "^2.9.6",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "uuid": "^13.0.0",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

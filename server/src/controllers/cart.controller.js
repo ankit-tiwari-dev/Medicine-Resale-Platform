@@ -28,6 +28,18 @@ export const addToCart = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You cannot purchase your own medicine");
     }
 
+    // Check if medicine is reserved by someone else
+    if (medicine.reservedBy &&
+        medicine.reservedBy.toString() !== req.user._id.toString() &&
+        medicine.reservedUntil > new Date()) {
+        throw new ApiError(400, "This medicine is currently reserved in someone else's cart");
+    }
+
+    // Set/Update reservation (15 minutes of TTL)
+    medicine.reservedBy = req.user._id;
+    medicine.reservedUntil = new Date(Date.now() + 15 * 60 * 1000);
+    await medicine.save();
+
     const cart = await getOrCreateCart(req.user._id);
 
     // Check if item already exists in cart
@@ -58,6 +70,14 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 
     cart.items = cart.items.filter(item => item.medicineId.toString() !== medicineId);
     await cart.save();
+
+    // Clear reservation on remove
+    const medicine = await Medicine.findById(medicineId);
+    if (medicine && medicine.reservedBy?.toString() === req.user._id.toString()) {
+        medicine.reservedBy = undefined;
+        medicine.reservedUntil = undefined;
+        await medicine.save();
+    }
 
     return res.status(200).json(
         new ApiResponse(200, cart, "Item removed from cart successfully")

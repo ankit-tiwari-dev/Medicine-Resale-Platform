@@ -144,7 +144,7 @@ const extractMedicineDetails = async (files, forceMock = false) => {
                     Authorization: `Bearer ${apiKey}`,
                     "Content-Type": "application/json",
                 },
-                timeout: 60000 
+                timeout: 60000
             }
         );
 
@@ -270,9 +270,16 @@ export const getMedicines = asyncHandler(async (req, res) => {
         filter.status = 'listed';
     }
 
-    // Search by medicine name (case-insensitive)
+    // Exclude reserved items (if reserved by someone else and reservation hasn't expired)
+    filter.$or = [
+        { reservedUntil: { $exists: false } },
+        { reservedUntil: { $lte: new Date() } },
+        { reservedBy: req.user?._id } // Allow the person who reserved it to still see/buy it
+    ];
+
+    // Search by medicine name (using Text Index for fuzzy match)
     if (search) {
-        filter['extractedData.name'] = { $regex: search, $options: 'i' };
+        filter.$text = { $search: search };
     }
 
     // Price range filter
@@ -288,7 +295,16 @@ export const getMedicines = asyncHandler(async (req, res) => {
     }
 
     // Build query
-    let query = Medicine.find(filter).populate("sellerId", "name email");
+    let query;
+    if (search) {
+        // Sort by text search score if searching
+        query = Medicine.find(filter, { score: { $meta: "textScore" } })
+            .sort({ score: { $meta: "textScore" } });
+    } else {
+        query = Medicine.find(filter);
+    }
+
+    query = query.populate("sellerId", "name email");
 
     // Sorting
     if (sort) {
