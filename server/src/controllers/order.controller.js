@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { Order } from "../models/order.model.js";
+import mongoose from "mongoose";
 
 // Helper to group items by seller
 const groupItemsBySeller = (items) => {
@@ -49,12 +50,12 @@ export const createOrder = asyncHandler(async (req, res) => {
     // Check availability
     const unavailable = medicines.filter(m => m.status !== 'listed');
     if (unavailable.length > 0) {
-        throw new ApiError(400, `Some medicines are not available: ${unavailable.map(m => m.name).join(", ")}`);
+        throw new ApiError(400, `Some medicines are not available: ${unavailable.map(m => m.extractedData?.name || m._id).join(", ")}`);
     }
 
     const selfPurchase = medicines.filter(m => m.sellerId.toString() === req.user._id.toString());
     if (selfPurchase.length > 0) {
-        throw new ApiError(400, `You cannot purchase your own medicine: ${selfPurchase.map(m => m.name).join(", ")}`);
+        throw new ApiError(400, `You cannot purchase your own medicine: ${selfPurchase.map(m => m.extractedData?.name || m._id).join(", ")}`);
     }
 
     // Group by seller
@@ -63,39 +64,70 @@ export const createOrder = asyncHandler(async (req, res) => {
     const createdOrders = [];
 
     // Create one order per seller
-    for (const sellerId in sellerGroups) {
-        const sellerMedicines = sellerGroups[sellerId];
-        const totalAmount = sellerMedicines.reduce((sum, m) => sum + m.price, 0);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-        const orderItems = sellerMedicines.map(m => ({
-            medicineId: m._id,
-            price: m.price
-        }));
+    try {
+        for (const sellerId in sellerGroups) {
+            const sellerMedicines = sellerGroups[sellerId];
+            const totalAmount = sellerMedicines.reduce((sum, m) => sum + m.price, 0);
 
-        const order = await Order.create({
-            buyerId: req.user._id,
-            sellerId,
-            orderItems,
-            amount: totalAmount,
-            shippingAddress,
-            status: 'pending',
-            statusHistory: [buildStatusHistoryEntry('pending', 'system')]
-        });
+            const orderItems = sellerMedicines.map(m => ({
+                medicineId: m._id,
+                price: m.price
+            }));
 
-        createdOrders.push(order);
+            const [order] = await Order.create([{
+                buyerId: req.user._id,
+                sellerId: new mongoose.Types.ObjectId(sellerId),
+                orderItems,
+                amount: totalAmount,
+                shippingAddress,
+                status: 'pending',
+                statusHistory: [buildStatusHistoryEntry('pending', 'system')]
+            }], { session });
 
-        // Mark medicines as sold/reserved
-        // In a real app we might wait for payment, but here we reserve them.
-        for (const m of sellerMedicines) {
-            m.status = 'sold'; // or 'reserved'
-            m.buyerId = req.user._id;
-            await m.save();
+            createdOrders.push(order);
+
+            // Reserve medicines ATOMICALLY
+            for (const m of sellerMedicines) {
+                const updatedMedicine = await Medicine.findOneAndUpdate(
+                    {
+                        _id: m._id,
+                        status: 'listed',
+                        $or: [
+                            { reservedBy: { $exists: false } },
+                            { reservedBy: null },
+                            { reservedBy: req.user._id },
+                            { reservedUntil: { $lt: new Date() } }
+                        ]
+                    },
+                    {
+                        $set: {
+                            reservedBy: req.user._id,
+                            reservedUntil: new Date(Date.now() + 30 * 60 * 1000)
+                        }
+                    },
+                    { session, new: true }
+                );
+
+                if (!updatedMedicine) {
+                    throw new ApiError(400, `Medicine ${m.extractedData?.name || m._id} was just taken by someone else.`);
+                }
+            }
         }
-    }
 
-    return res.status(201).json(
-        new ApiResponse(201, createdOrders, "Order(s) placed successfully")
-    );
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(201).json(
+            new ApiResponse(201, createdOrders, "Order(s) placed successfully")
+        );
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
 });
 
 export const getMyOrders = asyncHandler(async (req, res) => {

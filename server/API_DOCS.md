@@ -7,6 +7,19 @@ Auth conventions
 - `/admin/*` requires `admin` role.
 - `/rider/*` requires `rider` role.
 
+---
+
+## System (`/`)
+
+### Health Check
+- **URL**: `/health`
+- **Method**: `GET`
+- **Role**: Public
+- **Response**:
+  ```json
+  { "status": "ok", "uptime": 123.45 }
+  ```
+
 ## Authentication (`/auth`)
 
 ### Register
@@ -402,7 +415,5 @@ Riders must complete these steps to be verified. The flow uses **Digital Aadhaar
 
 ---
 
-### DigiLocker Flow (Alternative)
-- `GET /kyc/digilocker/url`: Generates auth URL.
-- `GET /kyc/digilocker/callback`: Handles verification callback.
+
 

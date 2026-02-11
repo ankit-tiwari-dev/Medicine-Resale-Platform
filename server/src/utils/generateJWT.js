@@ -3,15 +3,15 @@ import jwt from 'jsonwebtoken';
 const generateAccessToken = (userId) => {
     return jwt.sign(
         { id: userId },
-        process.env.JWT_SECRET,
-        { expiresIn: '7d' }
+        process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET,
+        { expiresIn: '15m' }
     );
 };
 
 const generateRefreshToken = (userId) => {
     return jwt.sign(
         { id: userId },
-        process.env.JWT_SECRET, 
+        process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET,
         { expiresIn: '30d' }
     );
 };

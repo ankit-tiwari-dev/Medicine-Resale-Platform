@@ -8,7 +8,25 @@ import { v4 as uuidv4 } from "uuid";
 export const securityHeaders = helmet();
 
 // 2. NoSQL Injection Prevention
-export const sanitizeData = mongoSanitize();
+export const sanitizeData = (req, res, next) => {
+    mongoSanitize.sanitize(req.body);
+    mongoSanitize.sanitize(req.params);
+    if (req.query) {
+        // Create a deep copy to sanitize
+        const queryCopy = JSON.parse(JSON.stringify(req.query));
+        mongoSanitize.sanitize(queryCopy);
+
+        // Sync back only the values to avoid replacing the possibly read-only req.query object
+        Object.keys(req.query).forEach(key => {
+            if (queryCopy[key] === undefined) {
+                delete req.query[key];
+            } else {
+                req.query[key] = queryCopy[key];
+            }
+        });
+    }
+    next();
+};
 
 // 3. XSS Prevention for all body inputs
 export const xssClean = (req, res, next) => {
@@ -36,6 +54,7 @@ export const globalLimiter = rateLimit({
     message: "Too many requests from this IP, please try again after 15 minutes",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test',
 });
 
 export const authLimiter = rateLimit({
@@ -44,6 +63,7 @@ export const authLimiter = rateLimit({
     message: "Too many login/verification attempts, please try again after an hour",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test',
 });
 
 export const kycLimiter = rateLimit({
@@ -52,4 +72,5 @@ export const kycLimiter = rateLimit({
     message: "KYC daily limit reached, please try again tomorrow",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test',
 });

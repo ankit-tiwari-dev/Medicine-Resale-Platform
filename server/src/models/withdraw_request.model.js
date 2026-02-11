@@ -23,7 +23,11 @@ const withdrawRequestSchema = new mongoose.Schema(
             accountHolderName: String
         },
         adminComment: String,
-        processedAt: Date
+        processedAt: Date,
+        processedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
     },
     {
         timestamps: true

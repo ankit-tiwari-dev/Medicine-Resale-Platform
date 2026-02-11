@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
-    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' JWT_SECRET=test_jwt_secret_supreme_fidelity NODE_ENV=test jest --verbose --runInBand"
+    "start": "node --experimental-json-modules src/index.js",
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' ACCESS_TOKEN_SECRET=test_access_secret REFRESH_TOKEN_SECRET=test_refresh_secret JWT_SECRET=test_jwt_secret_supreme_fidelity NODE_ENV=test jest --runInBand"
   },
   "author": "Ankit Tiwari",
   "license": "MIT",

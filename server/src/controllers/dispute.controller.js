@@ -3,21 +3,9 @@ import { Order } from "../models/order.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 
-// Helper to upload buffer to cloudinary
-const uploadToCloudinary = (buffer, folder, filename) => {
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            { folder, public_id: filename },
-            (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-            }
-        );
-        uploadStream.end(buffer);
-    });
-};
+
 
 export const createDispute = asyncHandler(async (req, res) => {
     const { orderId, reason, description } = req.body;
@@ -82,6 +70,11 @@ export const resolveDispute = asyncHandler(async (req, res) => {
     const { status, adminResponse } = req.body; // status: resolved, rejected
 
     if (req.user.role !== "admin") throw new ApiError(403, "Only admins can resolve disputes");
+
+    const validStatuses = ['resolved', 'rejected'];
+    if (!status || !validStatuses.includes(status)) {
+        throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
 
     const dispute = await Dispute.findById(disputeId);
     if (!dispute) throw new ApiError(404, "Dispute not found");

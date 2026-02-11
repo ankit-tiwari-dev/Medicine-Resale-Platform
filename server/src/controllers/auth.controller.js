@@ -29,7 +29,9 @@ const generateAccessAndRefereshTokens = async (userId) => {
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
 
-        user.refreshToken = refreshToken;
+        // Hash the refresh token before storing in DB
+        const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        user.refreshToken = hashedRefreshToken;
         await user.save({ validateBeforeSave: false });
 
         return { accessToken, refreshToken };
@@ -157,15 +159,19 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     try {
-        const decodedToken = jwt.verify(incomingRefreshToken, process.env.JWT_SECRET);
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET
+        );
 
         const user = await User.findById(decodedToken?.id);
 
-        if (!user) {
+        if (!user || !user.refreshToken) {
             throw new ApiError(401, "Invalid refresh token");
         }
 
-        if (incomingRefreshToken !== user?.refreshToken) {
+        const hashedIncomingToken = crypto.createHash('sha256').update(incomingRefreshToken).digest('hex');
+        if (hashedIncomingToken !== user?.refreshToken) {
             throw new ApiError(401, "Refresh token is expired or used");
         }
 
@@ -183,20 +189,32 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 export const googleAuth = asyncHandler(async (req, res) => {
+    const state = crypto.randomBytes(32).toString('hex');
+    res.cookie('oauth_state', state, { ...cookieOptions, maxAge: 3600000 }); // 1 hour
+
     const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: [
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email'
         ],
-        prompt: 'consent'
+        prompt: 'consent',
+        state
     });
     res.redirect(url);
 });
 
 export const googleAuthCallback = asyncHandler(async (req, res) => {
     try {
-        const { code } = req.query;
+        const { code, state } = req.query;
+        const savedState = req.cookies.oauth_state;
+
+        if (!state || state !== savedState) {
+            throw new ApiError(400, "Invalid OAuth state. Potential CSRF detected.");
+        }
+
+        res.clearCookie('oauth_state');
+
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
 
@@ -227,6 +245,14 @@ export const googleAuthCallback = asyncHandler(async (req, res) => {
 
 export const registerLocal = asyncHandler(async (req, res) => {
     const { email, password, name } = req.body;
+
+    if (!email || !password || !name) {
+        throw new ApiError(400, "Email, password, and name are required");
+    }
+
+    if (password.length < 8) {
+        throw new ApiError(400, "Password must be at least 8 characters long");
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

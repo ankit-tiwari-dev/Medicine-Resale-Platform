@@ -3,97 +3,11 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { MIN_EXPIRY_DAYS } from "../constants.js";
-import cloudinary from "../config/cloudinary.js";
+
+import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 import axios from "axios";
 
-/*
-const extractMedicineDetailsKaggle = async (files, forceMock = false) => {
-    try {
-        const rawUrl = process.env.KAGGLE_TUNNEL_URL?.trim();
 
-        // 1. Check for manual mock or missing URL
-        if (!rawUrl || forceMock) {
-            console.log("AI Extraction: Falling back to Mock data (URL missing or forceMock enabled)");
-            return {
-                name: "Mock Medicine " + Math.floor(Math.random() * 100),
-                expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-                batchNumber: "MOCK-BATCH",
-                mrp: 100,
-                aiNote: forceMock ? "Manual Mock Mode" : "Kaggle Tunnel URL missing (Mock Fallback)"
-            };
-        }
-
-        const file = files[0];
-        const imageBase64 = file.buffer.toString("base64");
-
-        // Clean the tunnel URL
-        const baseUrl = rawUrl.replace(/\/api\/chat\/?$/, "").replace(/\/$/, "");
-        console.log("AI Extraction: Base URL used for Axios:", baseUrl);
-
-        console.log("AI Extraction: Sending request to Kaggle (Localtunnel + Ollama)...");
-
-        const response = await axios.post(`${baseUrl}/api/chat`, {
-            model: "llama3.2-vision:11b",
-            messages: [{
-                role: "user",
-                content: `Persona: You are a professional pharmaceutical OCR scanner.
-        Task: Extract data from the provided medicine label.
-        Rules:
-        1. Locate the 'Medicine Name' (usually the largest text).
-        2. Find 'Batch No' or 'Lot No'.
-        3. Find 'Expiry Date' or 'EXP'.
-        4. Find 'MRP' or 'Price'.
-        5. If text is blurry, look for date patterns (MM/YYYY or DD/MM/YY).
-        6. Return ONLY a JSON object. No conversation. No markdown blocks.
-        
-        Expected Format:
-        {"medicine_name": "", "batch_no": "", "expiry_date": "YYYY-MM-DD", "mrp": 0.0}`,
-                images: [imageBase64]
-            }],
-            stream: false,
-            format: "json",
-            options: {
-                temperature: 0,
-                num_ctx: 2048
-            }
-        }, {
-            headers: { 'bypass-tunnel-reminder': 'true' },
-            timeout: 120000
-        });
-
-        const aiContent = response.data.message.content;
-        const extracted = typeof aiContent === 'string' ? JSON.parse(aiContent) : aiContent;
-
-        const finalData = {
-            name: extracted.medicine_name || extracted["Medicine Name"] || extracted.name || "Unknown Medicine",
-
-            expiryDate: (extracted.expiry_date || extracted["Expiry Date"] || extracted.expiryDate)
-                ? new Date(extracted.expiry_date || extracted["Expiry Date"] || extracted.expiryDate)
-                : null,
-
-            batchNumber: extracted.batch_no || extracted["Batch Number"] || extracted.batchNumber || "N/A",
-
-            mrp: Number(extracted.mrp || extracted.MRP || extracted["MRP"]) || 0,
-
-            aiNote: "Processed via Llama 3.2-Vision"
-        };
-
-        console.log("AI Extraction: Successfully processed image.");
-        return finalData;
-
-    } catch (error) {
-        console.error("AI Logic Error (Llama/Localtunnel):", error.response?.data || error.message);
-        return {
-            name: "Manual Entry Required",
-            expiryDate: null,
-            batchNumber: "N/A",
-            mrp: 0,
-            aiError: error.message,
-            aiNote: "AI extraction failed. Please enter details manually."
-        };
-    }
-};
-*/
 
 const extractMedicineDetails = async (files, forceMock = false) => {
     try {
@@ -178,25 +92,7 @@ const extractMedicineDetails = async (files, forceMock = false) => {
 };
 
 
-const uploadToCloudinary = (buffer, filename) => {
-    if (process.env.NODE_ENV === 'test') {
-        return Promise.resolve(`https://res.cloudinary.com/test/image/upload/${filename}`);
-    }
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: "medicine-resale-platform",
-                public_id: `medicine_${Date.now()}_${filename}`,
-                resource_type: "image"
-            },
-            (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-            }
-        );
-        uploadStream.end(buffer);
-    });
-};
+
 
 const getExpiryValidationError = (expiryDate) => {
     if (!expiryDate) return null;
@@ -228,7 +124,7 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
     const { description, forceMock } = req.body;
 
     const uploadPromises = req.files.map(file =>
-        uploadToCloudinary(file.buffer, file.originalname)
+        uploadToCloudinary(file.buffer, "medicine-resale-platform", file.originalname)
     );
 
     const imageUrls = await Promise.all(uploadPromises);

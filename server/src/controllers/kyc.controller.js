@@ -4,25 +4,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Rider } from "../models/rider.model.js";
 import AadharService from "../utils/aadhar.service.js";
 import OCRService from "../utils/ocr.service.js";
-import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 
-// Helper to upload buffer to cloudinary
-const uploadToCloudinary = (buffer, folder, filename) => {
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: folder,
-                public_id: `kyc_${Date.now()}_${filename}`,
-                resource_type: "image"
-            },
-            (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-            }
-        );
-        uploadStream.end(buffer);
-    });
-};
+
 
 
 /**
@@ -85,7 +69,7 @@ export const verifyAadharQR = asyncHandler(async (req, res) => {
     if (!nameMatch) {
         rider.verificationStatus = "document_mismatch";
         await rider.save();
-        throw new ApiError(400, `Name on card photo does not match QR data. Card: ${ocrText.substring(0, 50)}..., QR: ${decoded.name}`);
+        throw new ApiError(400, "Name mismatch: The name on your Aadhaar card does not match your profile name.");
     }
 
     // Map decoded data to model
@@ -129,8 +113,8 @@ export const verifyDocumentsOCR = asyncHandler(async (req, res) => {
 
     const results = {};
 
-    if (rider.documents.panPhoto) {
-        const text = await OCRService.extractText(rider.documents.panPhoto);
+    if (rider.documents.panFront) {
+        const text = await OCRService.extractText(rider.documents.panFront);
         const panData = OCRService.parsePAN(text);
         if (panData) {
             rider.extractedData.pan = {
@@ -144,8 +128,8 @@ export const verifyDocumentsOCR = asyncHandler(async (req, res) => {
         }
     }
 
-    if (rider.documents.licensePhoto) {
-        const text = await OCRService.extractText(rider.documents.licensePhoto);
+    if (rider.documents.licenseFront) {
+        const text = await OCRService.extractText(rider.documents.licenseFront);
         const dlData = OCRService.parseDL(text);
         if (dlData) {
             rider.extractedData.license = {

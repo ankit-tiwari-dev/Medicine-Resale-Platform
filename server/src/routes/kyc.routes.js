@@ -5,7 +5,7 @@ import {
     verifyDocumentsOCR,
     submitKycConsent
 } from "../controllers/kyc.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, verifyRole } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 
 const router = Router();
@@ -15,6 +15,7 @@ const router = Router();
 // 1. Upload Photos
 router.route("/upload-docs").post(
     verifyJWT,
+    verifyRole("rider"),
     upload.fields([
         { name: "aadharFront", maxCount: 1 },
         { name: "aadharBack", maxCount: 1 },
@@ -28,12 +29,12 @@ router.route("/upload-docs").post(
 );
 
 // 2. Verify Aadhaar via scanned QR string
-router.route("/verify-aadhar-qr").post(verifyJWT, verifyAadharQR);
+router.route("/verify-aadhar-qr").post(verifyJWT, verifyRole("rider"), verifyAadharQR);
 
 // 3. Process OCR for PAN/DL
-router.route("/verify-ocr").post(verifyJWT, verifyDocumentsOCR);
+router.route("/verify-ocr").post(verifyJWT, verifyRole("rider"), verifyDocumentsOCR);
 
 // 4. Submit Final Consent
-router.route("/submit-consent").post(verifyJWT, submitKycConsent);
+router.route("/submit-consent").post(verifyJWT, verifyRole("rider"), submitKycConsent);
 
 export default router;

@@ -58,4 +58,3 @@ export const sendKycSubmissionEmail = (email, name) => {
 };
 
 export { sendEmail };
-```

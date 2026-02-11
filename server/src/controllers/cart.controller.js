@@ -109,6 +109,12 @@ export const getCart = asyncHandler(async (req, res) => {
 export const clearCart = asyncHandler(async (req, res) => {
     const cart = await Cart.findOne({ userId: req.user._id });
     if (cart) {
+        // Release reservations for all items in the cart
+        for (const item of cart.items) {
+            await Medicine.findByIdAndUpdate(item.medicineId, {
+                $unset: { reservedBy: 1, reservedUntil: 1 }
+            });
+        }
         cart.items = [];
         await cart.save();
     }

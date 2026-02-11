@@ -99,8 +99,8 @@ const riderSchema = new mongoose.Schema(
             ipAddress: String
         },
         vehicleDetails: {
-            type: String,
-            model: String
+            vehicleType: String,
+            vehicleModel: String
         }
     },
     {

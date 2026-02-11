@@ -3,30 +3,11 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { Rider } from "../models/rider.model.js";
-import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 // import { kycService } from "../utils/kyc.service.js";
 
 
-// Helper to upload buffer to cloudinary
-const uploadToCloudinary = (buffer, filename) => {
-    if (process.env.NODE_ENV === 'test') {
-        return Promise.resolve(`https://res.cloudinary.com/test/rider-proof/upload/${filename}`);
-    }
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: "rider-proofs",
-                public_id: `proof_${Date.now()}_${filename}`,
-                resource_type: "image"
-            },
-            (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-            }
-        );
-        uploadStream.end(buffer);
-    });
-};
+
 
 export const getMyTasks = asyncHandler(async (req, res) => {
     const { history } = req.query;
@@ -62,7 +43,7 @@ export const confirmCollection = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not assigned to this medicine");
     }
 
-    const proofUrl = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+    const proofUrl = await uploadToCloudinary(req.file.buffer, "rider-proofs", req.file.originalname);
 
     medicine.status = 'collected';
     medicine.pickupProof = proofUrl;

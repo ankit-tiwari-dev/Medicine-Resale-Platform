@@ -23,7 +23,7 @@ const medicineSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['uploaded', 'verified', 'pickup_assigned', 'collected', 'listed', 'sold'],
+            enum: ['uploaded', 'verified', 'rejected', 'pickup_assigned', 'collected', 'listed', 'sold'],
             default: 'uploaded'
         },
         isExpired: {

@@ -5,20 +5,19 @@ import { Medicine } from "../models/medicine.model.js";
 import { Rider } from "../models/rider.model.js";
 import { User } from "../models/user.model.js";
 import { AdminLog } from "../models/admin_log.model.js";
-
 import { Wallet } from "../models/wallet.model.js";
 import { Transaction } from "../models/transaction.model.js";
 import { WithdrawRequest } from "../models/withdraw_request.model.js";
+import { Order } from "../models/order.model.js";
+
+// ============ MEDICINE MANAGEMENT ============
 
 export const verifyMedicine = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { action, reason } = req.body;
 
     const medicine = await Medicine.findById(id);
-
-    if (!medicine) {
-        throw new ApiError(404, "Medicine not found");
-    }
+    if (!medicine) throw new ApiError(404, "Medicine not found");
 
     if (action === 'approve') {
         medicine.adminVerified = true;
@@ -42,9 +41,7 @@ export const verifyMedicine = asyncHandler(async (req, res) => {
         details: { reason }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, medicine, `Medicine ${action}d successfully`)
-    );
+    return res.status(200).json(new ApiResponse(200, medicine, `Medicine ${action}d successfully`));
 });
 
 export const getAdminMedicines = asyncHandler(async (req, res) => {
@@ -56,15 +53,11 @@ export const getAdminMedicines = asyncHandler(async (req, res) => {
         .populate("sellerId", "name email")
         .sort({ createdAt: -1 });
 
-    return res.status(200).json(
-        new ApiResponse(200, medicines, "Medicines fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, medicines, "Medicines fetched successfully"));
 });
 
 export const assignRider = asyncHandler(async (req, res) => {
-    let { medicineId, riderId } = req.body;
-
-    if (riderId) riderId = riderId.trim();
+    const { medicineId, riderId } = req.body;
 
     const medicine = await Medicine.findById(medicineId);
     if (!medicine) throw new ApiError(404, "Medicine not found");
@@ -73,6 +66,7 @@ export const assignRider = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Medicine must be verified before assigning rider");
     }
 
+    // riderId here is referring to the userId of the rider
     const rider = await Rider.findOne({ userId: riderId });
     if (!rider) throw new ApiError(404, "Rider not found");
 
@@ -80,6 +74,7 @@ export const assignRider = asyncHandler(async (req, res) => {
     medicine.status = 'pickup_assigned';
     await medicine.save();
 
+    rider.assignedTasks = rider.assignedTasks || [];
     rider.assignedTasks.push(medicine._id);
     await rider.save();
 
@@ -91,17 +86,12 @@ export const assignRider = asyncHandler(async (req, res) => {
         details: { riderId }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, medicine, "Rider assigned successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, medicine, "Rider assigned successfully"));
 });
 
 export const getAvailableRiders = asyncHandler(async (req, res) => {
     const riders = await Rider.find({ isActive: true }).populate("userId", "name email phone");
-
-    return res.status(200).json(
-        new ApiResponse(200, riders, "Active riders fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, riders, "Active riders fetched successfully"));
 });
 
 export const approveCollection = asyncHandler(async (req, res) => {
@@ -114,10 +104,9 @@ export const approveCollection = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Medicine has not been collected by rider yet");
     }
 
-    // Credit User Wallet
     let wallet = await Wallet.findOne({ userId: medicine.sellerId });
     if (!wallet) {
-        wallet = await Wallet.create({ userId: medicine.sellerId });
+        wallet = await Wallet.create({ userId: medicine.sellerId, balance: 0, transactions: [] });
     }
 
     const transaction = await Transaction.create({
@@ -132,7 +121,7 @@ export const approveCollection = asyncHandler(async (req, res) => {
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
-    medicine.status = 'listed'; // Now it can be bought by others
+    medicine.status = 'listed';
     await medicine.save();
 
     await AdminLog.create({
@@ -143,10 +132,10 @@ export const approveCollection = asyncHandler(async (req, res) => {
         details: { creditedAmount: medicine.price }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, { medicine, wallet }, "Collection approved and wallet credited")
-    );
+    return res.status(200).json(new ApiResponse(200, { medicine, wallet }, "Collection approved and wallet credited"));
 });
+
+// ============ AUDIT & LOGS ============
 
 export const getAdminLogs = asyncHandler(async (req, res) => {
     const logs = await AdminLog.find()
@@ -154,16 +143,13 @@ export const getAdminLogs = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .limit(20);
 
-    return res.status(200).json(
-        new ApiResponse(200, logs, "Admin logs fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, logs, "Admin logs fetched successfully"));
 });
 
 export const getAdminStats = asyncHandler(async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalMedicines = await Medicine.countDocuments();
 
-    // Calculate total revenue from completed transactions
     const revenueData = await Transaction.aggregate([
         { $match: { type: 'credit', status: 'completed' } },
         { $group: { _id: null, total: { $sum: '$amount' } } }
@@ -171,13 +157,11 @@ export const getAdminStats = asyncHandler(async (req, res) => {
 
     const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
 
-    return res.status(200).json(
-        new ApiResponse(200, {
-            totalUsers,
-            totalMedicines,
-            totalRevenue
-        }, "Admin stats fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, {
+        totalUsers,
+        totalMedicines,
+        totalRevenue
+    }, "Admin stats fetched successfully"));
 });
 
 // ============ WITHDRAWAL MANAGEMENT ============
@@ -185,42 +169,32 @@ export const getAdminStats = asyncHandler(async (req, res) => {
 export const getWithdrawalRequests = asyncHandler(async (req, res) => {
     const { status } = req.query;
     const filter = {};
-
-    if (status) {
-        filter.status = status;
-    }
+    if (status) filter.status = status;
 
     const withdrawals = await WithdrawRequest.find(filter)
         .populate("userId", "name email")
         .sort({ createdAt: -1 });
 
-    return res.status(200).json(
-        new ApiResponse(200, withdrawals, "Withdrawal requests fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, withdrawals, "Withdrawal requests fetched successfully"));
 });
 
 export const approveWithdrawal = asyncHandler(async (req, res) => {
     const { id } = req.params;
-
     const withdrawal = await WithdrawRequest.findById(id);
     if (!withdrawal) throw new ApiError(404, "Withdrawal request not found");
-
-    if (withdrawal.status !== 'pending') {
-        throw new ApiError(400, "Withdrawal request already processed");
-    }
+    if (withdrawal.status !== 'pending') throw new ApiError(400, "Withdrawal request already processed");
 
     withdrawal.status = 'approved';
     withdrawal.processedAt = new Date();
     withdrawal.processedBy = req.user._id;
     await withdrawal.save();
 
-    // Update transaction status
     const transaction = await Transaction.findOne({
         userId: withdrawal.userId,
         amount: withdrawal.amount,
         type: 'withdrawal',
         status: 'pending'
-    });
+    }).sort({ createdAt: 1 });
 
     if (transaction) {
         transaction.status = 'completed';
@@ -235,21 +209,15 @@ export const approveWithdrawal = asyncHandler(async (req, res) => {
         details: { amount: withdrawal.amount }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, withdrawal, "Withdrawal approved successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, withdrawal, "Withdrawal approved successfully"));
 });
 
 export const rejectWithdrawal = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
-
     const withdrawal = await WithdrawRequest.findById(id);
     if (!withdrawal) throw new ApiError(404, "Withdrawal request not found");
-
-    if (withdrawal.status !== 'pending') {
-        throw new ApiError(400, "Withdrawal request already processed");
-    }
+    if (withdrawal.status !== 'pending') throw new ApiError(400, "Withdrawal request already processed");
 
     withdrawal.status = 'rejected';
     withdrawal.rejectionReason = reason || "No reason provided";
@@ -257,20 +225,18 @@ export const rejectWithdrawal = asyncHandler(async (req, res) => {
     withdrawal.processedBy = req.user._id;
     await withdrawal.save();
 
-    // Refund to wallet
     const wallet = await Wallet.findOne({ userId: withdrawal.userId });
     if (wallet) {
         wallet.balance += withdrawal.amount;
         await wallet.save();
     }
 
-    // Update transaction status
     const transaction = await Transaction.findOne({
         userId: withdrawal.userId,
         amount: withdrawal.amount,
         type: 'withdrawal',
         status: 'pending'
-    });
+    }).sort({ createdAt: 1 });
 
     if (transaction) {
         transaction.status = 'failed';
@@ -285,9 +251,7 @@ export const rejectWithdrawal = asyncHandler(async (req, res) => {
         details: { amount: withdrawal.amount, reason }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, withdrawal, "Withdrawal rejected and amount refunded")
-    );
+    return res.status(200).json(new ApiResponse(200, withdrawal, "Withdrawal rejected and amount refunded"));
 });
 
 // ============ USER MANAGEMENT ============
@@ -295,10 +259,7 @@ export const rejectWithdrawal = asyncHandler(async (req, res) => {
 export const getAllUsers = asyncHandler(async (req, res) => {
     const { role, page = 1, limit = 20 } = req.query;
     const filter = {};
-
-    if (role) {
-        filter.role = role;
-    }
+    if (role) filter.role = role;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -310,17 +271,15 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
     const total = await User.countDocuments(filter);
 
-    return res.status(200).json(
-        new ApiResponse(200, {
-            users,
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total,
-                pages: Math.ceil(total / parseInt(limit))
-            }
-        }, "Users fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, {
+        users,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / parseInt(limit))
+        }
+    }, "Users fetched successfully"));
 });
 
 export const updateUser = asyncHandler(async (req, res) => {
@@ -343,14 +302,11 @@ export const updateUser = asyncHandler(async (req, res) => {
         details: { role, isVerified }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, user, "User updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, user, "User updated successfully"));
 });
 
 export const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
-
     const user = await User.findByIdAndDelete(id);
     if (!user) throw new ApiError(404, "User not found");
 
@@ -362,9 +318,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
         details: { email: user.email }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, null, "User deleted successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, null, "User deleted successfully"));
 });
 
 // ============ ORDER MANAGEMENT ============
@@ -372,39 +326,33 @@ export const deleteUser = asyncHandler(async (req, res) => {
 export const getAllOrders = asyncHandler(async (req, res) => {
     const { status } = req.query;
     const filter = {};
-
-    if (status) {
-        filter.status = status;
-    }
-
-    const Order = (await import("../models/order.model.js")).Order;
+    if (status) filter.status = status;
 
     const orders = await Order.find(filter)
         .populate("buyerId", "name email")
-        .populate("medicineId", "extractedData images")
+        .populate("orderItems.medicineId")
         .sort({ createdAt: -1 });
 
-    return res.status(200).json(
-        new ApiResponse(200, orders, "Orders fetched successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, orders, "Orders fetched successfully"));
 });
+
+const VALID_ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled', 'disputed'];
 
 export const updateOrderStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const Order = (await import("../models/order.model.js")).Order;
+    if (!status || !VALID_ORDER_STATUSES.includes(status)) {
+        throw new ApiError(400, `Invalid status. Must be one of: ${VALID_ORDER_STATUSES.join(', ')}`);
+    }
 
     const order = await Order.findById(id);
     if (!order) throw new ApiError(404, "Order not found");
 
     order.status = status;
-    if (status === 'delivered') {
-        order.deliveredAt = new Date();
-    }
-    if (status === 'shipped') {
-        order.shippedAt = new Date();
-    }
+    if (status === 'delivered') order.deliveredAt = new Date();
+    if (status === 'shipped') order.shippedAt = new Date();
+
     order.statusHistory = order.statusHistory || [];
     order.statusHistory.push({
         status,
@@ -421,7 +369,5 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         details: { status }
     });
 
-    return res.status(200).json(
-        new ApiResponse(200, order, "Order status updated successfully")
-    );
+    return res.status(200).json(new ApiResponse(200, order, "Order status updated successfully"));
 });
