@@ -9,6 +9,7 @@ import { Wallet } from "../models/wallet.model.js";
 import { Transaction } from "../models/transaction.model.js";
 import { WithdrawRequest } from "../models/withdraw_request.model.js";
 import { Order } from "../models/order.model.js";
+import { sendKycApprovalEmail, sendKycRejectionEmail } from "../utils/mailer.js";
 
 // ============ MEDICINE MANAGEMENT ============
 
@@ -370,4 +371,53 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     });
 
     return res.status(200).json(new ApiResponse(200, order, "Order status updated successfully"));
+});
+
+// ============ KYC MANAGEMENT ============
+
+export const getPendingKycRiders = asyncHandler(async (req, res) => {
+    const riders = await Rider.find({ verificationStatus: "verified_pending_admin" })
+        .populate("userId", "name email phone");
+
+    return res.status(200).json(new ApiResponse(200, riders, "Pending KYC riders fetched successfully"));
+});
+
+export const verifyRiderKYC = asyncHandler(async (req, res) => {
+    const { id } = req.params; // rider id
+    const { action, reason } = req.body;
+
+    const rider = await Rider.findById(id).populate("userId", "name email");
+    if (!rider) throw new ApiError(404, "Rider profile not found");
+
+    if (rider.verificationStatus !== "verified_pending_admin" && rider.verificationStatus !== "document_mismatch") {
+        throw new ApiError(400, "Rider is not in the pending verification queue");
+    }
+
+    if (action === 'approve') {
+        rider.verificationStatus = 'verified';
+        rider.isVerified = true;
+
+        // Notify Rider
+        await sendKycApprovalEmail(rider.userId.email, rider.userId.name);
+    } else if (action === 'reject') {
+        rider.verificationStatus = 'rejected';
+        rider.isVerified = false;
+
+        // Notify Rider
+        await sendKycRejectionEmail(rider.userId.email, rider.userId.name, reason);
+    } else {
+        throw new ApiError(400, "Invalid action. Use 'approve' or 'reject'");
+    }
+
+    await rider.save();
+
+    await AdminLog.create({
+        adminId: req.user._id,
+        action: `KYC_${action.toUpperCase()}`,
+        targetId: rider._id,
+        targetType: 'Rider',
+        details: { reason }
+    });
+
+    return res.status(200).json(new ApiResponse(200, rider, `Rider KYC ${action}d successfully`));
 });

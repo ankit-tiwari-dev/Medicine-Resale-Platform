@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Wallet } from "../models/wallet.model.js";
 import { WithdrawRequest } from "../models/withdraw_request.model.js";
 import { Transaction } from "../models/transaction.model.js";
+import { Rider } from "../models/rider.model.js";
 
 // Helper to get or create wallet
 const getOrCreateWallet = async (userId) => {
@@ -35,7 +36,22 @@ export const getTransactions = asyncHandler(async (req, res) => {
 });
 
 export const requestWithdrawal = asyncHandler(async (req, res) => {
-    const { amount, bankDetails } = req.body;
+    let { amount, bankDetails } = req.body;
+
+    // --- Payout Security Lock ---
+    if (req.user.role === "rider") {
+        const rider = await Rider.findOne({ userId: req.user._id });
+        if (!rider || !rider.bankDetails || !rider.bankDetails.isVerified) {
+            throw new ApiError(403, "Withdrawals are locked until your bank details are verified by an Admin.");
+        }
+        // Force the use of the pre-verified bank details
+        bankDetails = {
+            accountNumber: rider.bankDetails.accountNumber,
+            ifsc: rider.bankDetails.ifsc,
+            bankName: rider.bankDetails.bankName,
+            holderName: rider.bankDetails.holderName
+        };
+    }
 
     if (!amount || amount <= 0) {
         throw new ApiError(400, "Amount must be greater than zero");

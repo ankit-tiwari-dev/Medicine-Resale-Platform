@@ -38,3 +38,22 @@ export const verifyRole = (...roles) => {
         next();
     };
 };
+
+export const verifyAdmin = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        throw new ApiError(403, "Admin access required");
+    }
+    next();
+};
+
+export const verifyRiderVerified = asyncHandler(async (req, res, next) => {
+    const { Rider } = await import("../models/rider.model.js");
+    const rider = await Rider.findOne({ userId: req.user._id });
+
+    if (!rider || !rider.isVerified) {
+        throw new ApiError(403, "Your Rider account is not yet verified by Admin. Please complete KYC.");
+    }
+
+    req.rider = rider;
+    next();
+});

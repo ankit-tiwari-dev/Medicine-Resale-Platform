@@ -15,43 +15,44 @@ import {
     updateUser,
     deleteUser,
     getAllOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    getPendingKycRiders,
+    verifyRiderKYC
 } from "../controllers/admin.controller.js";
+import { verifyAdmin } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 // All routes require Admin role
-router.use(verifyJWT, verifyRole("admin"));
+router.use(verifyJWT, verifyAdmin);
 
-// Medicine verification
+// Medicine Management
+router.patch("/medicine/verify/:id", verifyMedicine);
 router.get("/medicines", getAdminMedicines);
-router.post("/medicines/:id/verify", verifyMedicine);
-
-// Rider management
-router.get("/riders", getAvailableRiders);
 router.post("/assign-rider", assignRider);
-
-// Collection approval
+router.get("/available-riders", getAvailableRiders);
 router.post("/approve-collection", approveCollection);
 
-// Withdrawal management
-router.get("/withdrawals", getWithdrawalRequests);
-router.post("/withdrawals/:id/approve", approveWithdrawal);
-router.post("/withdrawals/:id/reject", rejectWithdrawal);
-
-// User management
-router.get("/users", getAllUsers);
-router.patch("/users/:id", updateUser);
-router.delete("/users/:id", deleteUser);
-
-// Order management
+// Order Management
 router.get("/orders", getAllOrders);
-router.patch("/orders/:id/status", updateOrderStatus);
+router.patch("/order/status/:id", updateOrderStatus);
 
-// Activity logs
+// Withdrawal Management
+router.get("/withdrawals", getWithdrawalRequests);
+router.patch("/withdrawal/approve/:id", approveWithdrawal);
+router.patch("/withdrawal/reject/:id", rejectWithdrawal);
+
+// User Management
+router.get("/users", getAllUsers);
+router.patch("/user/:id", updateUser);
+router.delete("/user/:id", deleteUser);
+
+// KYC Management
+router.get("/kyc/pending", getPendingKycRiders);
+router.patch("/kyc/verify/:id", verifyRiderKYC);
+
+// Audit Logs
 router.get("/logs", getAdminLogs);
-
-// System stats
 router.get("/stats", getAdminStats);
 
 export default router;

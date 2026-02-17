@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyJWT, verifyRole } from "../middlewares/auth.middleware.js";
+import { verifyJWT, verifyRole, verifyRiderVerified } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import {
     getMyTasks,
@@ -9,11 +9,10 @@ import {
 
 const router = express.Router();
 
-router.use(verifyJWT, verifyRole("rider"));
+router.use(verifyJWT, verifyRole("rider"), verifyRiderVerified);
 
 router.get("/tasks", getMyTasks);
 router.get("/stats", getRiderStats);
 router.post("/confirm-collection", upload.single("proof"), confirmCollection);
 
 export default router;
-

@@ -4,7 +4,7 @@
 ![Tech Stack](https://img.shields.io/badge/Stack-MERN-blue)
 ![AI Powered](https://img.shields.io/badge/AI-Gemini%20Included-green)
 
-A state-of-the-art MERN platform designed for the safe resale of unused medicines. The system integrates advanced AI for data extraction and a zero-cost, tamper-proof identity verification system for riders.
+A state-of-the-art MERN platform designed for the safe resale of unused medicines. The system integrates advanced AI for data extraction and a **Zero-Tolerance, AI-powered forensic document verification system** to ensure rider authenticity.
 
 ---
 
@@ -21,8 +21,9 @@ A state-of-the-art MERN platform designed for the safe resale of unused medicine
 ### 2. Zero-Cost KYC (Rider Identity)
 A robust offline verification system that requires **Zero External API Costs**:
 - **Aadhaar Secure QR (V4)**: Decodes government-signed QR data (Name, DOB, Photo) using digital signatures.
-- **Cross-Verification**: Automatically matches the OCR text from the physical Aadhaar card against the signed data in the QR code to detect identity fraud.
-- **Selfie Face-Match**: Riders upload a live selfie which the Admin compares with the government-extracted photo.
+- **AI Forensic Analysis**: Uses custom vision models to detect Moiré patterns (screen photos), font inconsistencies, and missing government seals.
+- **Optical Depth Check**: Distinguishes between a physical plastic card and a flat photocopy or digital mask.
+- **Admin Verification Stamp**: A final human audit to confirm AI forensic notes before a rider is officially verified.
 
 ---
 

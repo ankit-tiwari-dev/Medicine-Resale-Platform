@@ -57,4 +57,35 @@ export const sendKycSubmissionEmail = (email, name) => {
     return sendEmail(email, 'KYC Verification - Application Under Review', html);
 };
 
+export const sendKycApprovalEmail = (email, name) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #27ae60;">Congratulations! KYC Approved</h2>
+            <p>Dear ${name},</p>
+            <p>We are pleased to inform you that your identity documents have been successfully verified by our team.</p>
+            <p><strong>Your account is now fully active.</strong> You can now log in as a Rider and start accepting delivery tasks.</p>
+            <p>Welcome aboard!</p>
+            <p>Regards,<br>Team Medicine Resale Platform</p>
+        </div>
+    `;
+    return sendEmail(email, 'KYC Verification - Approved', html);
+};
+
+export const sendKycRejectionEmail = (email, name, reason) => {
+    const html = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #e74c3c;">KYC Application Rejected</h2>
+            <p>Dear ${name},</p>
+            <p>We regret to inform you that your KYC application has been rejected after review.</p>
+            <div style="background-color: #fdf2f2; border-left: 5px solid #e74c3c; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #c0392b;"><strong>Rejection Reason:</strong></p>
+                <p style="margin: 5px 0 0;">${reason || "Your documents did not meet our verification standards."}</p>
+            </div>
+            <p>If you believe this was an error, you can re-upload clear, original photos of your documents in the app.</p>
+            <p>Regards,<br>Team Medicine Resale Platform</p>
+        </div>
+    `;
+    return sendEmail(email, 'KYC Verification - Rejected', html);
+};
+
 export { sendEmail };

@@ -53,7 +53,11 @@ This platform enables users to upload unused medicines for resale. The system us
 - View assigned collection tasks
 - Upload proof of collection
 - View rider stats (pending pickups, collected total)
-- **KYC Verification**: Production-ready Aadhaar (OTP based), PAN, and Driving License verification against government records.
+- **High-Security KYC**: Multi-stage verification including:
+  - Cryptographic Aadhaar QR decoding.
+  - **Zero-Tolerance AI Analysis**: Detecting screen-captures, photoshops, and flat printouts.
+  - **Forensic Audit Trail**: Detailed logs of AI analysis (Holograms, Signatures, Seals).
+  - **Admin Approval Lock**: Riders are restricted from duties until an Admin officially approves their forensic profile.
 
 ## AI Integration
 - Gemini models used to extract structured data from medicine images

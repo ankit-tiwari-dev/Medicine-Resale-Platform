@@ -59,6 +59,10 @@ const riderSchema = new mongoose.Schema(
             panBack: String,
             licenseFront: String,
             licenseBack: String,
+            rcFront: String,
+            rcBack: String,
+            insuranceFront: String,
+            bankProof: String,
             selfie: String
         },
         extractedData: {
@@ -100,7 +104,39 @@ const riderSchema = new mongoose.Schema(
         },
         vehicleDetails: {
             vehicleType: String,
-            vehicleModel: String
+            vehicleModel: String,
+            vehicleNumber: String,
+            rcNumber: String
+        },
+        insurance: {
+            policyNumber: String,
+            expiryDate: Date,
+            isVerified: {
+                type: Boolean,
+                default: false
+            }
+        },
+        bankDetails: {
+            accountNumber: String,
+            ifsc: String,
+            bankName: String,
+            holderName: String,
+            isVerified: {
+                type: Boolean,
+                default: false
+            },
+            verifiedAt: Date
+        },
+        emergencyContact: {
+            name: String,
+            phone: String
+        },
+        verificationScores: {
+            faceMatch: Number,
+            integrity: Number,
+            overall: Number,
+            aiFraudScore: { type: Number, default: 0 },
+            forensicAudit: [String] // List of notes from AI forensics TaskBoundary
         }
     },
     {

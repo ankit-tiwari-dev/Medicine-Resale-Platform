@@ -289,13 +289,13 @@ Auth conventions
 
 ### Medicines
 - `GET /admin/medicines` (query: `status`)
-- `POST /admin/medicines/:id/verify`
+- `PATCH /admin/medicine/verify/:id`
   ```json
   { "action": "approve", "reason": "Images clear and details match" }
   ```
 
 ### Riders & Collection
-- `GET /admin/riders`: List available riders.
+- `GET /admin/available-riders`: List active riders.
 - `POST /admin/assign-rider`
   ```json
   { "medicineId": "ID", "riderId": "ID" }
@@ -305,16 +305,23 @@ Auth conventions
   { "medicineId": "ID" }
   ```
 
+### KYC Management
+- `GET /admin/kyc/pending`: List riders awaiting admin approval.
+- `PATCH /admin/kyc/verify/:id`: Approve or Reject KYC.
+  ```json
+  { "action": "approve", "reason": "All documents match" }
+  ```
+
 ### User & Order Management
 - `GET /admin/users` (query: `role`, `page`, `limit`)
-- `PATCH /admin/users/:id`: Update role/status.
+- `PATCH /admin/user/:id`: Update role/status.
 - `GET /admin/orders`: List all orders.
-- `PATCH /admin/orders/:id/status`: Update status (e.g., `shipped`).
+- `PATCH /admin/order/status/:id`: Update status (e.g., `shipped`).
 
 ### Withdrawals
 - `GET /admin/withdrawals` (query: `status`)
-- `POST /admin/withdrawals/:id/approve`: Approves bank transfer.
-- `POST /admin/withdrawals/:id/reject`
+- `PATCH /admin/withdrawal/approve/:id`: Approves bank transfer.
+- `PATCH /admin/withdrawal/reject/:id`
 
 ### System Monitoring
 - `GET /admin/logs`: view activity history.
@@ -376,54 +383,93 @@ Auth conventions
 
 ---
 
-### KYC Verification (Identity - Offline Flow)
+### 9. Rider KYC
 
-Riders must complete these steps to be verified. The flow uses **Digital Aadhaar QR** and **OCR** for PAN/DL.
-
-#### 1. Upload Document Photos
-- **URL**: `/kyc/upload-docs`
+#### Upload KYC Documents
+- **URL**: `/api/v1/kyc/upload-docs`
 - **Method**: `POST`
-- **Headers**: `Content-Type: multipart/form-data`
-- **Body**:
-  - `aadharFront` (file)
-  - `aadharBack` (file)
-  - `panFront` (file)
-  - `panBack` (file)
-  - `licenseFront` (file)
-  - `licenseBack` (file)
-  - `selfie` (file): Live photo of the rider's face
-- **Response**: URLs of the uploaded proofs.
-
-#### 2. Verify Aadhaar via Secure QR
-- **URL**: `/kyc/verify-aadhar-qr`
-- **Method**: `POST`
-- **Body**:
-  ```json
-  { "qrData": "20510656815277038..." } 
-  ```
-- **Notes**: 
-  - Extract the "long decimal string" from the secure QR.
-  - **Cross-Verification**: The system will automatically OCR the `aadharFront` and match the Name/DOB with the QR data. If they don't match, it returns a `document_mismatch` error.
-
-#### 3. Extract PAN & DL Details (OCR)
-- **URL**: `/kyc/verify-ocr`
-- **Method**: `POST`
-- **Response**: 
+- **Headers**:
+  - `Authorization`: `Bearer <token>` (Rider Role)
+  - `Content-Type`: `multipart/form-data`
+- **Body**: (key: value)
+  - `aadharFront`: File
+  - `aadharBack`: File
+  - `panFront`: File
+  - `panBack`: File
+  - `licenseFront`: File
+  - `licenseBack`: File
+  - `rcFront`: File
+  - `rcBack`: File
+  - `insuranceFront`: File
+  - `bankProof`: File (Cancelled Cheque/Passbook)
+  - `selfie`: File
+- **Response**:
   ```json
   {
-    "extractedData": {
-      "pan": { "panNumber": "ABCDE1234F" },
-      "license": { "licenseNumber": "DL-04-202300..." }
-    }
+      "statusCode": 200,
+      "data": { "documents": { ...urls... } },
+      "message": "Documents uploaded successfully"
   }
   ```
-- **Notes**: Automatically processes the previously uploaded `panPhoto` and `licensePhoto` using AI.
 
-#### 4. Final Consent
-- **URL**: `/kyc/submit-consent`
+#### Verify Aadhaar QR (Anchor)
+- **URL**: `/api/v1/kyc/verify-aadhar-qr`
+- **Method**: `POST`
+- **Body**: `{ "qrData": "numeric_string_from_qr" }`
+- **Response**: Extracted Aadhaar details + `isVerified: true`
+
+#### Verify QR-OCR Parity (PAN/DL/RC)
+- **URL**: `/api/v1/kyc/verify-parity`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+      "docType": "pan", // or 'license', 'rc'
+      "qrData": "scanned_qr_content"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+      "statusCode": 200,
+      "data": {
+          "extractedData": { ... },
+          "parityResult": {
+              "visualName": "JOHN DOE",
+              "visualNumber": "ABCDE1234F",
+              "matchScore": 95,
+              "isFabricated": false,
+              "isMatch": true
+          }
+      },
+      "message": "PAN verified with QR-OCR parity successfully"
+  }
+  ```
+
+#### Verify Payout & Insurance Docs
+- **URL**: `/api/v1/kyc/verify-payout`
+- **Method**: `POST`
+- **Response**:
+  ```json
+  {
+      "statusCode": 200,
+      "data": { "results": { "bank": "extracted", "insurance": "extracted" } },
+      "message": "Payout documents processed successfully"
+  }
+  ```
+
+#### Submit Consent
+- **URL**: `/api/v1/kyc/submit-consent`
 - **Method**: `POST`
 - **Body**: `{ "consentGiven": true }`
-- **Response**: Status changed to `verified_pending_admin`.
+- **Response**:
+  ```json
+  {
+      "statusCode": 200,
+      "data": { "status": "verified_pending_admin" },
+      "message": "KYC submitted for final review. Admin will verify within 2 business days."
+  }
+  ```
 
 ---
 
