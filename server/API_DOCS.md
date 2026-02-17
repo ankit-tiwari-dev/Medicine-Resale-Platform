@@ -412,20 +412,18 @@ Auth conventions
   }
   ```
 
-#### Verify Aadhaar QR (Anchor)
-- **URL**: `/api/v1/kyc/verify-aadhar-qr`
+#### Verify Aadhaar
+- **URL**: `/api/v1/kyc/verify-aadhar`
 - **Method**: `POST`
-- **Body**: `{ "qrData": "numeric_string_from_qr" }`
 - **Response**: Extracted Aadhaar details + `isVerified: true`
 
-#### Verify QR-OCR Parity (PAN/DL/RC)
-- **URL**: `/api/v1/kyc/verify-parity`
+#### Verify Document (PAN/DL/RC)
+- **URL**: `/api/v1/kyc/verify-doc`
 - **Method**: `POST`
 - **Body**:
   ```json
   {
-      "docType": "pan", // or 'license', 'rc'
-      "qrData": "scanned_qr_content"
+      "docType": "pan" // or 'license', 'rc'
   }
   ```
 - **Response**:
@@ -433,16 +431,9 @@ Auth conventions
   {
       "statusCode": 200,
       "data": {
-          "extractedData": { ... },
-          "parityResult": {
-              "visualName": "JOHN DOE",
-              "visualNumber": "ABCDE1234F",
-              "matchScore": 95,
-              "isFabricated": false,
-              "isMatch": true
-          }
+          "extractedData": { ... }
       },
-      "message": "PAN verified with QR-OCR parity successfully"
+      "message": "PAN verified via AI successfully"
   }
   ```
 

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
     uploadRiderDocuments,
-    verifyAadharQR,
-    verifyDocumentParity,
+    verifyAadhar,
+    verifyDocument,
     verifyPayoutDocs,
     submitKycConsent
 } from "../controllers/kyc.controller.js";
@@ -33,11 +33,11 @@ router.route("/upload-docs").post(
     uploadRiderDocuments
 );
 
-// 2. Verify Aadhaar via scanned QR string (Dual-Input Anchor)
-router.route("/verify-aadhar-qr").post(verifyJWT, verifyRole("rider"), verifyAadharQR);
+// 2. Verify Aadhaar via AI
+router.route("/verify-aadhar").post(verifyJWT, verifyRole("rider"), verifyAadhar);
 
-// 3. Verify Parity for PAN/DL/RC (Dual-Input: Photo + Scanned QR)
-router.route("/verify-parity").post(verifyJWT, verifyRole("rider"), verifyDocumentParity);
+// 3. Verify Other Documents (PAN/DL/RC) via AI
+router.route("/verify-doc").post(verifyJWT, verifyRole("rider"), verifyDocument);
 
 // 4. Extract Payout Docs (Insurance, Bank)
 router.route("/verify-payout").post(verifyJWT, verifyRole("rider"), verifyPayoutDocs);

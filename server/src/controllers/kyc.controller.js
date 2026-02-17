@@ -2,9 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Rider } from "../models/rider.model.js";
-import AadharService from "../utils/aadhar.service.js";
 import OCRService from "../utils/ocr.service.js";
-import QRService from "../utils/qr.service.js";
 import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 
 
@@ -40,15 +38,9 @@ export const uploadRiderDocuments = asyncHandler(async (req, res) => {
 });
 
 /**
- * Step 2: Verify Aadhaar using Secure QR decimal string + Front Photo OCR
+ * Step 2: Verify Aadhaar using AI Identification + Front Photo
  */
-export const verifyAadharQR = asyncHandler(async (req, res) => {
-    const { qrData } = req.body;
-    if (!qrData) throw new ApiError(400, "Aadhaar QR data is required");
-
-    const decoded = AadharService.decodeSecureQR(qrData);
-    if (!decoded) throw new ApiError(400, "Failed to decode Aadhaar QR. Invalid or corrupted data.");
-
+export const verifyAadhar = asyncHandler(async (req, res) => {
     const rider = await Rider.findOne({ userId: req.user._id });
     if (!rider) throw new ApiError(404, "Rider profile not found");
 
@@ -56,41 +48,48 @@ export const verifyAadharQR = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Please upload your Aadhaar front photo first");
     }
 
-    // --- Cross-Verification Step ---
-    // Extract text from the uploaded Aadhaar Front photo
-    const ocrText = await OCRService.extractText(rider.documents.aadharFront);
-    const sanitizedOcr = ocrText.toLowerCase();
-    const sanitizedName = decoded.name.toLowerCase();
+    // AI Identification + Forensic Audit
+    const aiResponse = await OCRService.groqIdentify(rider.documents.aadharFront, "AADHAAR");
+    if (!aiResponse) throw new ApiError(400, "Failed to analyze Aadhaar image. Please ensure the photo is clear.");
 
-    // Check if the name in the QR matches the name on the card (simple partial match)
-    // We split the name into parts to handle middle names or different ordering
-    const nameParts = sanitizedName.split(" ").filter(p => p.length > 2);
-    const nameMatch = nameParts.every(part => sanitizedOcr.includes(part));
+    const aiData = aiResponse.data;
+    const fraudScore = aiResponse.fraudScore || 0;
+    const isAuthentic = aiResponse.isAuthentic !== false;
+    const hologramValid = aiResponse.hologramValid !== false;
 
-    if (!nameMatch) {
+    // Profile Matching: Ensure name matches
+    const userNames = req.user.name.toLowerCase().split(" ").filter(n => n.length > 2);
+    const extractedName = (aiData.fullName || "").toLowerCase();
+    const profileMatch = userNames.some(namePart => extractedName.includes(namePart));
+
+    const isMatch = profileMatch && isAuthentic && fraudScore === 0 && hologramValid;
+
+    if (!isMatch) {
         rider.verificationStatus = "document_mismatch";
+        if (aiResponse.forensicNote) {
+            rider.verificationScores.forensicAudit.push(`[AADHAAR FAIL] ${aiResponse.forensicNote}`);
+        }
         await rider.save();
-        throw new ApiError(400, "Name mismatch: The name on your Aadhaar card does not match your profile name.");
+        throw new ApiError(400, "Aadhaar verification failed. Name mismatch or forgery detected.");
     }
 
-    // Map decoded data to model
+    // Map extracted data to model
     rider.extractedData.aadhar = {
-        fullName: decoded.name,
-        dob: decoded.dob,
-        gender: decoded.gender,
-        pincode: decoded.pincode,
-        state: decoded.state,
-        district: decoded.district,
-        vtc: decoded.vtc,
-        maskedAadhar: decoded.maskedAadhar,
+        fullName: aiData.fullName,
+        dob: aiData.dob,
+        gender: aiData.gender,
+        pincode: aiData.pincode,
+        state: aiData.state,
+        district: aiData.district,
+        maskedAadhar: aiData.aadharNumber ? `XXXX XXXX ${aiData.aadharNumber.slice(-4)}` : null,
         isCrossVerified: true,
         verifiedAt: new Date()
     };
 
-    // If a photo was extracted from QR, upload it to Cloudinary
-    if (decoded.image && decoded.image.length > 100) {
-        const photoUrl = await uploadToCloudinary(decoded.image, "rider-avatars", "aadhar_extracted_photo.jp2");
-        rider.extractedData.aadhar.profileImage = photoUrl;
+    // Record forensic success
+    rider.verificationScores.aiFraudScore = Math.max(rider.verificationScores.aiFraudScore, fraudScore);
+    if (aiResponse.forensicNote) {
+        rider.verificationScores.forensicAudit.push(`[AADHAAR PASS] ${aiResponse.forensicNote}`);
     }
 
     // Reset status if it was mismatch
@@ -101,132 +100,94 @@ export const verifyAadharQR = asyncHandler(async (req, res) => {
     await rider.save();
 
     return res.status(200).json(
-        new ApiResponse(200, { aadhar: rider.extractedData.aadhar }, "Aadhaar QR cross-verified with photo successfully")
+        new ApiResponse(200, { aadhar: rider.extractedData.aadhar }, "Aadhaar verified via AI successfully")
     );
 });
 
 /**
- * Step 3: Verify Document Parity (Dual-Input: Photo + QR)
+ * Step 3: Verify Document (AI-only)
  * Handles PAN, DL, and RC
  */
-export const verifyDocumentParity = asyncHandler(async (req, res) => {
-    const { docType, qrData } = req.body;
-    if (!docType || !qrData) throw new ApiError(400, "Document type and QR data are required");
+export const verifyDocument = asyncHandler(async (req, res) => {
+    const { docType } = req.body;
+    if (!docType) throw new ApiError(400, "Document type is required");
 
     const rider = await Rider.findOne({ userId: req.user._id });
     if (!rider) throw new ApiError(404, "Rider profile not found");
 
-    let extractedQR;
     let imageUrl;
-    let isQRReadable = true;
-
     switch (docType) {
         case 'pan':
-            extractedQR = QRService.parsePAN(qrData);
             imageUrl = rider.documents.panFront;
             break;
         case 'license':
-            extractedQR = QRService.parseDL(qrData);
             imageUrl = rider.documents.licenseFront;
             break;
         case 'rc':
-            extractedQR = QRService.parseRC(qrData);
             imageUrl = rider.documents.rcFront;
             break;
         default:
-            throw new ApiError(400, "Invalid document type for parity check");
+            throw new ApiError(400, "Invalid document type");
     }
 
     if (!imageUrl) throw new ApiError(400, `Please upload ${docType} photo first`);
 
-    let parityResult;
-    if (extractedQR) {
-        // Full Triple-QR Secure Parity Check
-        parityResult = await QRService.verifyParity(extractedQR, imageUrl, docType);
-    } else {
-        // Fallback: AI Identification + Profile Matching (Level 2 Security)
-        isQRReadable = false;
+    const aiResponse = await OCRService.groqIdentify(imageUrl, docType.toUpperCase());
+    if (!aiResponse) throw new ApiError(400, `Failed to analyze ${docType} image. Please ensure the photo is clear.`);
 
-        const aiResponse = await OCRService.groqIdentify(imageUrl, docType.toUpperCase());
-        if (!aiResponse) throw new ApiError(400, `Failed to analyze ${docType} image. Please ensure the photo is clear.`);
+    const aiData = aiResponse.data;
+    const fraudScore = aiResponse.fraudScore || 0;
+    const isAuthentic = aiResponse.isAuthentic !== false;
+    const hologramValid = aiResponse.hologramValid !== false;
+    const signatureValid = aiResponse.signatureValid !== false;
 
-        const aiData = aiResponse.data;
-        const fraudScore = aiResponse.fraudScore || 0;
-        const isAuthentic = aiResponse.isAuthentic !== false;
-        const hologramValid = aiResponse.hologramValid !== false;
-        const signatureValid = aiResponse.signatureValid !== false;
+    // Profile Matching: Ensure at least one part of the extracted name matches a part of the profile name
+    const userNames = req.user.name.toLowerCase().split(" ").filter(n => n.length > 2);
+    const extractedName = (aiData.fullName || aiData.ownerName || "").toLowerCase();
+    const profileMatch = userNames.some(namePart => extractedName.includes(namePart));
 
-        // Profile Matching: Ensure at least one part of the extracted name matches a part of the profile name
-        const userNames = req.user.name.toLowerCase().split(" ").filter(n => n.length > 2);
-        const extractedName = (aiData.fullName || aiData.ownerName || "").toLowerCase();
-        const profileMatch = userNames.some(namePart => extractedName.includes(namePart));
+    const isMatch = profileMatch && isAuthentic && fraudScore === 0 && hologramValid && signatureValid;
 
-        parityResult = {
-            visualName: aiData.fullName || aiData.ownerName,
-            visualNumber: aiData.panNumber || aiData.licenseNumber || aiData.vehicleNumber,
-            matchScore: profileMatch ? 95 : 70,
-            fraudScore: fraudScore,
-            isAuthentic: isAuthentic,
-            // Hard Reject: If fraudScore > 0 OR isAuthentic is false OR hologram/signature missing
-            isMatch: profileMatch && isAuthentic && fraudScore === 0 && hologramValid && signatureValid,
-            warning: "QR code format unrecognized. Verified via High-Security AI Vision.",
-            forensicNote: aiResponse.forensicNote
-        };
-
-        // Populate extractedQR so subsequent logic works
-        extractedQR = {
-            panNumber: aiData.panNumber,
-            licenseNumber: aiData.licenseNumber,
-            rcNumber: aiData.rcNumber,
-            vehicleNumber: aiData.vehicleNumber,
-            fullName: aiData.fullName || aiData.ownerName,
-            dob: aiData.dob
-        };
-    }
-
-    if (!parityResult.isMatch) {
+    if (!isMatch) {
         rider.verificationStatus = "document_mismatch";
-        // Record forensic failure for audit
-        if (parityResult.forensicNote) {
-            rider.verificationScores.forensicAudit.push(`[${docType.toUpperCase()} FAIL] ${parityResult.forensicNote}`);
+        if (aiResponse.forensicNote) {
+            rider.verificationScores.forensicAudit.push(`[${docType.toUpperCase()} FAIL] ${aiResponse.forensicNote}`);
         }
         await rider.save();
-        throw new ApiError(400, `Verification failed: ${parityResult.reason || "Data doesn't match your profile or card is fabricated."}`);
+        throw new ApiError(400, `Verification failed: Data doesn't match your profile or card is fabricated.`);
     }
 
-    // Record forensic success for audit TaskBoundary
-    if (parityResult.fraudScore !== undefined) {
-        rider.verificationScores.aiFraudScore = Math.max(rider.verificationScores.aiFraudScore, parityResult.fraudScore);
-    }
-    if (parityResult.forensicNote) {
-        rider.verificationScores.forensicAudit.push(`[${docType.toUpperCase()} PASS] ${parityResult.forensicNote}`);
+    // Record forensic success
+    rider.verificationScores.aiFraudScore = Math.max(rider.verificationScores.aiFraudScore, fraudScore);
+    if (aiResponse.forensicNote) {
+        rider.verificationScores.forensicAudit.push(`[${docType.toUpperCase()} PASS] ${aiResponse.forensicNote}`);
     }
 
     // Save extracted data
     if (docType === 'pan') {
         rider.extractedData.pan = {
-            panNumber: extractedQR.panNumber,
-            fullName: extractedQR.fullName,
+            panNumber: aiData.panNumber,
+            fullName: aiData.fullName,
             verifiedAt: new Date()
         };
-        rider.panNumber = extractedQR.panNumber;
+        rider.panNumber = aiData.panNumber;
     } else if (docType === 'license') {
         rider.extractedData.license = {
-            licenseNumber: extractedQR.licenseNumber,
-            fullName: extractedQR.fullName,
-            dob: extractedQR.dob,
+            licenseNumber: aiData.licenseNumber,
+            fullName: aiData.fullName,
+            dob: aiData.dob,
             verifiedAt: new Date()
         };
-        rider.licenseNumber = extractedQR.licenseNumber;
+        rider.licenseNumber = aiData.licenseNumber;
     } else if (docType === 'rc') {
-        rider.vehicleDetails.rcNumber = extractedQR.rcNumber;
-        rider.vehicleDetails.vehicleNumber = extractedQR.vehicleNumber;
+        rider.vehicleDetails.rcNumber = aiData.rcNumber;
+        rider.vehicleDetails.vehicleNumber = aiData.vehicleNumber || aiData.rcNumber;
     }
 
     await rider.save();
 
     return res.status(200).json(
-        new ApiResponse(200, { extractedData: rider.extractedData, parityResult }, `${docType.toUpperCase()} verified with QR-OCR parity successfully`)
+        new ApiResponse(200, { extractedData: rider.extractedData }, `${docType.toUpperCase()} verified via AI successfully`)
     );
 });
 
