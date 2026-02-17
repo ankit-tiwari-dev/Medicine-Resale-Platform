@@ -17,7 +17,8 @@ import {
     getAllOrders,
     updateOrderStatus,
     getPendingKycRiders,
-    verifyRiderKYC
+    verifyRiderKYC,
+    getRiderKYCDetail
 } from "../controllers/admin.controller.js";
 import { verifyAdmin } from "../middlewares/auth.middleware.js";
 
@@ -49,6 +50,7 @@ router.delete("/user/:id", deleteUser);
 
 // KYC Management
 router.get("/kyc/pending", getPendingKycRiders);
+router.get("/kyc/rider/:id", getRiderKYCDetail);
 router.patch("/kyc/verify/:id", verifyRiderKYC);
 
 // Audit Logs

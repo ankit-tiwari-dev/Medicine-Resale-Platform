@@ -5,6 +5,16 @@ import { Rider } from "../models/rider.model.js";
 import OCRService from "../utils/ocr.service.js";
 import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 
+const sanitizeName = (name) => {
+    if (!name) return "";
+    return name
+        .replace(/\b(Male|Female|Man|Woman|S\/O|D\/O|W\/O|Mr|Mrs|Ms|Sri|Shri|Late)\b/gi, "")
+        .replace(/[^a-zA-Z\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toUpperCase();
+};
+
 
 
 
@@ -49,33 +59,44 @@ export const verifyAadhar = asyncHandler(async (req, res) => {
     }
 
     // AI Identification + Forensic Audit
-    const aiResponse = await OCRService.groqIdentify(rider.documents.aadharFront, "AADHAAR");
+    const aiResponse = await OCRService.groqIdentify(rider.documents.aadharFront, "AADHAAR", req.user.name);
     if (!aiResponse) throw new ApiError(400, "Failed to analyze Aadhaar image. Please ensure the photo is clear.");
 
     const aiData = aiResponse.data;
     const fraudScore = aiResponse.fraudScore || 0;
+    const forensics = aiResponse.forensics || {};
+
+    // Security check: 40/60 Decision Matrix
     const isAuthentic = aiResponse.isAuthentic !== false;
-    const hologramValid = aiResponse.hologramValid !== false;
+    // Hard reject if fraud > 60 or AI explicitly says not authentic
+    const definitelyFake = fraudScore > 60 || !isAuthentic;
+    // Soft reject if fraud > 40 UNLESS physicality is HIGH (Trust-Physicality)
+    const highRisk = fraudScore > 40 && forensics.physicalityConfidence !== 'HIGH';
+    const weakHologram = forensics.hologramConfidence === 'LOW' && forensics.physicalityConfidence === 'LOW';
 
     // Profile Matching: Ensure name matches
-    const userNames = req.user.name.toLowerCase().split(" ").filter(n => n.length > 2);
-    const extractedName = (aiData.fullName || "").toLowerCase();
+    const userNames = sanitizeName(req.user.name).toLowerCase().split(" ").filter(n => n.length > 2);
+    const extractedName = sanitizeName(aiData.fullName).toLowerCase();
     const profileMatch = userNames.some(namePart => extractedName.includes(namePart));
 
-    const isMatch = profileMatch && isAuthentic && fraudScore === 0 && hologramValid;
+    const isMatch = profileMatch && !definitelyFake && !highRisk && !weakHologram;
+
+    // Data Sanitization: Use the AI-extracted name (sanitized)
+    const finalName = extractedName.toUpperCase();
 
     if (!isMatch) {
         rider.verificationStatus = "document_mismatch";
+        const reason = aiResponse.forensicNote || "Aadhaar verification failed. Name mismatch or forgery detected.";
         if (aiResponse.forensicNote) {
             rider.verificationScores.forensicAudit.push(`[AADHAAR FAIL] ${aiResponse.forensicNote}`);
         }
         await rider.save();
-        throw new ApiError(400, "Aadhaar verification failed. Name mismatch or forgery detected.");
+        throw new ApiError(400, `Verification failed: ${reason}`);
     }
 
     // Map extracted data to model
     rider.extractedData.aadhar = {
-        fullName: aiData.fullName,
+        fullName: finalName,
         dob: aiData.dob,
         gender: aiData.gender,
         pincode: aiData.pincode,
@@ -132,29 +153,49 @@ export const verifyDocument = asyncHandler(async (req, res) => {
 
     if (!imageUrl) throw new ApiError(400, `Please upload ${docType} photo first`);
 
-    const aiResponse = await OCRService.groqIdentify(imageUrl, docType.toUpperCase());
+    const aiResponse = await OCRService.groqIdentify(imageUrl, docType.toUpperCase(), req.user.name);
     if (!aiResponse) throw new ApiError(400, `Failed to analyze ${docType} image. Please ensure the photo is clear.`);
 
     const aiData = aiResponse.data;
     const fraudScore = aiResponse.fraudScore || 0;
-    const isAuthentic = aiResponse.isAuthentic !== false;
-    const hologramValid = aiResponse.hologramValid !== false;
-    const signatureValid = aiResponse.signatureValid !== false;
+    const forensics = aiResponse.forensics || {};
 
-    // Profile Matching: Ensure at least one part of the extracted name matches a part of the profile name
-    const userNames = req.user.name.toLowerCase().split(" ").filter(n => n.length > 2);
-    const extractedName = (aiData.fullName || aiData.ownerName || "").toLowerCase();
+    // Security check: 40/60 Decision Matrix
+    const isAuthentic = aiResponse.isAuthentic !== false;
+    // Hard reject if fraud > 60
+    const definitelyFake = fraudScore > 60 || !isAuthentic;
+    // Soft reject if fraud > 40 UNLESS physicality or signature is HIGH
+    const highRisk = fraudScore > 40 && forensics.physicalityConfidence !== 'HIGH' && forensics.signatureConfidence !== 'HIGH';
+    const weakHologram = forensics.hologramConfidence === 'LOW' && forensics.physicalityConfidence === 'LOW' && forensics.signatureConfidence === 'LOW';
+
+    // Profile Matching: Use explicit fullName from new prompt
+    const userNames = sanitizeName(req.user.name).toLowerCase().split(" ").filter(n => n.length > 2);
+    const extractedName = sanitizeName(aiData.fullName).toLowerCase();
     const profileMatch = userNames.some(namePart => extractedName.includes(namePart));
 
-    const isMatch = profileMatch && isAuthentic && fraudScore === 0 && hologramValid && signatureValid;
+    const isMatch = profileMatch && !definitelyFake && !highRisk && !weakHologram;
+
+    // Data Sanitization: Use the AI-extracted name (sanitized)
+    const finalName = extractedName.toUpperCase();
+
+    console.log("KYC_DIAG_REFINED:", {
+        docType,
+        profileMatch,
+        definitelyFake,
+        weakHologram,
+        fraudScore,
+        extractedName,
+        expectedName: req.user.name
+    });
 
     if (!isMatch) {
         rider.verificationStatus = "document_mismatch";
+        const reason = aiResponse.forensicNote || "Data doesn't match your profile or card is fabricated.";
         if (aiResponse.forensicNote) {
             rider.verificationScores.forensicAudit.push(`[${docType.toUpperCase()} FAIL] ${aiResponse.forensicNote}`);
         }
         await rider.save();
-        throw new ApiError(400, `Verification failed: Data doesn't match your profile or card is fabricated.`);
+        throw new ApiError(400, `Verification failed: ${reason}`);
     }
 
     // Record forensic success
@@ -167,14 +208,14 @@ export const verifyDocument = asyncHandler(async (req, res) => {
     if (docType === 'pan') {
         rider.extractedData.pan = {
             panNumber: aiData.panNumber,
-            fullName: aiData.fullName,
+            fullName: finalName,
             verifiedAt: new Date()
         };
         rider.panNumber = aiData.panNumber;
     } else if (docType === 'license') {
         rider.extractedData.license = {
             licenseNumber: aiData.licenseNumber,
-            fullName: aiData.fullName,
+            fullName: finalName,
             dob: aiData.dob,
             verifiedAt: new Date()
         };
@@ -201,8 +242,18 @@ export const verifyPayoutDocs = asyncHandler(async (req, res) => {
     const results = {};
 
     if (rider.documents.insuranceFront) {
-        const aiResponse = await OCRService.groqIdentify(rider.documents.insuranceFront, 'Insurance');
-        if (aiResponse && aiResponse.isAuthentic && aiResponse.fraudScore === 0 && aiResponse.hologramValid && aiResponse.signatureValid) {
+        const aiResponse = await OCRService.groqIdentify(rider.documents.insuranceFront, 'INSURANCE');
+
+        // Security check: 40/60 Decision Matrix
+        const fraudScore = aiResponse.fraudScore || 0;
+        const forensics = aiResponse.forensics || {};
+        const isAuthentic = aiResponse.isAuthentic !== false;
+
+        const definitelyFake = fraudScore > 60 || !isAuthentic;
+        // For Paper Docs (Insurance), MEDIUM is acceptable. Only reject if LOW.
+        const highRisk = fraudScore > 40 && forensics.physicalityConfidence === 'LOW';
+
+        if (aiResponse && !definitelyFake && !highRisk) {
             const insuranceData = aiResponse.data;
             rider.insurance = {
                 policyNumber: insuranceData.policyNumber,
@@ -210,14 +261,31 @@ export const verifyPayoutDocs = asyncHandler(async (req, res) => {
                 isVerified: false
             };
             results.insurance = "extracted_verified";
+            if (aiResponse.forensicNote) {
+                rider.verificationScores.forensicAudit.push(`[INSURANCE PASS] ${aiResponse.forensicNote}`);
+            }
         } else {
             results.insurance = "rejected_forgery";
+            if (aiResponse?.forensicNote) {
+                rider.verificationScores.forensicAudit.push(`[INSURANCE FAIL] ${aiResponse.forensicNote}`);
+            }
         }
     }
 
     if (rider.documents.bankProof) {
-        const aiResponse = await OCRService.groqIdentify(rider.documents.bankProof, 'Bank');
-        if (aiResponse && aiResponse.isAuthentic && aiResponse.fraudScore === 0 && aiResponse.hologramValid && aiResponse.signatureValid) {
+        // Pass expected name for bank account matching
+        const aiResponse = await OCRService.groqIdentify(rider.documents.bankProof, 'BANK', req.user.name);
+
+        // Security check: 40/60 Decision Matrix
+        const fraudScore = aiResponse.fraudScore || 0;
+        const forensics = aiResponse.forensics || {};
+        const isAuthentic = aiResponse.isAuthentic !== false;
+
+        const definitelyFake = fraudScore > 60 || !isAuthentic;
+        // For Paper Docs (Bank), MEDIUM is acceptable. Only reject if LOW.
+        const highRisk = fraudScore > 40 && forensics.physicalityConfidence === 'LOW';
+
+        if (aiResponse && !definitelyFake && !highRisk) {
             const bankData = aiResponse.data;
             rider.bankDetails = {
                 accountNumber: bankData.accountNumber,
@@ -227,7 +295,9 @@ export const verifyPayoutDocs = asyncHandler(async (req, res) => {
                 isVerified: false
             };
             results.bank = "extracted_verified";
-            rider.verificationScores.forensicAudit.push(`[BANK PASS] ${aiResponse.forensicNote}`);
+            if (aiResponse.forensicNote) {
+                rider.verificationScores.forensicAudit.push(`[BANK PASS] ${aiResponse.forensicNote}`);
+            }
         } else {
             results.bank = "rejected_forgery";
             if (aiResponse?.forensicNote) {
@@ -247,6 +317,7 @@ export const verifyPayoutDocs = asyncHandler(async (req, res) => {
         new ApiResponse(200, { results }, "Payout documents processed successfully")
     );
 });
+
 
 /**
  * Step 4: Final Consent and Status Update

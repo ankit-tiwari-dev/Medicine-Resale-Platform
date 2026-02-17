@@ -19,29 +19,92 @@ class OCRService {
     /**
      * Use Groq Vision for smart identity extraction (Cloud AI)
      */
-    static async groqIdentify(imageUrl, docType) {
+    static async groqIdentify(imageUrl, docType, expectedName = "") {
         const apiKey = process.env.GROQ_API_KEY;
         if (!apiKey) return null;
 
-        const prompt = `
-            Act as a Senior Forensic Document Specialist. Extract details from this ${docType} image and perform a strict authenticity audit.
-            
-            Hard-Reject Forensics:
-            - **Hologram Check**: Verify the presence of official holograms/seals. Reject if missing or flat.
-            - **Signature Check**: Verify the official government signature. Reject if pixelated, blurry, or missing.
-            - **Photostat/Digital Mask**: Detect if this is a scan of a B&W photocopy or a digitally altered image.
-            - **Moiré Detection**: Detect screen-capture artifacts (wavy lines).
+        let prompt = "";
 
-            Return a RAW JSON object ONLY:
-            {
-                "data": { ... },
-                "fraudScore": 0-100,
-                "isAuthentic": boolean (Hard reject if false),
-                "hologramValid": boolean,
-                "signatureValid": boolean,
-                "forensicNote": "..."
-            }
-        `;
+        if (docType === 'INSURANCE') {
+            prompt = `
+                Act as a Forensic Document Analyst. Analyze this INSURANCE POLICY document.
+                ${expectedName ? `The expected policy holder is likely: "${expectedName}".` : ""}
+                
+                1. **Extraction**:
+                   - **fullName**: Extract the policy holder name. If it phonetically matches "${expectedName}", prefer the profile spelling.
+                   - **policyNumber**: Extract the unique Policy Number.
+                   - **expiryDate**: Extract the policy Expiry Date (Valid To).
+                
+                2. **Forensics**:
+                   - **Originality**: Insurance policies are often paper printouts or PDFs. This is ACCEPTABLE.
+                   - **Forgery**: Look for obvious digital tampering (mismatched fonts, pasted text).
+                   
+                Return JSON:
+                {
+                    "data": { "fullName": "...", "policyNumber": "...", "expiryDate": "..." },
+                    "fraudScore": 0-100,
+                    "isAuthentic": true,
+                    "forensics": { "physicalityConfidence": "MEDIUM" },
+                    "forensicNote": "..."
+                }
+            `;
+        } else if (docType === 'BANK') {
+            prompt = `
+                Act as a Forensic Financial Analyst. Analyze this BANK PROOF (Cheque/Passbook/Statement).
+                ${expectedName ? `The expected account holder is likely: "${expectedName}".` : ""}
+                
+                1. **Extraction**:
+                   - **fullName**: Extract account holder name. Match with "${expectedName}" if close.
+                   - **accountNumber**: Extract Bank Account Number.
+                   - **ifsc**: Extract IFSC Code.
+                   - **bankName**: Extract Bank Name.
+                
+                2. **Forensics**:
+                   - **Originality**: Online statements or physical passbooks are valid.
+                   - **Forgery**: Check for digital edits on the name/account number.
+                   
+                Return JSON:
+                {
+                    "data": { "fullName": "...", "accountNumber": "...", "ifsc": "...", "bankName": "..." },
+                    "fraudScore": 0-100,
+                    "isAuthentic": true,
+                    "forensics": { "physicalityConfidence": "MEDIUM" },
+                    "forensicNote": "..."
+                }
+            `;
+        } else {
+            // Default for IDs (Aadhaar, PAN, DL, RC)
+            prompt = `
+                Act as a Senior Forensic Document Specialist. Analyze this ${docType} image.
+                ${expectedName ? `The expected holder name on the card is likely: "${expectedName}".` : ""}
+                
+                1. **Extraction**: 
+                   - **fullName**: Extract ONLY the name. DO NOT include gender, father's names, or titles. Remove words like "Male", "Female", "S/O", "D/O".
+                   - **Verification**: If the visible text is a common OCR misreading or phonetic match of "${expectedName}" (e.g., misreading 'm' as 'nb'), prefer the correct spelling from the profile.
+                   - **idNumber**: Extract the unique document number accurately.
+                   - **dob**: Extract the date of birth.
+                
+                2. **Forensics**: 
+                   - **Physicality**: Does this look like a physical card held/placed in the real world? Look for natural light reflection, shadows, card edges, and texture.
+                   - **Originality**: Does the text look printed on plastic/paper vs displayed on a screen?
+                   - **Hologram**: Is there any glint or security seal visible?
+                
+                Rule: If the image clearly shows natural shadows/depth and natural pen-strokes, it is likely a physical original even if the hologram is faint.
+
+                Return a RAW JSON object ONLY (no markdown):
+                {
+                    "data": {
+                        "fullName": "extracted name",
+                        "idNumber": "extracted document number",
+                        "dob": "extracted date of birth"
+                    },
+                    "fraudScore": 0-100,
+                    "isAuthentic": true,
+                    "forensics": { ... },
+                    "forensicNote": "..."
+                }
+            `;
+        }
 
         try {
             const response = await axios.post(

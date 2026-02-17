@@ -375,6 +375,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
 // ============ KYC MANAGEMENT ============
 
+export const getRiderKYCDetail = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const rider = await Rider.findById(id).populate("userId", "name email phone");
+    if (!rider) throw new ApiError(404, "Rider profile not found");
+
+    return res.status(200).json(new ApiResponse(200, rider, "Rider KYC details fetched successfully"));
+});
+
 export const getPendingKycRiders = asyncHandler(async (req, res) => {
     const riders = await Rider.find({ verificationStatus: "verified_pending_admin" })
         .populate("userId", "name email phone");
