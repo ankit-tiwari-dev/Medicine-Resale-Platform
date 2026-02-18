@@ -18,6 +18,10 @@ export const createReview = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Items can only be reviewed after delivery");
     }
 
+    if (order.disputeStatus !== "none") {
+        throw new ApiError(400, "Cannot add review for disputed orders");
+    }
+
     const orderItem = order.orderItems.find(item => item.medicineId.toString() === medicineId.toString());
     if (!orderItem) {
         throw new ApiError(404, "Medicine not found in this order");

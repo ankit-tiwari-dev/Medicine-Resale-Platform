@@ -236,10 +236,13 @@ Auth conventions
 - **Body**:
   ```json
   {
-    "amount": 499,
+    "orderId": "64f0c2e2c7a1c9b1c2f9d555",
     "currency": "INR"
   }
   ```
+- **Notes**:
+  - `amount` is derived from the order in DB; do not send `amount` from client.
+  - The created Razorpay order id is stored internally against this DB order.
 
 ### Verify Payment
 - **URL**: `/payment/verify`
@@ -254,6 +257,9 @@ Auth conventions
     "order_db_id": "64f0c2e2c7a1c9b1c2f9d555"
   }
   ```
+- **Notes**:
+  - Field names are strict snake_case (`razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`, `order_db_id`).
+  - Endpoint is idempotent: repeated verification on an already paid order returns success with `alreadyVerified: true`.
 
 ---
 
@@ -271,6 +277,11 @@ Auth conventions
 ## Disputes (`/disputes`)
 - `POST /disputes/raise`: Raise a dispute for a delivered order.
   - `Body`: `orderId`, `reason`, `description`, `evidence` (files)
+  - Validation:
+    - Only buyer of the order can raise dispute.
+    - Order must be `delivered`.
+    - Dispute can be raised only once while `disputeStatus` is `none`.
+    - Dispute is blocked if any item in that order is already reviewed.
 - `GET /disputes/`: List disputes (Role-based views).
 - `POST /disputes/:disputeId/resolve` (Admin only): Resolve or Reject a dispute.
 
@@ -279,6 +290,11 @@ Auth conventions
 ## Reviews (`/reviews`)
 - `POST /reviews/add`: Review a purchased medicine.
   - `Body`: `orderId`, `medicineId`, `rating`, `comment`
+  - Validation:
+    - Only buyer of that order can review.
+    - Order must be `delivered`.
+    - Order must not be under dispute (`disputeStatus` must be `none`).
+    - Same order item cannot be reviewed twice.
 - `GET /reviews/seller/:sellerId`: View average rating and history.
 - `GET /reviews/medicine/:medicineId`: View specific medicine reviews.
 

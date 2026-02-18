@@ -12,6 +12,12 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+const maskValue = (value = "", keep = 6) => {
+    if (!value || typeof value !== "string") return "N/A";
+    if (value.length <= keep * 2) return `${value.slice(0, 2)}...${value.slice(-2)}`;
+    return `${value.slice(0, keep)}...${value.slice(-keep)}`;
+};
+
 export const createPaymentOrder = asyncHandler(async (req, res) => {
     const { orderId, currency = "INR" } = req.body;
 
@@ -28,10 +34,15 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not authorized to pay for this order");
     }
 
+    // Validate order amount
+    if (!orderRecord.amount || isNaN(orderRecord.amount) || orderRecord.amount <= 0) {
+        throw new ApiError(400, "Invalid order amount");
+    }
+
     const options = {
         amount: Math.round(orderRecord.amount * 100), // amount in the smallest currency unit (paise)
         currency,
-        receipt: `receipt_${orderId}_${Date.now()}`
+        receipt: `${orderId}_${Date.now()}`.substring(0, 40) // Ensure it doesn't exceed 40 chars
     };
 
     try {
@@ -52,7 +63,9 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
             new ApiResponse(200, razorpayOrder, "Payment order created successfully")
         );
     } catch (error) {
-        throw new ApiError(500, "Could not create Razorpay order: " + error.message);
+        console.error("Razorpay Error:", JSON.stringify(error, null, 2));
+        const errorMessage = error.error?.description || error.message || "Unknown Razorpay error";
+        throw new ApiError(500, "Could not create Razorpay order: " + errorMessage);
     }
 });
 
@@ -73,6 +86,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (!isAuthentic) {
+        // Debug-only signal for local troubleshooting; does not expose full signature.
+        console.warn("[PAYMENT_VERIFY] Signature mismatch", {
+            orderDbId: order_db_id || "N/A",
+            razorpayOrderId: razorpay_order_id || "N/A",
+            razorpayPaymentId: razorpay_payment_id || "N/A",
+            providedSignature: maskValue(razorpay_signature),
+            expectedSignature: maskValue(expectedSignature)
+        });
         throw new ApiError(400, "Invalid payment signature");
     }
 
@@ -94,6 +115,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Payment signature does not match this internal order");
     }
 
+    // Idempotency guard: repeated callbacks should not mutate order repeatedly.
+    if (order.paymentStatus === "completed") {
+        return res.status(200).json(
+            new ApiResponse(200, { success: true, alreadyVerified: true }, "Payment already verified")
+        );
+    }
+
     // Wrap order + medicine updates in a transaction for atomicity
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -102,22 +130,36 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         order.paymentStatus = 'completed';
         order.razorpayPaymentId = razorpay_payment_id;
         order.razorpaySignature = razorpay_signature;
-        order.status = 'paid';
-        order.statusHistory.push({
-            status: 'paid',
-            at: new Date(),
-            by: 'payment'
-        });
+        if (order.status === "pending") {
+            order.status = "paid";
+        }
+        const hasPaidHistory = (order.statusHistory || []).some((entry) => entry.status === "paid");
+        if (!hasPaidHistory) {
+            order.statusHistory.push({
+                status: 'paid',
+                at: new Date(),
+                by: 'payment'
+            });
+        }
         await order.save({ session });
 
         // Now officially mark medicines as sold
         for (const item of order.orderItems) {
-            await Medicine.findByIdAndUpdate(item.medicineId, {
-                status: 'sold',
-                buyerId: req.user._id,
-                reservedBy: undefined,
-                reservedUntil: undefined
-            }, { session });
+            await Medicine.findByIdAndUpdate(
+                item.medicineId,
+                {
+                    $set: {
+                        status: "sold",
+                        buyerId: req.user._id,
+                        paymentStatus: "completed"
+                    },
+                    $unset: {
+                        reservedBy: 1,
+                        reservedUntil: 1
+                    }
+                },
+                { session }
+            );
         }
 
         await session.commitTransaction();

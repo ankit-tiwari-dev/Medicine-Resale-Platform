@@ -25,6 +25,11 @@ export const createDispute = asyncHandler(async (req, res) => {
         throw new ApiError(400, "A dispute is already open for this order");
     }
 
+    const hasReviewedItem = (order.orderItems || []).some((item) => item.isReviewed);
+    if (hasReviewedItem) {
+        throw new ApiError(400, "Cannot raise a dispute after submitting a review");
+    }
+
     const evidenceUrls = [];
     if (req.files && req.files.evidence) {
         for (const file of req.files.evidence) {

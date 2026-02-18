@@ -206,6 +206,10 @@ export const confirmDelivery = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cancelled orders cannot be delivered");
     }
 
+    if (order.paymentStatus !== "completed") {
+        throw new ApiError(400, "Only paid orders can be marked as delivered");
+    }
+
     order.status = 'delivered';
     order.deliveredAt = new Date();
     order.statusHistory = order.statusHistory || [];
