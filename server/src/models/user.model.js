@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       unique: true,
-      sparse: true 
+      sparse: true
     },
     password: {
       type: String
@@ -47,8 +47,14 @@ const userSchema = new mongoose.Schema(
       street: String,
       city: String,
       pincode: String,
-      coordinates: { lat: Number, lng: Number }
+      coordinates: {
+        lat: { type: Number, default: 0 },
+        lng: { type: Number, default: 0 }
+      }
     },
+    avatar: {
+      type: String
+    }
   },
   {
     timestamps: true

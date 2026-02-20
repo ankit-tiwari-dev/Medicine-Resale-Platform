@@ -14,3 +14,4 @@ server/.env*
 server/tests/
 server/scripts/
 server/jest.config.js
+figma-design/

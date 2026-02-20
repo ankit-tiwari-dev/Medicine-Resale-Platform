@@ -1,0 +1,81 @@
+:root {
+    /* --- Palette (Base Colors) --- */
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+
+    --emerald-600: #059669;
+    --cyan-600: #0891b2;
+    --amber-600: #d97706;
+    --red-700: #b91c1c;
+    --blue-600: #2563eb;
+
+    /* --- Semantic Tokens (THE CRITICAL LAYER) --- */
+
+    /* Primary (Clinical Navy) */
+    --color-primary: var(--slate-900);
+    --color-primary-foreground: #ffffff;
+
+    /* Success (Trust Emerald) */
+    --color-success: var(--emerald-600);
+    --color-success-foreground: #ffffff;
+
+    /* Warning (Alert Citron) */
+    --color-warning: var(--amber-600);
+    --color-warning-foreground: #ffffff;
+
+    /* Danger (Secure Red) */
+    --color-danger: var(--red-700);
+    --color-danger-foreground: #ffffff;
+
+    /* Info / Interaction (Secure Cyan) */
+    --color-info: var(--cyan-600);
+    --color-info-foreground: #ffffff;
+
+    /* Surfaces & Backgrounds */
+    --color-background: var(--slate-50);
+    /* Main app background */
+    --color-surface: #ffffff;
+    /* Standard cards */
+    --color-surface-elevated: hsl(210 20% 99%);
+    /* Subtle tint for enterprise layering */
+    --color-surface-muted: var(--slate-100);
+    /* Muted sections */
+
+    /* Content/Text */
+    --color-foreground: var(--slate-900);
+    --color-foreground-muted: var(--slate-500);
+
+    /* Borders & UI Elements */
+    --color-border: var(--slate-200);
+    --color-border-strong: var(--slate-300);
+    --color-ring: var(--color-info);
+
+    /* --- Spacing System --- */
+    --spacing-section-py-desktop: 5rem;
+    --spacing-section-py-mobile: 3rem;
+    --spacing-card-p: 1.5rem;
+    --spacing-modal-p: 2rem;
+    --spacing-container-px: 1.5rem;
+
+    /* --- Container System --- */
+    --container-max: 1280px;
+
+    /* --- Elevation System (HSLA Based Soft Shadows) --- */
+    --shadow-low: 0 1px 3px 0 hsla(222, 47%, 10%, 0.05), 0 1px 2px -1px hsla(222, 47%, 10%, 0.05);
+    --shadow-medium: 0 10px 15px -3px hsla(222, 47%, 10%, 0.1), 0 4px 6px -4px hsla(222, 47%, 10%, 0.1);
+    --shadow-high: 0 25px 50px -12px hsla(222, 47%, 10%, 0.25);
+
+    /* --- Border Radius System --- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-container: 20px;
+}

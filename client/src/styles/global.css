@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* =============================================
+   TAILWIND v4 @theme
+   All design tokens live here. These become
+   available as Tailwind utility classes.
+   ============================================= */
+@theme {
+  /* ── Core Surfaces ── */
+  --color-background: var(--theme-background);
+  --color-foreground: var(--theme-foreground);
+
+  --color-card: var(--theme-card);
+  --color-surface: var(--theme-card);
+  --color-card-foreground: var(--theme-card-foreground);
+
+  --color-popover: var(--theme-popover);
+  --color-popover-foreground: var(--theme-popover-foreground);
+
+  /* ── Brand Primary (Clinical Teal-Navy) ── */
+  --color-primary: var(--theme-primary);
+  --color-primary-foreground: var(--theme-primary-foreground);
+
+  /* ── Secondary ── */
+  --color-secondary: var(--theme-secondary);
+  --color-secondary-foreground: var(--theme-secondary-foreground);
+
+  /* ── Muted ── */
+  --color-muted: var(--theme-muted);
+  --color-muted-foreground: var(--theme-muted-foreground);
+
+  /* ── Accent ── */
+  --color-accent: var(--theme-accent);
+  --color-accent-foreground: var(--theme-accent-foreground);
+
+  /* ── Destructive ── */
+  --color-destructive: var(--theme-destructive);
+  --color-destructive-foreground: var(--theme-destructive-foreground);
+
+  /* ── Border, Input, Ring ── */
+  --color-border: var(--theme-border);
+  --color-input: var(--theme-input);
+  --color-ring: var(--theme-ring);
+
+  /* ── Medical Palette ── */
+  --color-clinical-navy: var(--theme-clinical-navy);
+  --color-clinical-navy-light: var(--theme-clinical-navy-light);
+  --color-clinical-navy-dark: var(--theme-clinical-navy-dark);
+
+  --color-emerald-green: var(--theme-emerald-green);
+  --color-emerald-green-light: var(--theme-emerald-green-light);
+  --color-emerald-green-dark: var(--theme-emerald-green-dark);
+
+  --color-soft-cyan: var(--theme-soft-cyan);
+  --color-soft-cyan-light: var(--theme-soft-cyan-light);
+  --color-soft-cyan-dark: var(--theme-soft-cyan-dark);
+
+  --color-soft-red: var(--theme-soft-red);
+  --color-muted-amber: var(--theme-muted-amber);
+  --color-light-slate: var(--theme-light-slate);
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Roboto Slab', Georgia, serif;
+  --font-display: 'Roboto Slab', Georgia, serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Shadows ── */
+  --shadow-low: 0 1px 3px 0 hsla(222, 47%, 10%, 0.05), 0 1px 2px -1px hsla(222, 47%, 10%, 0.05);
+  --shadow-medium: 0 10px 15px -3px hsla(222, 47%, 10%, 0.1), 0 4px 6px -4px hsla(222, 47%, 10%, 0.1);
+  --shadow-high: 0 25px 50px -12px hsla(222, 47%, 10%, 0.25);
+
+  /* ── Layout ── */
+  --spacing-container: 1440px;
+  --radius: 0.5rem;
+}
+
+/* =============================================
+   BASE LAYER
+   ============================================= */
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: color-mix(in srgb, var(--color-ring) 50%, transparent);
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+  }
+
+  h1 {
+    @apply text-2xl font-medium leading-relaxed;
+  }
+
+  h2 {
+    @apply text-xl font-medium leading-relaxed;
+  }
+
+  h3 {
+    @apply text-lg font-medium leading-relaxed;
+  }
+
+  h4 {
+    @apply text-base font-medium leading-relaxed;
+  }
+
+  label {
+    @apply text-base font-medium leading-relaxed;
+  }
+
+  button {
+    @apply text-base font-medium leading-relaxed cursor-pointer;
+  }
+
+  input {
+    @apply text-base font-normal leading-relaxed;
+  }
+}
+
+/* =============================================
+   COMPONENT LAYER
+   ============================================= */
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-accent transition-colors;
+  }
+
+  .card-medical {
+    @apply bg-card text-card-foreground border border-border rounded-lg shadow-md overflow-hidden;
+  }
+}
+
+/* =============================================
+   CUSTOM UTILITIES — direct CSS (safe in v4)
+   ============================================= */
+.shadow-low {
+  box-shadow: var(--shadow-low);
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium);
+}
+
+.shadow-high {
+  box-shadow: var(--shadow-high);
+}

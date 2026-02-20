@@ -10,6 +10,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/generateJWT.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { uploadToCloudinary } from '../utils/cloudinary.helper.js';
 
 const cookieOptions = {
     httpOnly: true,
@@ -237,7 +238,7 @@ export const googleAuthCallback = asyncHandler(async (req, res) => {
 
         res.cookie("accessToken", accessToken, cookieOptions);
         res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-        res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+        res.redirect(`${process.env.FRONTEND_URL}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`);
     } catch (error) {
         res.redirect(`${process.env.FRONTEND_URL}/login?error=google_failed`);
     }
@@ -315,4 +316,64 @@ export const resendOTP = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json(new ApiResponse(200, {}, "A new verification code has been sent to your email."));
+});
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { name, phone, address } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    // Nested address update fix
+    if (address) {
+        if (address.street) user.address.street = address.street;
+        if (address.city) user.address.city = address.city;
+        if (address.pincode) user.address.pincode = address.pincode;
+        // Specifically avoid touching coordinates unless provided
+        if (address.coordinates) {
+            user.address.coordinates = {
+                ...user.address.coordinates,
+                ...address.coordinates
+            };
+        }
+    }
+
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            user, // Returns the full updated user including avatar
+            "Profile updated successfully"
+        )
+    );
+});
+
+export const updateAvatar = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new ApiError(400, "Avatar image is required");
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const avatarUrl = await uploadToCloudinary(
+        req.file.buffer,
+        "avatars",
+        `avatar_${user._id}_${Date.now()}`
+    );
+
+    user.avatar = avatarUrl;
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(200, { avatar: avatarUrl }, "Avatar updated successfully")
+    );
 });

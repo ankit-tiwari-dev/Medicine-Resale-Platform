@@ -1,85 +1,220 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
-import toast from 'react-hot-toast';
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+  resendOtp,
+  verifyOtp,
+  updateProfile as apiUpdateProfile,
+  uploadAvatar as apiUploadAvatar
+} from "../api/authApi";
+import { extractErrorMessage, isRateLimited } from "../utils/errors";
+import { storage } from "../utils/storage";
 
-const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-export const useAuth = () => useContext(AuthContext);
+const resolveAuthTokens = (payload) => {
+  return {
+    accessToken: payload?.data?.accessToken || payload?.data?.token || payload?.accessToken || payload?.token || null,
+    refreshToken: payload?.data?.refreshToken || payload?.refreshToken || null,
+    user: payload?.data?.user || payload?.user || null
+  };
+};
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(storage.getUser());
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [otpSession, setOtpSession] = useState(null);
+  const [rateLimit, setRateLimit] = useState({ active: false, retryAfter: null, message: "" });
 
-    useEffect(() => {
-        checkAuthStatus();
-    }, []);
+  const updateRateLimitState = (error) => {
+    if (!isRateLimited(error)) {
+      setRateLimit({ active: false, retryAfter: null, message: "" });
+      return;
+    }
+    const retryAfter = error?.rateLimitInfo?.retryAfter || null;
+    setRateLimit({
+      active: true,
+      retryAfter,
+      message: retryAfter
+        ? `Too many attempts. Retry after ${retryAfter} seconds.`
+        : "Too many attempts. Please retry later."
+    });
+  };
 
-    const checkAuthStatus = async () => {
-        try {
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
-            } else {
-                // If no local user, try fetching from API (supports cookie-based auth)
-                const response = await api.get('/auth/me');
-                if (response.data && response.data.data) {
-                    const authenticatedUser = response.data.data;
-                    localStorage.setItem('user', JSON.stringify(authenticatedUser));
-                    setUser(authenticatedUser);
-                }
-            }
-        } catch (error) {
-            // No session found, silent fail is fine for checkAuth
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const saveAuthState = (payload) => {
+    const { accessToken, refreshToken, user: nextUser } = resolveAuthTokens(payload);
 
-    const login = async (email, password) => {
-        try {
-            const response = await api.post('/auth/login', { email, password });
-            const { token, user } = response.data;
+    if (accessToken) storage.setAccessToken(accessToken);
+    if (refreshToken) storage.setRefreshToken(refreshToken);
+    if (nextUser) {
+      storage.setUser(nextUser);
+      setUser(nextUser);
+    }
+  };
 
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            setUser(user);
+  const bootstrapAuth = useCallback(async () => {
+    try {
+      const response = await getCurrentUser();
+      const nextUser = response?.data?.data || response?.data?.user || null;
+      if (nextUser) {
+        storage.setUser(nextUser);
+        setUser(nextUser);
+      }
+    } catch {
+      storage.clearAuth();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-            toast.success('Login successful!');
-            return true;
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Login failed');
-            return false;
-        }
-    };
+  useEffect(() => {
+    bootstrapAuth();
+  }, [bootstrapAuth]);
 
-    const register = async (userData) => {
-        try {
-            const response = await api.post('/auth/register', userData);
-            const { token, user } = response.data;
+  const login = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      const response = await loginUser(payload);
+      const statusCode = response?.data?.statusCode;
 
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            setUser(user);
+      if (statusCode === 202) {
+        setOtpSession({
+          email: payload.email,
+          userId: response?.data?.data?.userId || response?.data?.userId || null
+        });
+        return { success: true, otpRequired: true, message: "OTP verification required." };
+      }
 
-            toast.success('Registration successful!');
-            return true;
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Registration failed');
-            return false;
-        }
-    };
+      saveAuthState(response?.data);
+      setOtpSession(null);
+      setRateLimit({ active: false, retryAfter: null, message: "" });
+      const loggedInUser = response?.data?.data?.user || response?.data?.user;
+      return { success: true, otpRequired: false, user: loggedInUser };
+    } catch (error) {
+      updateRateLimitState(error);
+      return { success: false, message: extractErrorMessage(error, "Unable to login") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        toast.success('Logged out successfully');
-    };
+  const register = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      const response = await registerUser(payload);
+      const userId = response?.data?.data?.userId || response?.data?.userId || null;
+      setOtpSession({ email: payload.email, userId });
+      setRateLimit({ active: false, retryAfter: null, message: "" });
+      return { success: true, otpRequired: true };
+    } catch (error) {
+      updateRateLimitState(error);
+      return { success: false, message: extractErrorMessage(error, "Unable to register") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-            {!loading && children}
-        </AuthContext.Provider>
-    );
+  const submitOtp = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      const response = await verifyOtp(payload);
+      saveAuthState(response?.data);
+      setOtpSession(null);
+      const loggedInUser = response?.data?.data?.user || response?.data?.user;
+      return { success: true, user: loggedInUser };
+    } catch (error) {
+      updateRateLimitState(error);
+      return { success: false, message: extractErrorMessage(error, "OTP verification failed") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resendVerificationOtp = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      await resendOtp(payload);
+      return { success: true };
+    } catch (error) {
+      updateRateLimitState(error);
+      return { success: false, message: extractErrorMessage(error, "Unable to resend OTP") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateProfile = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      const response = await apiUpdateProfile(payload);
+      const nextUser = response?.data?.data || response?.data?.user || null;
+      if (nextUser) {
+        storage.setUser(nextUser);
+        setUser(nextUser);
+      }
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: extractErrorMessage(error, "Unable to update profile") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const uploadUserAvatar = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      const response = await apiUploadAvatar(formData);
+      const avatarUrl = response?.data?.data?.avatar || response?.data?.avatar;
+
+      if (avatarUrl && user) {
+        const nextUser = { ...user, avatar: avatarUrl };
+        storage.setUser(nextUser);
+        setUser(nextUser);
+      }
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: extractErrorMessage(error, "Photo upload failed") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // Logout should complete locally even if API call fails.
+    } finally {
+      storage.clearAuth();
+      setUser(null);
+      setOtpSession(null);
+    }
+  };
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      isSubmitting,
+      otpSession,
+      rateLimit,
+      isAuthenticated: Boolean(user),
+      login,
+      register,
+      submitOtp,
+      resendVerificationOtp,
+      logout,
+      updateProfile,
+      uploadUserAvatar,
+      refreshUser: bootstrapAuth,
+      setOtpSession
+    }),
+    [user, loading, isSubmitting, otpSession, rateLimit]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

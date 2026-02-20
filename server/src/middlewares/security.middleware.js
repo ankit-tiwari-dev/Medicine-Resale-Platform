@@ -59,7 +59,7 @@ export const globalLimiter = rateLimit({
 
 export const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // 10 attempts per hour for sensitive auth routes
+    max: 100, // 100 attempts per hour for sensitive auth routes
     message: "Too many login/verification attempts, please try again after an hour",
     standardHeaders: true,
     legacyHeaders: false,

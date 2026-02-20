@@ -158,10 +158,46 @@ export const getAdminStats = asyncHandler(async (req, res) => {
 
     const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
 
+    const verificationsPending = await Rider.countDocuments({ verificationStatus: "verified_pending_admin" });
+    const sellersActive = await User.countDocuments({ role: "seller" });
+    const ridersActive = await User.countDocuments({ role: "rider" });
+
+    // Monthly revenue for current year
+    const currentYear = new Date().getFullYear();
+    const monthlyRevenueData = await Transaction.aggregate([
+        {
+            $match: {
+                type: 'credit',
+                status: 'completed',
+                createdAt: {
+                    $gte: new Date(`${currentYear}-01-01`),
+                    $lte: new Date(`${currentYear}-12-31`)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: { $month: '$createdAt' },
+                total: { $sum: '$amount' }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    // Build full 12-month array (0 for months with no data)
+    const monthlyRevenue = Array.from({ length: 12 }, (_, i) => {
+        const found = monthlyRevenueData.find(d => d._id === i + 1);
+        return found ? found.total : 0;
+    });
+
     return res.status(200).json(new ApiResponse(200, {
         totalUsers,
         totalMedicines,
-        totalRevenue
+        totalRevenue,
+        verificationsPending,
+        sellersActive,
+        ridersActive,
+        monthlyRevenue
     }, "Admin stats fetched successfully"));
 });
 

@@ -1,0 +1,180 @@
+import { useState } from "react";
+import { getAdminOrders, updateAdminOrderStatus } from "../../api/adminApi";
+import Button from "../../components/common/Button";
+import { useApiQuery } from "../../hooks/useApiQuery";
+import { extractErrorMessage } from "../../utils/errors";
+import {
+  Package,
+  ChevronLeft,
+  Search,
+  Filter,
+  Clock,
+  CheckCircle,
+  Truck,
+  XCircle,
+  ShieldAlert,
+  RefreshCw,
+  ArrowRight
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+
+const STATUS_OPTIONS = [
+  { value: "pending", label: "Pending", icon: Clock, color: "text-muted-amber" },
+  { value: "paid", label: "Capital Secured", icon: CheckCircle, color: "text-primary" },
+  { value: "shipped", label: "In Transit", icon: Truck, color: "text-soft-cyan" },
+  { value: "delivered", label: "Handover Complete", icon: CheckCircle, color: "text-emerald-green" },
+  { value: "cancelled", label: "Voided", icon: XCircle, color: "text-red-500" },
+  { value: "disputed", label: "Under Investigation", icon: ShieldAlert, color: "text-muted-amber" }
+];
+
+const getStatusStyle = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'delivered': return 'text-emerald-green border-emerald-green/20 bg-emerald-green/5';
+    case 'shipped': return 'text-soft-cyan border-soft-cyan/20 bg-soft-cyan/5';
+    case 'paid': return 'text-primary border-primary/20 bg-primary/5';
+    case 'cancelled': return 'text-red-500 border-red-500/20 bg-red-500/5';
+    case 'disputed': return 'text-muted-amber border-muted-amber/20 bg-muted-amber/5';
+    default: return 'text-muted-foreground border-border bg-muted/30';
+  }
+};
+
+const AdminOrdersPage = () => {
+  const query = useApiQuery(getAdminOrders, true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const onStatusChange = async (orderId, status) => {
+    if (!status) return;
+    setUpdatingId(orderId);
+    try {
+      await updateAdminOrderStatus(orderId, { status });
+      toast.success(`Order transitioned to: ${status}`);
+      await query.execute();
+    } catch (error) {
+      toast.error(extractErrorMessage(error, "State transition failed."));
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const orders = (query.data || []).filter(o =>
+    o._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    o.status?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="mb-10">
+        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
+          <ChevronLeft className="w-4 h-4" />
+          Admin Terminal
+        </Link>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+              <Package size={12} />
+              Procurement Ledger
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
+              Order <span className="text-primary">State Control</span>
+            </h1>
+            <p className="text-muted-foreground mt-2 font-sans font-medium">
+              Administrative lifecycle management for all registered medical procurements.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Order ID or Status..."
+                className="h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center"
+              onClick={() => query.execute()}
+              loading={query.loading}
+            >
+              <RefreshCw size={18} />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {query.loading && orders.length === 0 ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => <div key={i} className="h-28 bg-card rounded-[2rem] animate-pulse border border-border" />)}
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="py-20 text-center bg-card rounded-[2.5rem] border border-border shadow-sm">
+          <p className="text-muted-foreground italic font-medium">No procurement records match the current filter.</p>
+        </div>
+      ) : (
+        <div className="bg-card rounded-[2.5rem] border border-border shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr className="bg-muted/30 border-b border-border">
+                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Procurement ID</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Current State</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Registered</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">State Override</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {orders.map((order) => (
+                  <tr key={order._id} className="hover:bg-muted/10 transition-colors group">
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col">
+                        <span className="font-mono text-xs font-black text-foreground">#{order._id?.slice(-10).toUpperCase()}</span>
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 italic">Clinical Lot</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-widest ${getStatusStyle(order.status)}`}>
+                        {order.status || 'PENDING'}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-xs font-bold text-muted-foreground italic">
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex justify-end">
+                        <select
+                          className="h-10 px-4 rounded-xl border-2 border-border bg-muted/30 text-[10px] font-black uppercase tracking-widest outline-none focus:border-primary transition-all cursor-pointer"
+                          defaultValue=""
+                          onChange={(e) => onStatusChange(order._id, e.target.value)}
+                          disabled={updatingId === order._id}
+                        >
+                          <option value="" disabled>Override State</option>
+                          {STATUS_OPTIONS.map(o => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-8 py-5 bg-muted/20 border-t border-border flex justify-between items-center">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              {orders.length} Records in Audit Window
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminOrdersPage;
