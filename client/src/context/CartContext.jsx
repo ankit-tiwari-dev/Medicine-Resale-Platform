@@ -40,16 +40,16 @@ export const CartProvider = ({ children }) => {
             // User: API Call
             try {
                 // Optimistic UI update
-                const existingItem = cartItems.find(item => item.medicineId === medicine.id);
+                const existingItem = cartItems.find(item => item.medicineId === medicine._id);
                 if (existingItem) {
                     setCartItems(prev => prev.map(item =>
-                        item.medicineId === medicine.id ? { ...item, quantity: item.quantity + 1 } : item
+                        item.medicineId === medicine._id ? { ...item, quantity: item.quantity + 1 } : item
                     ));
                 } else {
-                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine.id, quantity: 1 }]);
+                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: 1 }]);
                 }
 
-                await api.post('/cart/add', { medicineId: medicine.id, quantity: 1 });
+                await api.post('/cart/add', { medicineId: medicine._id, quantity: 1 });
                 toast.success('Added to cart');
                 fetchCart(); // Sync to be safe
             } catch (error) {
@@ -59,12 +59,12 @@ export const CartProvider = ({ children }) => {
         } else {
             // Guest: LocalStorage
             const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-            const existingItemIndex = localCart.findIndex(item => item.id === medicine.id);
+            const existingItemIndex = localCart.findIndex(item => (item.id === medicine._id || item._id === medicine._id));
 
             if (existingItemIndex >= 0) {
                 localCart[existingItemIndex].quantity += 1;
             } else {
-                localCart.push({ ...medicine, quantity: 1 });
+                localCart.push({ ...medicine, _id: medicine._id, quantity: 1 });
             }
 
             localStorage.setItem('guestCart', JSON.stringify(localCart));
@@ -76,7 +76,7 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (medicineId) => {
         if (user) {
             try {
-                setCartItems(prev => prev.filter(item => item.medicineId !== medicineId && item.id !== medicineId));
+                setCartItems(prev => prev.filter(item => item.medicineId !== medicineId && item._id !== medicineId));
                 await api.delete(`/cart/remove/${medicineId}`);
                 toast.success('Removed from cart');
             } catch (error) {
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }) => {
             }
         } else {
             const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-            const updatedCart = localCart.filter(item => item.id !== medicineId);
+            const updatedCart = localCart.filter(item => (item.id !== medicineId && item._id !== medicineId));
             localStorage.setItem('guestCart', JSON.stringify(updatedCart));
             setCartItems(updatedCart);
             toast.success('Removed from cart');
@@ -101,7 +101,7 @@ export const CartProvider = ({ children }) => {
             // await api.post('/cart/update', { medicineId, quantity });
         } else {
             const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-            const itemIndex = localCart.findIndex(item => item.id === medicineId);
+            const itemIndex = localCart.findIndex(item => (item.id === medicineId || item._id === medicineId));
             if (itemIndex > -1) {
                 localCart[itemIndex].quantity = quantity;
                 localStorage.setItem('guestCart', JSON.stringify(localCart));

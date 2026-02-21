@@ -171,11 +171,15 @@ const MedicineDetailsPage = () => {
               {/* Price Block */}
               <div className="bg-muted/30 border border-border rounded-2xl p-8 mb-8">
                 <div className="flex items-end gap-3 mb-2">
-                  <div className="text-5xl font-bold text-foreground font-sans tracking-tighter">₹{price}</div>
-                  <div className="text-xl text-muted-foreground line-through pb-1 decoration-destructive/30">₹{originalPrice}</div>
-                  <div className="text-lg text-emerald-green font-bold pb-1 ml-2 bg-emerald-green/10 px-3 py-1 rounded-lg">
-                    {Math.round(((originalPrice - price) / originalPrice) * 100)}% Off
-                  </div>
+                  <div className="text-5xl font-bold text-foreground font-sans tracking-tighter">₹{Number(price || 0).toFixed(2)}</div>
+                  {originalPrice && originalPrice > price && (
+                    <>
+                      <div className="text-xl text-muted-foreground line-through pb-1 decoration-destructive/30">₹{Number(originalPrice).toFixed(2)}</div>
+                      <div className="text-lg text-emerald-green font-bold pb-1 ml-2 bg-emerald-green/10 px-3 py-1 rounded-lg">
+                        {Math.round(((originalPrice - price) / originalPrice) * 100)}% Off
+                      </div>
+                    </>
+                  )}
                 </div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Final Price Incl. Escrow Protection</p>
               </div>

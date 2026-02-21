@@ -153,7 +153,7 @@ const MyMedicinesPage = () => {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-2">
-                          <Link to={`/medicines/${item._id}`}>
+                          <Link to={`/browse/${item._id}`}>
                             <button className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
                               <Eye size={18} />
                             </button>
@@ -202,7 +202,7 @@ const MyMedicinesPage = () => {
                     </div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <Link to={`/medicines/${item._id}`} className="flex-1">
+                    <Link to={`/browse/${item._id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full font-bold">Inspect</Button>
                     </Link>
                     <Button variant="outline" size="sm" className="h-9 w-9 p-0 flex items-center justify-center">

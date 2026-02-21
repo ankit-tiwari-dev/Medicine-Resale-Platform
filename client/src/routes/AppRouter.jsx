@@ -78,7 +78,7 @@ const AppRouter = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute roles={[ROLES.BUYER, ROLES.SELLER]}>
+            <ProtectedRoute roles={[ROLES.USER]}>
               <AppLayout />
             </ProtectedRoute>
           }
@@ -96,7 +96,7 @@ const AppRouter = () => {
         <Route
           path="/buyer"
           element={
-            <ProtectedRoute roles={[ROLES.BUYER, ROLES.SELLER]}>
+            <ProtectedRoute roles={[ROLES.USER]}>
               <AppLayout />
             </ProtectedRoute>
           }
@@ -144,7 +144,6 @@ const AppRouter = () => {
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
-        <Route path="/dashboard" element={<Navigate to="/dashboard" replace />} />
         <Route path="/sell" element={<Navigate to="/register" replace />} />
         <Route path="/cart" element={<Navigate to="/dashboard/cart" replace />} />
         <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />

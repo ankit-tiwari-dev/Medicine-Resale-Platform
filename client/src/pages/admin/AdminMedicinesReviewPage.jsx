@@ -190,7 +190,7 @@ const AdminMedicinesReviewPage = () => {
                         <Button
                           variant="outline"
                           className="h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] border-2 hover:bg-primary hover:text-white transition-all group/btn"
-                          onClick={() => window.open(`/medicines/${item._id}`, '_blank')}
+                          onClick={() => window.open(`/browse/${item._id}`, '_blank')}
                         >
                           Evidence Vault <ExternalLink size={12} className="ml-2" />
                         </Button>
