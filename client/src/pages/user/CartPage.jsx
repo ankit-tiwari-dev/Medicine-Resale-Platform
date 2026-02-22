@@ -1,53 +1,61 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { clearCart, getCart, removeFromCart } from "../../api/cartApi";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { createOrder } from "../../api/orderApi";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import Button from "../../components/common/Button";
 import EmptyState from "../../components/common/EmptyState";
 import Container from "../../components/layout/Container";
-import { useApiQuery } from "../../hooks/useApiQuery";
 import { extractErrorMessage } from "../../utils/errors";
 import { Trash2, Shield, Truck, ShoppingBag, ChevronRight, Info } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../hooks/useAuth";
+import { useCart } from "../../context/CartContext";
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const query = useApiQuery(getCart, true);
-  const cart = query.data || {};
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const { cartItems: items, removeFromCart, clearCart, loading } = useCart();
   const [actionLoading, setActionLoading] = useState(false);
 
-  const items = cart.items || cart.cartItems || [];
+  // Amazon-style: Auto-trigger checkout if redirected from "Buy Now"
+  useEffect(() => {
+    const shouldAutoCheckout = searchParams.get('autocheckout') === 'true';
+    if (shouldAutoCheckout && items.length > 0 && user && !loading && !actionLoading) {
+      handleCheckout();
+      // Remove query param to prevent infinite loops or re-triggers on refresh
+      navigate('/cart', { replace: true });
+    }
+  }, [searchParams, items, user, loading]);
+
   const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item?.medicineId?.price || item?.price || 0), 0),
+    () => items.reduce((sum, item) => {
+      const price = Number(item?.medicineId?.price || item?.price || 0);
+      const quantity = item?.quantity || 1;
+      return sum + (price * quantity);
+    }, 0),
     [items]
   );
 
   const handleRemove = async (medicineId) => {
-    try {
-      await removeFromCart(medicineId);
-      await query.execute();
-      toast.success("Item removed from cart");
-    } catch (error) {
-      toast.error(extractErrorMessage(error, "Unable to remove item."));
-    }
+    await removeFromCart(medicineId);
   };
 
   const handleClear = async () => {
     if (!window.confirm("Are you sure you want to clear your entire cart?")) return;
-    try {
-      await clearCart();
-      await query.execute();
-      toast.success("Cart cleared");
-    } catch (error) {
-      toast.error(extractErrorMessage(error, "Unable to clear cart."));
-    }
+    await clearCart();
   };
 
   const handleCheckout = async () => {
+    if (!user) {
+      toast.error("Please login to proceed with checkout.");
+      navigate('/login', { state: { from: location } });
+      return;
+    }
     setActionLoading(true);
     try {
-      const medicineIds = items.map((item) => item?.medicineId?._id || item.medicineId).filter(Boolean);
+      const medicineIds = items.map((item) => item?.medicineId?._id || item.medicineId || item._id).filter(Boolean);
       const response = await createOrder({ items: medicineIds, shippingAddress: "Address update required" });
       const createdOrders = response?.data?.data || [];
       const orderId = createdOrders[0]?._id;
@@ -88,7 +96,7 @@ const CartPage = () => {
           )}
         </div>
 
-        {query.loading && items.length === 0 ? (
+        {loading && items.length === 0 ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="h-24 bg-card rounded-2xl animate-pulse border border-border" />
@@ -106,13 +114,13 @@ const CartPage = () => {
             {/* Cart Items List */}
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
-                const medicine = item.medicineId || {};
-                const medicineId = medicine._id || item.medicineId;
+                const medicine = item.medicineId ? item.medicineId : item;
+                const medicineId = medicine._id || item.medicineId || item._id;
                 return (
                   <div key={medicineId} className="bg-card rounded-2xl p-5 border border-border shadow-sm flex flex-col sm:flex-row items-center gap-6 group hover:border-primary/20 transition-all">
                     <div className="w-24 h-24 bg-muted/50 rounded-xl overflow-hidden border border-border flex-shrink-0">
                       <img
-                        src={medicine?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
+                        src={medicine?.image || medicine?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
                         alt={medicine?.extractedData?.name}
                         className="w-full h-full object-cover"
                       />

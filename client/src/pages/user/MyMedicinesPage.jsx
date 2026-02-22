@@ -130,7 +130,7 @@ const MyMedicinesPage = () => {
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted/50 flex-shrink-0">
                             <img
-                              src={item.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
+                              src={item.image || item.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
                               alt={item.extractedData?.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                             />
@@ -179,7 +179,7 @@ const MyMedicinesPage = () => {
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-xl border border-border bg-muted/30 overflow-hidden flex-shrink-0">
                       <img
-                        src={item.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
+                        src={item.image || item.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
                         alt={item.extractedData?.name}
                         className="w-full h-full object-cover"
                       />

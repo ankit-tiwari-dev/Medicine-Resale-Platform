@@ -103,7 +103,7 @@ const OrderDetailsPage = () => {
                   <div key={item._id} className="p-6 flex items-center gap-6 group hover:bg-muted/30 transition-colors">
                     <div className="w-20 h-20 bg-muted rounded-xl overflow-hidden border border-border">
                       <img
-                        src={item.medicineId?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
+                        src={item.medicineId?.image || item.medicineId?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
                         alt="Medicine"
                         className="w-full h-full object-cover"
                       />

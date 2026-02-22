@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { Menu, X, Search, LogIn, ShoppingBag } from "lucide-react";
 import ThemeSwitcher from "../common/ThemeSwitcher";
 import { useTheme } from "../../theme/ThemeContext";
+import { useCart } from "../../context/CartContext";
 import blackLogo from "../../assets/black-theme-logo.png";
 import whiteLogo from "../../assets/white-theme-logo.png";
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isDarkMode } = useTheme();
+    const { cartCount } = useCart();
     const logoSrc = isDarkMode ? blackLogo : whiteLogo;
 
     return (
@@ -36,9 +38,16 @@ export default function Header() {
                         </div>
                     </div>
 
-                    {/* Actions - Right (Desktop) */}
                     <nav className="hidden lg:flex items-center gap-6">
                         <ThemeSwitcher />
+                        <Link to="/cart" className="relative text-foreground-muted hover:text-primary transition-colors flex items-center">
+                            <ShoppingBag className="w-5 h-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-1.5 -right-2 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
                         <Link to="/browse" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
                             Browse
                         </Link>
@@ -54,8 +63,16 @@ export default function Header() {
                     </nav>
 
                     {/* Mobile Controls */}
-                    <div className="flex items-center gap-2 lg:hidden">
+                    <div className="flex items-center gap-4 lg:hidden">
                         <ThemeSwitcher />
+                        <Link to="/cart" className="relative text-foreground-muted hover:text-primary transition-colors flex items-center pr-2">
+                            <ShoppingBag className="w-5 h-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-1.5 0 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="p-2 text-foreground-muted hover:text-primary transition-colors z-50"

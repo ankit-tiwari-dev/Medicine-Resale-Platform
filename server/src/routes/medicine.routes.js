@@ -9,6 +9,9 @@ const router = express.Router();
 // For now, browsing medicines might be public or user only. Let's keep it open or user based.
 router.get("/", getMedicines);
 
+// Get single medicine details
+router.get("/:id", getMedicineById);
+
 // Protected routes
 router.use(verifyJWT);
 
@@ -20,8 +23,5 @@ router.get("/my-medicines", getMyMedicines);
 
 // Update medicine (User/Admin)
 router.patch("/:id", updateMedicineDetails);
-
-// Get single medicine details
-router.get("/:id", getMedicineById);
 
 export default router;

@@ -36,6 +36,9 @@ const LoginPage = () => {
     }
 
     let nextPath = location.state?.from?.pathname || "/dashboard";
+    if (location.state?.from?.search) {
+      nextPath += location.state?.from?.search;
+    }
     if (result.user?.role === 'admin') {
       nextPath = "/admin";
     }

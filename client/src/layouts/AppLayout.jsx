@@ -11,7 +11,7 @@ const links = [
   { to: "/dashboard/upload-medicine", label: "Upload Medicine", icon: Upload },
   { to: "/dashboard/orders", label: "Orders", icon: History },
   { to: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { to: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
+  { to: "/cart", label: "Cart", icon: ShoppingCart },
   { to: "/dashboard/profile", label: "Profile", icon: User }
 ];
 

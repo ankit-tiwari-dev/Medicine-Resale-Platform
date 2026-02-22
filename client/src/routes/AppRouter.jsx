@@ -61,6 +61,7 @@ const AppRouter = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/browse" element={<BrowseMedicinesPage />} />
           <Route path="/browse/:id" element={<MedicineDetailsPage />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/auth/callback" element={<OAuthCallbackPage />} />
           <Route path="/disputes" element={<ProtectedRoute><DisputesPage /></ProtectedRoute>} />
           <Route path="/disputes/raise" element={<ProtectedRoute><RaiseDisputePage /></ProtectedRoute>} />
@@ -89,7 +90,6 @@ const AppRouter = () => {
           <Route path="wallet" element={<WalletPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailsPage />} />
-          <Route path="cart" element={<CartPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
@@ -145,7 +145,6 @@ const AppRouter = () => {
 
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/sell" element={<Navigate to="/register" replace />} />
-        <Route path="/cart" element={<Navigate to="/dashboard/cart" replace />} />
         <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
       </Routes>
     </BrowserRouter>

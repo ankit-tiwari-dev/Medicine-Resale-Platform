@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, CheckCircle, Clock, ShoppingCart } from 'lucide-react';
 import Button from './Button';
 import TrustBadge from './TrustBadge';
@@ -9,8 +10,10 @@ import TrustBadge from './TrustBadge';
  * Engineered for enterprise healthcare aesthetics.
  */
 export default function MedicineCard({ medicine, onAddToCart, loading = false }) {
+    const navigate = useNavigate();
     const {
         extractedData,
+        image,
         images,
         price,
         adminVerified,
@@ -28,12 +31,15 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
         : false;
 
     return (
-        <article className="group relative flex flex-col bg-card text-card-foreground border border-border rounded-xl shadow-sm transition-all duration-300 hover:shadow-md overflow-hidden">
+        <article
+            onClick={() => navigate(`/browse/${medicine._id}`)}
+            className="group relative flex flex-col bg-card text-card-foreground border border-border rounded-xl shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer overflow-hidden"
+        >
 
             {/* 1. Image Block with Trust Overlays */}
             <div className="relative aspect-[4/3] bg-muted overflow-hidden">
                 <img
-                    src={images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400'}
+                    src={image || images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400'}
                     alt={medicineName}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />

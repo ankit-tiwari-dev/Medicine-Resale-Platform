@@ -17,9 +17,33 @@ export const CartProvider = ({ children }) => {
         fetchCart();
     }, [user]);
 
+    // Cross-tab synchronization for guest cart
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'guestCart' && !user) {
+                const newCart = JSON.parse(e.newValue || '[]');
+                setCartItems(newCart);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [user]);
+
     const fetchCart = async () => {
         setLoading(true);
         if (user) {
+            // Sync guest cart to user account upon login
+            const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+            if (guestCart.length > 0) {
+                try {
+                    await Promise.all(guestCart.map(item => api.post('/cart/add', { medicineId: item._id || item.medicineId, quantity: item.quantity })));
+                    localStorage.removeItem('guestCart');
+                } catch (err) {
+                    console.error('Failed to sync guest cart', err);
+                }
+            }
+
             // User: Fetch from API
             try {
                 const response = await api.get('/cart');
@@ -35,7 +59,7 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
     };
 
-    const addToCart = async (medicine) => {
+    const addToCart = async (medicine, quantityToAdd = 1) => {
         if (user) {
             // User: API Call
             try {
@@ -43,13 +67,13 @@ export const CartProvider = ({ children }) => {
                 const existingItem = cartItems.find(item => item.medicineId === medicine._id);
                 if (existingItem) {
                     setCartItems(prev => prev.map(item =>
-                        item.medicineId === medicine._id ? { ...item, quantity: item.quantity + 1 } : item
+                        item.medicineId === medicine._id ? { ...item, quantity: item.quantity + quantityToAdd } : item
                     ));
                 } else {
-                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: 1 }]);
+                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: quantityToAdd }]);
                 }
 
-                await api.post('/cart/add', { medicineId: medicine._id, quantity: 1 });
+                await api.post('/cart/add', { medicineId: medicine._id, quantity: quantityToAdd });
                 toast.success('Added to cart');
                 fetchCart(); // Sync to be safe
             } catch (error) {
@@ -62,9 +86,9 @@ export const CartProvider = ({ children }) => {
             const existingItemIndex = localCart.findIndex(item => (item.id === medicine._id || item._id === medicine._id));
 
             if (existingItemIndex >= 0) {
-                localCart[existingItemIndex].quantity += 1;
+                localCart[existingItemIndex].quantity += quantityToAdd;
             } else {
-                localCart.push({ ...medicine, _id: medicine._id, quantity: 1 });
+                localCart.push({ ...medicine, _id: medicine._id, quantity: quantityToAdd });
             }
 
             localStorage.setItem('guestCart', JSON.stringify(localCart));
@@ -76,7 +100,10 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (medicineId) => {
         if (user) {
             try {
-                setCartItems(prev => prev.filter(item => item.medicineId !== medicineId && item._id !== medicineId));
+                setCartItems(prev => prev.filter(item => {
+                    const currentId = item?.medicineId?._id || item.medicineId || item._id;
+                    return String(currentId) !== String(medicineId);
+                }));
                 await api.delete(`/cart/remove/${medicineId}`);
                 toast.success('Removed from cart');
             } catch (error) {
@@ -85,7 +112,10 @@ export const CartProvider = ({ children }) => {
             }
         } else {
             const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-            const updatedCart = localCart.filter(item => (item.id !== medicineId && item._id !== medicineId));
+            const updatedCart = localCart.filter(item => {
+                const currentId = item?.medicineId?._id || item.medicineId || item._id || item.id;
+                return String(currentId) !== String(medicineId);
+            });
             localStorage.setItem('guestCart', JSON.stringify(updatedCart));
             setCartItems(updatedCart);
             toast.success('Removed from cart');

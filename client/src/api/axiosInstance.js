@@ -123,7 +123,9 @@ axiosInstance.interceptors.response.use(
     } catch (refreshError) {
       resolveQueue(refreshError, null);
       storage.clearAuth();
-      window.location.replace("/login");
+      if (!originalRequest.url?.includes("/auth/me")) {
+        window.location.replace("/login");
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

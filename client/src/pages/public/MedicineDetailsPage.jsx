@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Shield, CheckCircle, Star, ChevronLeft, Plus, Minus, Truck, Info, Award } from "lucide-react";
 import medicineService from "../../services/medicineService";
-import { addToCart as apiAddToCart } from "../../api/cartApi";
+
 import Section from "../../components/layout/Section";
 import Container from "../../components/layout/Container";
 import Button from "../../components/common/Button";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 
 const MedicineDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -36,11 +39,25 @@ const MedicineDetailsPage = () => {
   const handleAddToCart = async () => {
     setActionLoading(true);
     try {
-      await apiAddToCart({ medicineId: id, quantity });
-      addToCart(medicine, quantity);
-      toast.success("Added to cart!");
+      await addToCart(medicine, quantity);
     } catch (error) {
-      toast.error("Failed to add to cart.");
+      console.error(error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    setActionLoading(true);
+    try {
+      await addToCart(medicine, quantity);
+      if (!user) {
+        navigate('/login', { state: { from: { pathname: '/cart', search: '?autocheckout=true' } } });
+      } else {
+        navigate('/cart?autocheckout=true');
+      }
+    } catch (error) {
+      console.error(error);
     } finally {
       setActionLoading(false);
     }
@@ -78,8 +95,8 @@ const MedicineDetailsPage = () => {
     );
   }
 
-  const { extractedData, images, price, adminVerified, riderVerified, description, seller, originalPrice, category, manufacturer, batchNumber, quantity: stock } = medicine;
-  const medicineImages = images?.length > 0 ? images : ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800'];
+  const { extractedData, image, images, price, adminVerified, riderVerified, description, seller, originalPrice, category, manufacturer, batchNumber, stock = 10 } = medicine;
+  const medicineImages = image ? [image] : (images?.length > 0 ? images : ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=800']);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -100,7 +117,7 @@ const MedicineDetailsPage = () => {
                 <img
                   src={medicineImages[selectedImage]}
                   alt={extractedData?.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-2"
                 />
                 {adminVerified && (
                   <div className="absolute top-4 right-4">
@@ -119,7 +136,7 @@ const MedicineDetailsPage = () => {
                       onClick={() => setSelectedImage(idx)}
                       className={`aspect-square rounded-xl overflow-hidden border-2 transition-all p-1 bg-muted/30 ${selectedImage === idx ? 'border-primary' : 'border-transparent hover:border-border'}`}
                     >
-                      <img src={img} alt="Thumbnail" className="w-full h-full object-cover rounded-lg" />
+                      <img src={img} alt="Thumbnail" className="w-full h-full object-contain rounded-lg bg-white" />
                     </button>
                   ))}
                 </div>
@@ -204,6 +221,17 @@ const MedicineDetailsPage = () => {
                   <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Available In-Store</div>
                   <div className="font-bold text-primary text-sm px-2 py-0.5 bg-primary/5 rounded w-fit">{stock} Units</div>
                 </div>
+                <div className="space-y-1">
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-1.5"><Shield size={12} /> Listing Status</div>
+                  <div className="font-bold text-emerald-green text-sm uppercase tracking-tighter">{medicine.status || "Unknown"}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Procurement Location</div>
+                  <div className="font-bold text-foreground text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-green animate-pulse"></span>
+                    {medicine.pickupLocation || "Address verification pending"}
+                  </div>
+                </div>
               </div>
 
               {/* Verification Badge */}
@@ -229,8 +257,8 @@ const MedicineDetailsPage = () => {
 
               {/* Purchase Action */}
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 bg-muted/50 p-1.5 rounded-xl border border-border">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 bg-muted/50 p-1.5 rounded-xl border border-border w-fit">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
@@ -239,20 +267,30 @@ const MedicineDetailsPage = () => {
                     </button>
                     <span className="text-xl font-bold text-foreground w-12 text-center font-sans">{quantity}</span>
                     <button
-                      onClick={() => setQuantity(Math.min(stock, quantity + 1))}
+                      onClick={() => setQuantity(Math.min(Number(stock) || 10, quantity + 1))}
                       className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
-                  <Button
-                    variant="primary"
-                    className="h-14 flex-1 ml-4 rounded-xl shadow-lg shadow-primary/20 text-lg"
-                    onClick={handleAddToCart}
-                    loading={actionLoading}
-                  >
-                    Add to Cart • ₹{(price * quantity).toLocaleString()}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      variant="outline"
+                      className="h-14 flex-1 rounded-xl font-bold uppercase transition-all"
+                      onClick={handleAddToCart}
+                      loading={actionLoading}
+                    >
+                      Add to Cart
+                    </Button>
+                    <Button
+                      variant="primary"
+                      className="h-14 flex-1 rounded-xl shadow-lg shadow-primary/20 text-lg font-bold uppercase transition-all"
+                      onClick={handleBuyNow}
+                      loading={actionLoading}
+                    >
+                      Buy Now • ₹{(price * quantity).toLocaleString()}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
