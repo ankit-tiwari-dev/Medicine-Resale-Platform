@@ -14,6 +14,11 @@ const getOrCreateCart = async (userId) => {
 
 export const addToCart = asyncHandler(async (req, res) => {
     const { medicineId, quantity = 1 } = req.body;
+    const qtyToAdd = Number(quantity);
+
+    if (isNaN(qtyToAdd) || qtyToAdd < 1) {
+        throw new ApiError(400, "Invalid quantity");
+    }
 
     // Check if medicine exists and is available
     const medicine = await Medicine.findById(medicineId);
@@ -43,14 +48,14 @@ export const addToCart = asyncHandler(async (req, res) => {
     const cart = await getOrCreateCart(req.user._id);
 
     // Check if item already exists in cart
-    const itemIndex = cart.items.findIndex(item => item.medicineId.toString() === medicineId);
+    const itemIndex = cart.items.findIndex(item => item.medicineId.toString() === medicineId.toString());
 
     if (itemIndex > -1) {
         // Update quantity
-        cart.items[itemIndex].quantity += quantity;
+        cart.items[itemIndex].quantity = Number(cart.items[itemIndex].quantity) + qtyToAdd;
     } else {
         // Add new item
-        cart.items.push({ medicineId, quantity });
+        cart.items.push({ medicineId, quantity: qtyToAdd });
     }
 
     await cart.save();
@@ -121,5 +126,31 @@ export const clearCart = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, [], "Cart cleared successfully")
+    );
+});
+
+export const updateCartItemQuantity = asyncHandler(async (req, res) => {
+    const { medicineId, quantity } = req.body;
+    const newQty = Number(quantity);
+
+    if (isNaN(newQty) || newQty < 1) {
+        throw new ApiError(400, "Quantity must be a valid number and at least 1");
+    }
+
+    const cart = await Cart.findOne({ userId: req.user._id });
+    if (!cart) {
+        throw new ApiError(404, "Cart not found");
+    }
+
+    const itemIndex = cart.items.findIndex(item => item.medicineId.toString() === medicineId.toString());
+    if (itemIndex === -1) {
+        throw new ApiError(404, "Item not found in cart");
+    }
+
+    cart.items[itemIndex].quantity = newQty;
+    await cart.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, cart, "Cart quantity updated successfully")
     );
 });

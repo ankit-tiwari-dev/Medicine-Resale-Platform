@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
-import { MIN_EXPIRY_DAYS } from "../constants.js";
+import { MIN_EXPIRY_DAYS } from "../utils/constants.js";
 
 import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 import axios from "axios";
@@ -38,7 +38,19 @@ const extractMedicineDetails = async (file, forceMock = false) => {
                         content: [
                             {
                                 type: "text",
-                                text: "Extract Medicine Name, Batch Number, Expiry Date (YYYY-MM-DD), and MRP into a JSON object. Return ONLY JSON."
+                                text: `Extract the following details from the medicine packaging image if it is a medical product (medicine, tablets, syrup, etc.):
+                                1. medicine_name (Brand Name)
+                                2. generic_name
+                                3. manufacturer
+                                4. batch_no
+                                5. expiry_date (ISO format YYYY-MM-DD)
+                                6. mrp (Number)
+                                7. description (A 2-3 sentence summary for consumers including usage, dosage form, and key safety warnings found on the packaging)
+                                8. image_quality (Enum: "clear", "blurry", "unreadable" - based on how well text can be extracted)
+                                9. is_medical (Boolean - true if it's a pharmaceutical/medical product, false otherwise)
+                                10. rejection_reason (String - if is_medical is false, explain why in a professional manner, otherwise leave empty)
+
+                                Return ONLY a valid JSON object.`
                             },
                             {
                                 type: "image_url",
@@ -66,11 +78,17 @@ const extractMedicineDetails = async (file, forceMock = false) => {
 
         const finalData = {
             name: data.medicine_name || data["Medicine Name"] || data.name || "Unknown Medicine",
+            genericName: data.generic_name || data["Generic Name"] || "N/A",
+            manufacturer: data.manufacturer || "N/A",
             expiryDate: (data.expiry_date || data["Expiry Date"] || data.expiryDate)
                 ? new Date(data.expiry_date || data["Expiry Date"] || data.expiryDate)
                 : null,
             batchNumber: data.batch_no || data.batch_number || data["Batch Number"] || data.batchNumber || "N/A",
             mrp: Number(data.mrp || data.MRP || data["MRP"]) || 0,
+            description: data.description || data.safety_description || "No description provided.",
+            imageQuality: data.image_quality || "clear",
+            isMedical: data.is_medical !== false,
+            rejectionReason: data.rejection_reason || "",
             aiNote: "Processed via Groq Llama 3.2 Vision"
         };
 
@@ -148,6 +166,19 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
 
     return res.status(201).json(
         new ApiResponse(201, medicine, "Medicine uploaded and processed successfully")
+    );
+});
+
+export const scanMedicineImage = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new ApiError(400, "Image is required for AI scanning");
+    }
+
+    const { forceMock } = req.body;
+    const extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
+
+    return res.status(200).json(
+        new ApiResponse(200, extractedData, "AI Scan completed successfully")
     );
 });
 
@@ -238,6 +269,12 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized to update this medicine");
     }
 
+    // Strict Protection: Block updates if status is locked
+    const lockedStatuses = ['sold', 'collected', 'pickup_assigned'];
+    if (lockedStatuses.includes(medicine.status?.toLowerCase()) && req.user.role !== 'admin') {
+        throw new ApiError(400, `Cannot update listing as it is currently in '${medicine.status}' status`);
+    }
+
     if (name) medicine.extractedData.name = name;
     if (expiryDate) {
         const expiryError = getExpiryValidationError(expiryDate);
@@ -282,5 +319,32 @@ export const getMedicineById = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, medicine, "Medicine details fetched successfully")
+    );
+});
+
+export const deleteMedicine = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const medicine = await Medicine.findById(id);
+
+    if (!medicine) {
+        throw new ApiError(404, "Medicine not found");
+    }
+
+    // Authorization check
+    if (medicine.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        throw new ApiError(403, "Unauthorized to delete this listing");
+    }
+
+    // Strict Protection: block deletion if medicine is SOLD, COLLECTED or PICKUP_ASSIGNED
+    const lockedStatuses = ['sold', 'collected', 'pickup_assigned'];
+    if (lockedStatuses.includes(medicine.status?.toLowerCase()) && req.user.role !== 'admin') {
+        throw new ApiError(400, `Cannot delete a listing that is ${medicine.status}`);
+    }
+
+    await Medicine.findByIdAndDelete(id);
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Medicine listing removed successfully")
     );
 });

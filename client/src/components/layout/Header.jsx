@@ -4,6 +4,7 @@ import { Menu, X, Search, LogIn, ShoppingBag } from "lucide-react";
 import ThemeSwitcher from "../common/ThemeSwitcher";
 import { useTheme } from "../../theme/ThemeContext";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../hooks/useAuth";
 import blackLogo from "../../assets/black-theme-logo.png";
 import whiteLogo from "../../assets/white-theme-logo.png";
 
@@ -11,6 +12,7 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isDarkMode } = useTheme();
     const { cartCount } = useCart();
+    const { user, logout, isAuthenticated } = useAuth();
     const logoSrc = isDarkMode ? blackLogo : whiteLogo;
 
     return (
@@ -51,9 +53,15 @@ export default function Header() {
                         <Link to="/browse" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
                             Browse
                         </Link>
-                        <Link to="/login" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
-                            Login
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link to="/dashboard" className="text-sm font-medium text-primary font-bold transition-colors">
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <Link to="/login" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
+                                Login
+                            </Link>
+                        )}
                         <Link
                             to="/register"
                             className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-low hover:shadow-medium hover:scale-[1.02] active:scale-[0.98] transition-all"
@@ -97,14 +105,25 @@ export default function Header() {
                             <ShoppingBag className="text-primary" />
                             Browse Medicines
                         </Link>
-                        <Link
-                            to="/login"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
-                        >
-                            <LogIn className="text-primary" />
-                            Secure Login
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link
+                                to="/dashboard"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
+                            >
+                                <LogIn className="text-primary" />
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <Link
+                                to="/login"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
+                            >
+                                <LogIn className="text-primary" />
+                                Secure Login
+                            </Link>
+                        )}
                         <Link
                             to="/register"
                             onClick={() => setIsMenuOpen(false)}

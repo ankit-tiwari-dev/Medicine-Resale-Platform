@@ -1,16 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Upload,
-  Camera,
-  ChevronLeft,
-  CheckCircle,
-  Info,
-  Shield,
-  ArrowRight,
-  ShoppingBag
+  RefreshCw
 } from "lucide-react";
-import { uploadMedicine } from "../../api/medicineApi";
+import { uploadMedicine, scanMedicine } from "../../api/medicineApi";
 import Container from "../../components/layout/Container";
 import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
@@ -21,8 +14,13 @@ const UploadMedicinePage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState('details'); // 'details' | 'verifying' | 'success'
   const [loading, setLoading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [aiFeedback, setAiFeedback] = useState(null); // { type: 'success' | 'refusal' | 'quality', message: string }
+  const [isValidated, setIsValidated] = useState(false);
+  const [scanCount, setScanCount] = useState(0);
+  const MAX_SCANS = 3;
 
   const [form, setForm] = useState({
     name: "",
@@ -42,6 +40,75 @@ const UploadMedicinePage = () => {
     if (file) {
       setImage(file);
       setPreview(URL.createObjectURL(file));
+      setAiFeedback(null);
+      setIsValidated(false);
+    }
+  };
+
+  const handleAIScan = async () => {
+    if (!image) {
+      toast.error("Please upload an image first.");
+      return;
+    }
+
+    if (scanCount >= MAX_SCANS) {
+      setAiFeedback({
+        type: 'refusal',
+        message: "Scanning limit reached for this session to ensure platform integrity. Please review your data manually or try again later."
+      });
+      return;
+    }
+
+    setIsScanning(true);
+    setAiFeedback(null);
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    try {
+      const response = await scanMedicine(formData);
+      const data = response?.data?.data;
+
+      if (data) {
+        if (data.isMedical) {
+          setForm(prev => ({
+            ...prev,
+            name: data.name || prev.name,
+            genericName: data.genericName || prev.genericName,
+            manufacturer: data.manufacturer || prev.manufacturer,
+            batchNumber: data.batchNumber || prev.batchNumber,
+            expiryDate: data.expiryDate ? new Date(data.expiryDate).toISOString().split('T')[0] : prev.expiryDate,
+            originalPrice: data.mrp || prev.originalPrice,
+            price: data.mrp ? (data.mrp * 0.8).toFixed(2) : prev.price,
+            description: data.description || prev.description
+          }));
+
+          if (data.imageQuality === 'blurry' || data.imageQuality === 'unreadable') {
+            setAiFeedback({
+              type: 'quality',
+              message: "The medicine packaging is detected but the image is slightly blurry. This may lead to audit failures. We recommend uploading a clearer image for better trust."
+            });
+          } else {
+            setAiFeedback({
+              type: 'success',
+              message: "AI Scan Successful! Metadata and a professional description have been synchronized with your form."
+            });
+          }
+          setIsValidated(true);
+        } else {
+          setAiFeedback({
+            type: 'refusal',
+            message: data.rejectionReason || "This product does not appear to be a medical item. Only pharmaceuticals are permitted."
+          });
+          setIsValidated(false);
+        }
+        setScanCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("AI Scan failed. Please check your connection.");
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -82,7 +149,6 @@ const UploadMedicinePage = () => {
         <Container className="max-w-md">
           <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
             <div className="w-24 h-24 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <CheckCircle size={40} className="text-emerald-green" />
             </div>
             <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Listing Secured</h2>
             <p className="text-muted-foreground mb-8 text-sm leading-relaxed font-medium">
@@ -119,7 +185,6 @@ const UploadMedicinePage = () => {
         <Container className="max-w-md">
           <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
             <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse shadow-inner">
-              <Camera size={40} className="text-primary" />
             </div>
             <h2 className="text-3xl font-serif font-bold text-foreground mb-4">AI Forensic Scan</h2>
             <p className="text-muted-foreground mb-10 text-sm leading-relaxed font-medium">
@@ -150,13 +215,11 @@ const UploadMedicinePage = () => {
         {/* Header */}
         <div className="mb-10">
           <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
             Back to Command Center
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <ShoppingBag size={12} />
+              <div className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
                 Seller Gateway
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -167,7 +230,6 @@ const UploadMedicinePage = () => {
               </p>
             </div>
             <div className="bg-emerald-green/5 border border-emerald-green/10 px-6 py-3 rounded-2xl flex items-center gap-3">
-              <Shield className="text-emerald-green" size={20} />
               <div className="text-[10px] uppercase font-bold text-emerald-green tracking-widest leading-tight">
                 100% Secure <br /> Escrow System
               </div>
@@ -187,11 +249,20 @@ const UploadMedicinePage = () => {
                 onClick={() => document.getElementById('image-upload').click()}
               >
                 {preview ? (
-                  <img src={preview} alt="Medicine Preview" className="w-full h-full object-cover rounded-xl shadow-lg shadow-primary/10" />
+                  <div className="relative w-full h-full">
+                    <img src={preview} alt="Medicine Preview" className="w-full h-full object-contain rounded-xl" />
+                    {isScanning && (
+                      <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] rounded-xl flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <RefreshCw className="w-10 h-10 text-white animate-spin" />
+                          <span className="text-xs font-bold text-white uppercase tracking-widest">Scanning...</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
-                      <Upload className="w-10 h-10 text-muted-foreground" />
                     </div>
                     <span className="text-sm font-bold text-foreground font-sans">Drop medication scan</span>
                     <span className="text-[10px] text-muted-foreground font-bold uppercase mt-1 tracking-widest">PNG, JPG up to 10MB</span>
@@ -206,14 +277,22 @@ const UploadMedicinePage = () => {
                 />
               </div>
 
-              <div className="mt-8 bg-muted/30 rounded-2xl p-4 border border-border dashed">
-                <div className="flex gap-4 items-start">
-                  <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Camera className="w-5 h-5 text-primary" />
-                  </div>
+              <div className="mt-8 space-y-4">
+                <Button
+                  type="button"
+                  variant={isValidated ? "outline" : "primary"}
+                  className={`w-full h-14 rounded-2xl flex gap-3 font-bold transition-all ${isValidated ? 'border-emerald-green/30 text-emerald-green' : 'shadow-lg shadow-primary/20'}`}
+                  onClick={handleAIScan}
+                  disabled={isScanning || !image}
+                >
+                  {isScanning && <RefreshCw className="animate-spin w-5 h-5" />}
+                  {isValidated ? "Rescan Pharmaceutical" : "Run AI Forensic Scan"}
+                </Button>
+
+                <div className="bg-muted/30 rounded-2xl p-4 border border-border dashed">
                   <div>
-                    <h4 className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">AI Capture Protocol</h4>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">Ensure the Batch Number and Expiry Date are clearly visible to avoid audit failure.</p>
+                    <h4 className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Forensic Protocol</h4>
+                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">AI scanning automatically extracts metadata and verifies medical legitimacy.</p>
                   </div>
                 </div>
               </div>
@@ -225,7 +304,6 @@ const UploadMedicinePage = () => {
             <div className="bg-card rounded-[2rem] p-10 border border-border shadow-sm space-y-10">
               <div>
                 <h2 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full" />
                   Pharmaceutical Data
                 </h2>
 
@@ -310,7 +388,6 @@ const UploadMedicinePage = () => {
 
               <div className="pt-4">
                 <h2 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-emerald-green rounded-full" />
                   Fair-Trade Pricing
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-6 items-start">
@@ -344,7 +421,6 @@ const UploadMedicinePage = () => {
                   </div>
                 </div>
                 <div className="mt-4 p-4 bg-emerald-green/5 border border-emerald-green/10 rounded-xl flex items-center gap-3">
-                  <Info size={16} className="text-emerald-green" />
                   <p className="text-[10px] font-bold text-emerald-green uppercase tracking-widest">Pricing 30% below MRP is recommended for rapid clinical redistribution.</p>
                 </div>
               </div>
@@ -352,16 +428,50 @@ const UploadMedicinePage = () => {
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20 text-lg font-bold flex gap-3 items-center justify-center group"
-                disabled={loading}
+                className={`w-full h-16 rounded-2xl shadow-xl transition-all text-lg font-bold flex gap-3 items-center justify-center group ${!isValidated && 'opacity-50 grayscale cursor-not-allowed'}`}
+                disabled={loading || !isValidated}
               >
-                {loading ? "Securely Initializing..." : "Submit for AI forensic scan"}
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                {loading ? "Securely Initializing..." : isValidated ? "Complete Verification & List" : "Scan Image to Initialize"}
               </Button>
             </div>
           </div>
         </form>
       </Container>
+
+      {/* Professional AI Feedback Modal (Amazon Style) */}
+      {aiFeedback && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-300">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">
+                {aiFeedback.type === 'success' ? 'Verification Successful' :
+                  aiFeedback.type === 'quality' ? 'Image Quality Report' : 'Verification Alert'}
+              </h3>
+              <button
+                onClick={() => setAiFeedback(null)}
+                className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest"
+                aria-label="Close"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-8">
+              <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                {aiFeedback.message}
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex justify-end">
+              <Button
+                variant="primary"
+                className="h-10 px-8 rounded-md text-sm font-bold"
+                onClick={() => setAiFeedback(null)}
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

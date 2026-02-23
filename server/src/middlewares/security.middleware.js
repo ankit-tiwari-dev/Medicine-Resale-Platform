@@ -50,8 +50,8 @@ export const requestId = (req, res, next) => {
 // 5. Rate Limiters
 export const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: "Too many requests from this IP, please try again after 15 minutes",
+    max: 200, // Limit each IP to 200 requests per windowMs
+    message: "Too many requests from this IP as a security guardrail, please try again after 15 minutes",
     standardHeaders: true,
     legacyHeaders: false,
     skip: () => process.env.NODE_ENV === 'test',

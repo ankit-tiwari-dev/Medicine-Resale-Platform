@@ -8,3 +8,9 @@ export const uploadMedicine = (formData) =>
   });
 export const getMyMedicines = () => axiosInstance.get("/medicines/my-medicines");
 export const updateMedicine = (medicineId, payload) => axiosInstance.patch(`/medicines/${medicineId}`, payload);
+export const scanMedicine = (formData) =>
+  axiosInstance.post("/medicines/scan", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+
+export const deleteMedicine = (id) => axiosInstance.delete(`/medicines/${id}`);

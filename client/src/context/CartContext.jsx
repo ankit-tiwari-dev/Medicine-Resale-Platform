@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -11,10 +11,16 @@ export const CartProvider = ({ children }) => {
     const { user } = useAuth();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const debounceTimers = useRef({});
 
     // Load cart on mount or user change
     useEffect(() => {
         fetchCart();
+        // Cleanup timers on unmount or user change
+        return () => {
+            Object.values(debounceTimers.current).forEach(clearTimeout);
+            debounceTimers.current = {};
+        };
     }, [user]);
 
     // Cross-tab synchronization for guest cart
@@ -60,21 +66,28 @@ export const CartProvider = ({ children }) => {
     };
 
     const addToCart = async (medicine, quantityToAdd = 1) => {
+        const qty = Number(quantityToAdd);
         if (user) {
             // User: API Call
             try {
                 // Optimistic UI update
-                const existingItem = cartItems.find(item => item.medicineId === medicine._id);
+                const existingItem = cartItems.find(item => {
+                    const id = item?.medicineId?._id || item.medicineId || item._id;
+                    return String(id) === String(medicine._id);
+                });
+
                 if (existingItem) {
-                    setCartItems(prev => prev.map(item =>
-                        item.medicineId === medicine._id ? { ...item, quantity: item.quantity + quantityToAdd } : item
-                    ));
+                    setCartItems(prev => prev.map(item => {
+                        const currentId = item?.medicineId?._id || item.medicineId || item._id;
+                        return String(currentId) === String(medicine._id)
+                            ? { ...item, quantity: Number(item.quantity) + qty }
+                            : item;
+                    }));
                 } else {
-                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: quantityToAdd }]);
+                    setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: qty }]);
                 }
 
-                await api.post('/cart/add', { medicineId: medicine._id, quantity: quantityToAdd });
-                toast.success('Added to cart');
+                await api.post('/cart/add', { medicineId: medicine._id, quantity: qty });
                 fetchCart(); // Sync to be safe
             } catch (error) {
                 toast.error('Failed to add to cart');
@@ -86,14 +99,13 @@ export const CartProvider = ({ children }) => {
             const existingItemIndex = localCart.findIndex(item => (item.id === medicine._id || item._id === medicine._id));
 
             if (existingItemIndex >= 0) {
-                localCart[existingItemIndex].quantity += quantityToAdd;
+                localCart[existingItemIndex].quantity = Number(localCart[existingItemIndex].quantity) + qty;
             } else {
-                localCart.push({ ...medicine, _id: medicine._id, quantity: quantityToAdd });
+                localCart.push({ ...medicine, _id: medicine._id, quantity: qty });
             }
 
             localStorage.setItem('guestCart', JSON.stringify(localCart));
             setCartItems(localCart);
-            toast.success('Added to cart');
         }
     };
 
@@ -105,7 +117,6 @@ export const CartProvider = ({ children }) => {
                     return String(currentId) !== String(medicineId);
                 }));
                 await api.delete(`/cart/remove/${medicineId}`);
-                toast.success('Removed from cart');
             } catch (error) {
                 toast.error('Failed to remove item');
                 fetchCart();
@@ -118,24 +129,41 @@ export const CartProvider = ({ children }) => {
             });
             localStorage.setItem('guestCart', JSON.stringify(updatedCart));
             setCartItems(updatedCart);
-            toast.success('Removed from cart');
         }
     };
 
     const updateQuantity = async (medicineId, quantity) => {
-        if (quantity < 1) return;
+        const newQty = Number(quantity);
+        if (newQty < 1) return;
+
+        // 1. Optimistic UI update (Instant)
+        setCartItems(prev => prev.map(item => {
+            const currentId = item?.medicineId?._id || item.medicineId || item._id;
+            return String(currentId) === String(medicineId) ? { ...item, quantity: newQty } : item;
+        }));
 
         if (user) {
-            // Implement update API call if available, or remove/add logic
-            // For now, simpler to just re-fetch or assume cart/add handles updates
-            // await api.post('/cart/update', { medicineId, quantity });
+            // 2. Debounced API Update (Prevents 429 Rate Limiting)
+            if (debounceTimers.current[medicineId]) {
+                clearTimeout(debounceTimers.current[medicineId]);
+            }
+
+            debounceTimers.current[medicineId] = setTimeout(async () => {
+                try {
+                    await api.patch('/cart/update-quantity', { medicineId, quantity: newQty });
+                    delete debounceTimers.current[medicineId];
+                } catch (error) {
+                    toast.error('Failed to sync quantity with server');
+                    fetchCart(); // Revert to server state on error
+                }
+            }, 500); // 500ms delay
         } else {
+            // Guest: Instant LocalStorage
             const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
             const itemIndex = localCart.findIndex(item => (item.id === medicineId || item._id === medicineId));
             if (itemIndex > -1) {
-                localCart[itemIndex].quantity = quantity;
+                localCart[itemIndex].quantity = newQty;
                 localStorage.setItem('guestCart', JSON.stringify(localCart));
-                setCartItems(localCart);
             }
         }
     }
@@ -154,7 +182,7 @@ export const CartProvider = ({ children }) => {
         }
     }
 
-    const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    const cartCount = cartItems.reduce((acc, item) => acc + Number(item.quantity || 0), 0);
 
     return (
         <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, loading }}>

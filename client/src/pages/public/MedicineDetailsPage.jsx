@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 const MedicineDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
   const { user } = useAuth();
   const [medicine, setMedicine] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,26 @@ const MedicineDetailsPage = () => {
     load();
   }, [id]);
 
+  // Sync with global cart state
+  useEffect(() => {
+    if (medicine && cartItems.length > 0) {
+      const cartItem = cartItems.find(item => {
+        const itemId = item?.medicineId?._id || item.medicineId || item._id;
+        return String(itemId) === String(id);
+      });
+      if (cartItem) {
+        setQuantity(Number(cartItem.quantity));
+      }
+    }
+  }, [medicine, cartItems, id]);
+
   const handleAddToCart = async () => {
+    const isInCart = cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id));
+    if (isInCart) {
+      navigate('/cart');
+      return;
+    }
+
     setActionLoading(true);
     try {
       await addToCart(medicine, quantity);
@@ -260,27 +279,37 @@ const MedicineDetailsPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 bg-muted/50 p-1.5 rounded-xl border border-border w-fit">
                     <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      onClick={() => {
+                        const newQty = Math.max(1, quantity - 1);
+                        setQuantity(newQty);
+                        const isInCart = cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id));
+                        if (isInCart) updateQuantity(id, newQty);
+                      }}
                       className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="text-xl font-bold text-foreground w-12 text-center font-sans">{quantity}</span>
+                    <span className="text-xl font-bold text-foreground w-12 text-center font-sans tracking-tight">{quantity}</span>
                     <button
-                      onClick={() => setQuantity(Math.min(Number(stock) || 10, quantity + 1))}
-                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
+                      onClick={() => {
+                        const newQty = Math.min(stock > 1 ? stock : 99, quantity + 1);
+                        setQuantity(newQty);
+                        const isInCart = cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id));
+                        if (isInCart) updateQuantity(id, newQty);
+                      }}
+                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground shadow-primary/5"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button
-                      variant="outline"
+                      variant={cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id)) ? "primary" : "outline"}
                       className="h-14 flex-1 rounded-xl font-bold uppercase transition-all"
                       onClick={handleAddToCart}
                       loading={actionLoading}
                     >
-                      Add to Cart
+                      {cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id)) ? 'Go to Cart' : 'Add to Cart'}
                     </Button>
                     <Button
                       variant="primary"

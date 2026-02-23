@@ -9,7 +9,7 @@ import { MEDICINE_CATEGORIES } from "../../utils/constants";
 import { useCart } from "../../context/CartContext";
 
 const BrowseMedicinesPage = () => {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, cartCount } = useCart();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,9 +53,15 @@ const BrowseMedicinesPage = () => {
     setOnlyVerified(false);
   };
 
+  const subtotal = cartItems.reduce((acc, item) => {
+    const price = Number(item?.medicineId?.price || item?.price || 0);
+    const qty = Number(item?.quantity || 0);
+    return acc + (price * qty);
+  }, 0);
+
   return (
     <div className="min-h-screen bg-muted/30">
-      <Container className="py-8 lg:py-12">
+      <Container className="py-8 lg:py-12 max-w-[1400px]">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
@@ -206,6 +212,61 @@ const BrowseMedicinesPage = () => {
               </div>
             )}
           </main>
+
+          {/* Right Sidebar: Mini Cart (Desktop Only) */}
+          <aside className="hidden xl:block w-72 flex-shrink-0">
+            <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-24 space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">Subtotal</h2>
+                <span className="text-lg font-bold text-primary italic">₹{subtotal.toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="p-4 bg-muted/50 rounded-xl border border-border">
+                <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-4">
+                  <span>Shopping Cart</span>
+                  <span>{cartCount} units</span>
+                </div>
+
+                {cartItems.length > 0 ? (
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {cartItems.slice(0, 3).map((item) => {
+                      const name = item?.medicineId?.extractedData?.name || item?.extractedData?.name || "Medicine";
+                      const img = item?.medicineId?.image || item?.image || item?.medicineId?.images?.[0] || item?.images?.[0];
+                      return (
+                        <div key={item._id || item.medicineId} className="flex gap-3">
+                          <img src={img} alt="" className="w-10 h-10 rounded-lg object-cover bg-muted" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold text-foreground line-clamp-1">{name}</p>
+                            <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {cartItems.length > 3 && (
+                      <p className="text-[10px] text-center text-primary font-bold pt-2">+{cartItems.length - 3} more items</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-center text-muted-foreground py-4 italic">Your cart is empty</p>
+                )}
+              </div>
+
+              <Button
+                variant="primary"
+                className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 font-bold"
+                onClick={() => window.location.href = '/cart'}
+              >
+                Go to Cart
+              </Button>
+
+              <div className="flex items-center gap-2 p-3 bg-emerald-green/5 border border-emerald-green/20 rounded-xl">
+                <Shield className="w-4 h-4 text-emerald-green flex-shrink-0" />
+                <p className="text-[10px] font-medium text-emerald-green italic leading-tight">
+                  Secured by Escrow Architecture. Listed medicines are AI-Verified.
+                </p>
+              </div>
+            </div>
+          </aside>
         </div>
       </Container>
 

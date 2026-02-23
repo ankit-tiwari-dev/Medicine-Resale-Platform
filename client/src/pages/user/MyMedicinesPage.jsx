@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { getMyMedicines, updateMedicine } from "../../api/medicineApi";
+import { getMyMedicines, updateMedicine, deleteMedicine } from "../../api/medicineApi";
 import EmptyState from "../../components/common/EmptyState";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
@@ -15,14 +15,19 @@ import {
   Clock,
   AlertCircle,
   Boxes,
-  BarChart3
+  BarChart3,
+  X
 } from "lucide-react";
 import Button from "../../components/common/Button";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import toast from "react-hot-toast";
 
 const MyMedicinesPage = () => {
   const { data, loading, error, execute: refreshList } = useApiQuery(getMyMedicines, true);
   const [activeTab, setActiveTab] = useState('all');
+  const [editItem, setEditItem] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const items = data || [];
 
   const getStatusStyles = (status) => {
@@ -46,6 +51,42 @@ const MyMedicinesPage = () => {
     if (activeTab === 'all') return true;
     return i.status === activeTab;
   });
+
+  const handleDelete = async () => {
+    if (!confirmDeleteId) return;
+
+    setActionLoading(true);
+    try {
+      await deleteMedicine(confirmDeleteId);
+      toast.success("Listing removed successfully");
+      refreshList();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to delete listing");
+    } finally {
+      setActionLoading(false);
+      setConfirmDeleteId(null);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    try {
+      await updateMedicine(editItem._id, {
+        price: editItem.price,
+        stock: editItem.stock,
+        name: editItem.extractedData.name,
+        batchNumber: editItem.extractedData.batchNumber
+      });
+      toast.success("Medicine updated");
+      setEditItem(null);
+      refreshList();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Update failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
@@ -153,17 +194,34 @@ const MyMedicinesPage = () => {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-2">
-                          <Link to={`/browse/${item._id}`}>
-                            <button className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
-                              <Eye size={18} />
-                            </button>
-                          </Link>
-                          <button className="p-2.5 text-muted-foreground hover:text-soft-cyan hover:bg-soft-cyan/5 rounded-xl transition-all">
-                            <Edit size={18} />
-                          </button>
-                          <button className="p-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl transition-all">
-                            <Trash2 size={18} />
-                          </button>
+                          {(() => {
+                            const isLocked = ['sold', 'collected', 'pickup_assigned'].includes(item.status?.toLowerCase());
+                            return (
+                              <>
+                                <Link to={`/browse/${item._id}`}>
+                                  <button className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
+                                    <Eye size={18} />
+                                  </button>
+                                </Link>
+                                <button
+                                  onClick={() => !isLocked && setEditItem(JSON.parse(JSON.stringify(item)))}
+                                  disabled={isLocked}
+                                  className={`p-2.5 rounded-xl transition-all ${isLocked ? 'text-muted-foreground/30 cursor-not-allowed' : 'text-muted-foreground hover:text-soft-cyan hover:bg-soft-cyan/5'}`}
+                                  title={isLocked ? "Listing is locked (Sold/Pickup Assigned)" : "Edit Listing"}
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={() => !isLocked && setConfirmDeleteId(item._id)}
+                                  disabled={isLocked || actionLoading}
+                                  className={`p-2.5 rounded-xl transition-all ${isLocked ? 'text-muted-foreground/30 cursor-not-allowed' : 'text-muted-foreground hover:text-destructive hover:bg-destructive/5'}`}
+                                  title={isLocked ? "Listing is locked (Sold/Pickup Assigned)" : "Delete Listing"}
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </>
+                            );
+                          })()}
                         </div>
                       </td>
                     </tr>
@@ -201,14 +259,34 @@ const MyMedicinesPage = () => {
                       <p className="font-bold text-foreground">{item.stock || 0} Units</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 pt-2">
-                    <Link to={`/browse/${item._id}`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full font-bold">Inspect</Button>
-                    </Link>
-                    <Button variant="outline" size="sm" className="h-9 w-9 p-0 flex items-center justify-center">
-                      <Edit size={16} />
-                    </Button>
-                  </div>
+                  {(() => {
+                    const isLocked = ['sold', 'collected', 'pickup_assigned'].includes(item.status?.toLowerCase());
+                    return (
+                      <div className="flex gap-2 pt-2">
+                        <Link to={`/browse/${item._id}`} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full font-bold">Inspect</Button>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isLocked}
+                          className={`h-9 w-9 p-0 flex items-center justify-center ${isLocked ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          onClick={() => !isLocked && setEditItem(JSON.parse(JSON.stringify(item)))}
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={isLocked || actionLoading}
+                          className={`h-9 w-9 p-0 flex items-center justify-center ${isLocked ? 'opacity-30 cursor-not-allowed' : 'text-destructive hover:bg-destructive/5'}`}
+                          onClick={() => !isLocked && setConfirmDeleteId(item._id)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
@@ -222,6 +300,97 @@ const MyMedicinesPage = () => {
           </div>
         )}
       </Container>
+
+      {/* Quick Edit Modal */}
+      {editItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-300">
+          <div className="bg-[#0f172a] border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between px-10 py-8 border-b border-white/5">
+              <div>
+                <h3 className="text-2xl font-bold text-white font-serif tracking-tight">Quick Inventory Edit</h3>
+                <p className="text-[10px] text-primary mt-1 uppercase font-bold tracking-[0.2em]">Update clinical particulars</p>
+              </div>
+              <button
+                onClick={() => setEditItem(null)}
+                className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdate} className="p-10 space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] pl-1">List Price (₹)</label>
+                  <input
+                    type="number"
+                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-white placeholder:text-gray-600"
+                    value={editItem.price}
+                    onChange={(e) => setEditItem({ ...editItem, price: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] pl-1">Available Stock</label>
+                  <input
+                    type="number"
+                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-white placeholder:text-gray-600"
+                    value={editItem.stock}
+                    onChange={(e) => setEditItem({ ...editItem, stock: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] pl-1">Medicine Name (Brand)</label>
+                <input
+                  type="text"
+                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-white placeholder:text-gray-600"
+                  value={editItem.extractedData.name}
+                  onChange={(e) => setEditItem({
+                    ...editItem,
+                    extractedData: { ...editItem.extractedData, name: e.target.value }
+                  })}
+                  required
+                />
+              </div>
+
+              <div className="pt-6 flex gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 h-14 rounded-2xl font-bold bg-white/5 border-white/10 hover:bg-white/10 transition-all"
+                  onClick={() => setEditItem(null)}
+                >
+                  Discard
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="flex-1 h-14 rounded-2xl font-bold shadow-xl shadow-primary/20"
+                  loading={actionLoading}
+                >
+                  Commit Changes
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Hospital-Grade Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Sanitize Listing?"
+        message="This operation will permanently purge the medicine from the clinical redistribution network. This action is irreversible."
+        confirmLabel="Confirm Purge"
+        cancelLabel="Abort Mission"
+        loading={actionLoading}
+        variant="danger"
+      />
     </div>
   );
 };

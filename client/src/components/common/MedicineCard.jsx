@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, Clock, ShoppingCart } from 'lucide-react';
+import { Shield, CheckCircle, Clock, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
 import Button from './Button';
 import TrustBadge from './TrustBadge';
+import { useCart } from '../../context/CartContext';
 
 /**
  * MedicineCard.jsx
@@ -20,6 +21,15 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
         riderVerified,
         category
     } = medicine;
+    const { cartItems, updateQuantity, removeFromCart, addToCart: addItem } = useCart();
+
+    // Find if this item is in cart
+    const cartItem = cartItems.find(item => {
+        const id = item?.medicineId?._id || item.medicineId || item._id;
+        return String(id) === String(medicine._id);
+    });
+    const quantity = cartItem?.quantity || 0;
+    const isInCart = quantity > 0;
 
     const medicineName = extractedData?.name || "Premium Medicine";
     const genericName = extractedData?.genericName || "Verified Composition";
@@ -98,18 +108,50 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
 
             {/* 4. Action Row */}
             <div className="px-5 pb-5">
-                <Button
-                    variant="primary"
-                    className="w-full h-10 font-semibold"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onAddToCart(medicine);
-                    }}
-                    loading={loading}
-                    icon={ShoppingCart}
-                >
-                    Add to Cart
-                </Button>
+                {isInCart ? (
+                    <div
+                        className="flex items-center justify-between bg-muted/50 rounded-xl p-1 border border-primary/20"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => {
+                                if (quantity === 1) {
+                                    removeFromCart(medicine._id);
+                                } else {
+                                    updateQuantity(medicine._id, quantity - 1);
+                                }
+                            }}
+                            className="w-9 h-9 flex items-center justify-center rounded-lg bg-card text-foreground-muted hover:text-red-500 hover:bg-red-500/5 transition-all shadow-sm border border-border"
+                        >
+                            {quantity === 1 ? <Trash2 size={16} /> : <Minus size={16} />}
+                        </button>
+
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-tighter leading-none">In Cart</span>
+                            <span className="text-sm font-bold text-foreground">{quantity}</span>
+                        </div>
+
+                        <button
+                            onClick={() => updateQuantity(medicine._id, quantity + 1)}
+                            className="w-9 h-9 flex items-center justify-center rounded-lg bg-card text-primary hover:bg-primary/5 transition-all shadow-sm border border-border"
+                        >
+                            <Plus size={16} />
+                        </button>
+                    </div>
+                ) : (
+                    <Button
+                        variant="primary"
+                        className="w-full h-10 font-semibold"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            addItem(medicine);
+                        }}
+                        loading={loading}
+                        icon={ShoppingCart}
+                    >
+                        Add to Cart
+                    </Button>
+                )}
             </div>
         </article>
     );

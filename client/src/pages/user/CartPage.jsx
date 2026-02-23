@@ -3,10 +3,11 @@ import { Link, useNavigate, useSearchParams, useLocation } from "react-router-do
 import { createOrder } from "../../api/orderApi";
 import { AlertMessage } from "../../components/common/AlertMessage";
 import Button from "../../components/common/Button";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import EmptyState from "../../components/common/EmptyState";
 import Container from "../../components/layout/Container";
 import { extractErrorMessage } from "../../utils/errors";
-import { Trash2, Shield, Truck, ShoppingBag, ChevronRight, Info } from "lucide-react";
+import { Trash2, Shield, Truck, ShoppingBag, ChevronRight, Info, Plus, Minus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../context/CartContext";
@@ -16,8 +17,9 @@ const CartPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { cartItems: items, removeFromCart, clearCart, loading } = useCart();
+  const { cartItems: items, removeFromCart, updateQuantity, clearCart, loading } = useCart();
   const [actionLoading, setActionLoading] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Amazon-style: Auto-trigger checkout if redirected from "Buy Now"
   useEffect(() => {
@@ -32,7 +34,7 @@ const CartPage = () => {
   const subtotal = useMemo(
     () => items.reduce((sum, item) => {
       const price = Number(item?.medicineId?.price || item?.price || 0);
-      const quantity = item?.quantity || 1;
+      const quantity = Number(item?.quantity || 1);
       return sum + (price * quantity);
     }, 0),
     [items]
@@ -43,14 +45,20 @@ const CartPage = () => {
   };
 
   const handleClear = async () => {
-    if (!window.confirm("Are you sure you want to clear your entire cart?")) return;
-    await clearCart();
+    setActionLoading(true);
+    try {
+      await clearCart();
+      toast.success("Clinical cart purged successfully");
+    } finally {
+      setActionLoading(false);
+      setShowClearConfirm(false);
+    }
   };
 
   const handleCheckout = async () => {
     if (!user) {
       toast.error("Please login to proceed with checkout.");
-      navigate('/login', { state: { from: location } });
+      navigate('/login', { state: { from: { pathname: location.pathname, search: '?autocheckout=true' } } });
       return;
     }
     setActionLoading(true);
@@ -88,7 +96,7 @@ const CartPage = () => {
 
           {items.length > 0 && (
             <button
-              onClick={handleClear}
+              onClick={() => setShowClearConfirm(true)}
               className="text-[10px] font-bold text-destructive hover:underline uppercase tracking-widest flex items-center gap-2"
             >
               <Trash2 size={12} /> Clear Entire Cart
@@ -134,7 +142,26 @@ const CartPage = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground font-sans font-medium mb-2">{medicine?.extractedData?.genericName}</p>
+                      <p className="text-xs text-muted-foreground font-sans font-medium mb-4">{medicine?.extractedData?.genericName}</p>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-3 bg-muted/30 p-1 rounded-lg border border-border w-fit mb-4">
+                        <button
+                          onClick={() => updateQuantity(medicineId, Math.max(1, Number(item.quantity || 1) - 1))}
+                          className="w-8 h-8 rounded bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
+                          disabled={Number(item.quantity || 1) <= 1}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-sm font-bold text-foreground w-8 text-center">{item.quantity || 1}</span>
+                        <button
+                          onClick={() => updateQuantity(medicineId, Number(item.quantity || 1) + 1)}
+                          className="w-8 h-8 rounded bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+
                       <div className="flex items-center justify-center sm:justify-start gap-4">
                         <div className="text-lg font-bold text-primary">₹{medicine?.price?.toLocaleString() || 0}</div>
                         <div className="h-4 w-px bg-border"></div>
@@ -215,6 +242,19 @@ const CartPage = () => {
           </div>
         )}
       </Container>
+
+      {/* Hospital-Grade Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={handleClear}
+        title="Purge Clinical Selection?"
+        message="This operation will clear all medicine units from your current session. You will need to re-verify listings from the marketplace to continue."
+        confirmLabel="Confirm Purge"
+        cancelLabel="Abort Operation"
+        loading={actionLoading}
+        variant="danger"
+      />
     </div>
   );
 };
