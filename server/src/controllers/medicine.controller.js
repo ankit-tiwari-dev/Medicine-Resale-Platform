@@ -38,17 +38,27 @@ const extractMedicineDetails = async (file, forceMock = false) => {
                         content: [
                             {
                                 type: "text",
-                                text: `Extract the following details from the medicine packaging image if it is a medical product (medicine, tablets, syrup, etc.):
+                                text: `Extract technical pharmaceutical metadata from this medicine packaging image.
+                                
+                                CRITICAL OCR INSTRUCTIONS:
+                                1. EXPIRY DATE: Look for "EXPIRY DATE", "EXP", "Use by", or "Best Before". 
+                                2. YEAR AUDIT: We are in year 2026. The expiry must be 2026 or later. 
+                                3. DO NOT confuse with "MFG. DATE" which is usually earlier and in the past.
+                                4. If you see format like "02/2028" or "02/28", it means February 2028.
+                                5. OCR CLARITY: Distinguish '5' from '8' and '2' carefully.
+                                6. Return dates in strict ISO YYYY-MM-DD format (use last day of the month if only month/year is provided).
+
+                                FIELDS TO EXTRACT:
                                 1. medicine_name (Brand Name)
                                 2. generic_name
                                 3. manufacturer
                                 4. batch_no
-                                5. expiry_date (ISO format YYYY-MM-DD)
-                                6. mrp (Number)
-                                7. description (A 2-3 sentence summary for consumers including usage, dosage form, and key safety warnings found on the packaging)
-                                8. image_quality (Enum: "clear", "blurry", "unreadable" - based on how well text can be extracted)
-                                9. is_medical (Boolean - true if it's a pharmaceutical/medical product, false otherwise)
-                                10. rejection_reason (String - if is_medical is false, explain why in a professional manner, otherwise leave empty)
+                                5. expiry_date
+                                6. mrp (Number only)
+                                7. description (Professional 2-3 sentence consumer safety summary)
+                                8. image_quality ("clear" | "blurry" | "unreadable")
+                                9. is_medical (Boolean)
+                                10. rejection_reason (String, if not medical)
 
                                 Return ONLY a valid JSON object.`
                             },
@@ -114,14 +124,29 @@ const extractMedicineDetails = async (file, forceMock = false) => {
 const getExpiryValidationError = (expiryDate) => {
     if (!expiryDate) return null;
     const date = new Date(expiryDate);
-    if (Number.isNaN(date.getTime())) {
+
+    // Check for Invalid Date
+    if (isNaN(date.getTime())) {
+        console.error(`Invalid expiry date received: ${expiryDate}`);
         return "Invalid expiry date format";
     }
+
     const now = new Date();
-    const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+    // Use start of day for both to be fair and avoid small negative diffs
+    const dateClone = new Date(date);
+    dateClone.setHours(0, 0, 0, 0);
+
+    const nowClone = new Date(now);
+    nowClone.setHours(0, 0, 0, 0);
+
+    const diffTime = dateClone.getTime() - nowClone.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    console.log(`Expiry Audit: Today is ${nowClone.toISOString()}, Expiry is ${dateClone.toISOString()}, Diff: ${diffDays} days`);
+
     if (diffDays < 0) return "Medicine is expired";
     if (diffDays < MIN_EXPIRY_DAYS) {
-        return `Expiry must be at least ${MIN_EXPIRY_DAYS} days from today`;
+        return `Expiry must be at least ${MIN_EXPIRY_DAYS} days from today to ensure safe redistribution.`;
     }
     return null;
 };
@@ -138,14 +163,32 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Medicine image is required");
     }
 
-    const { description, forceMock, stock } = req.body;
+    const { description, forceMock, stock, extractedData: clientExtractedData } = req.body;
 
     const imageUrl = await uploadToCloudinary(req.file.buffer, "medicine-resale-platform", req.file.originalname);
 
-    const extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
+    let extractedData;
+    if (clientExtractedData) {
+        try {
+            extractedData = typeof clientExtractedData === 'string' ? JSON.parse(clientExtractedData) : clientExtractedData;
+            console.log("AI Extraction: Validating pre-extracted data from client.");
+            // Handle different key naming/mismatch
+            const rawExpiry = extractedData.expiryDate || extractedData.expiry_date || extractedData.expiry;
+            if (rawExpiry) {
+                extractedData.expiryDate = new Date(rawExpiry);
+            }
+        } catch (e) {
+            console.warn("Failed to parse client extraction data, falling back to AI scan.");
+        }
+    }
+
+    if (!extractedData) {
+        extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
+    }
 
     const expiryError = getExpiryValidationError(extractedData?.expiryDate);
     if (expiryError) {
+        console.error(`Upload Blocked: ${expiryError}`);
         throw new ApiError(400, expiryError);
     }
 
@@ -158,8 +201,8 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         extractedData,
         stock: Number(stock) || 1,
         description,
-        price: (extractedData.mrp || 0) * 0.8,
-        status: 'uploaded',
+        price: (extractedData.mrp || 0) * 0.7, // Mandatory 30% discount
+        status: 'pending', // Initialize as pending for AI Audit tab
         pickupLocation,
         pickupCoordinates
     });
@@ -284,13 +327,17 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
         medicine.extractedData.expiryDate = expiryDate;
     }
     if (batchNumber) medicine.extractedData.batchNumber = batchNumber;
-    if (price) medicine.price = price;
     if (description) medicine.description = description;
     if (stock !== undefined) medicine.stock = Number(stock);
 
+    // Enforce 30% discount even on technical updates
+    if (medicine.extractedData.mrp) {
+        medicine.price = (medicine.extractedData.mrp || 0) * 0.7;
+    }
+
     if (name || expiryDate || batchNumber) {
         medicine.adminVerified = false;
-        medicine.status = 'uploaded';
+        medicine.status = 'pending'; // Keep in verification gate
     }
 
     await medicine.save();

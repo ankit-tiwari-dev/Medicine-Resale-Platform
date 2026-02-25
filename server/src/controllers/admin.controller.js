@@ -10,6 +10,7 @@ import { Transaction } from "../models/transaction.model.js";
 import { WithdrawRequest } from "../models/withdraw_request.model.js";
 import { Order } from "../models/order.model.js";
 import { sendKycApprovalEmail, sendKycRejectionEmail } from "../utils/mailer.js";
+import logger from "../utils/logger.js";
 
 // ============ MEDICINE MANAGEMENT ============
 
@@ -159,8 +160,10 @@ export const getAdminStats = asyncHandler(async (req, res) => {
     const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
 
     const verificationsPending = await Rider.countDocuments({ verificationStatus: "verified_pending_admin" });
-    const sellersActive = await User.countDocuments({ role: "seller" });
+    const sellersActive = await User.countDocuments({ role: "user" }); // Users are the 'entities'
     const ridersActive = await User.countDocuments({ role: "rider" });
+    const totalOrders = await Order.countDocuments();
+    const pendingWithdrawals = await WithdrawRequest.countDocuments({ status: "pending" });
 
     // Monthly revenue for current year
     const currentYear = new Date().getFullYear();
@@ -197,6 +200,8 @@ export const getAdminStats = asyncHandler(async (req, res) => {
         verificationsPending,
         sellersActive,
         ridersActive,
+        totalOrders,
+        pendingWithdrawals,
         monthlyRevenue
     }, "Admin stats fetched successfully"));
 });
@@ -302,9 +307,10 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
     const users = await User.find(filter)
         .select("-password -otp -otpExpires -refreshToken")
-        .sort({ createdAt: -1 })
+        .sort({ _id: -1 })
         .skip(skip)
-        .limit(parseInt(limit));
+        .limit(parseInt(limit))
+        .lean();
 
     const total = await User.countDocuments(filter);
 

@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import connectDB from "./config/db.js";
 import cookieParser from 'cookie-parser';
-import morgan from "morgan";
+import logger from "./utils/logger.js";
 import {
   securityHeaders,
   sanitizeData,
@@ -24,7 +24,16 @@ app.use(cors({
 // Apply Security Guardrails
 app.use(securityHeaders);
 app.use(requestId);
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms [ID: :req[x-request-id]]'));
+
+// Custom Request Logger using Winston
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info(`${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms [ID: ${req.id || '-'}]`);
+  });
+  next();
+});
 
 app.use(express.json({ limit: "16kb" })); // Production limit
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -65,9 +74,9 @@ app.use((err, req, res, next) => {
   const data = err.data || null;
 
   if (process.env.NODE_ENV === 'test') {
-    console.error("ERROR HANDLER STACK:", err.stack);
+    logger.error("ERROR HANDLER STACK:", err.stack);
   } else {
-    console.error("ERROR HANDLER - Status:", statusCode, "Message:", message);
+    logger.error(`ERROR HANDLER - Status: ${statusCode} Message: ${message}`);
   }
 
   res.status(statusCode).json({

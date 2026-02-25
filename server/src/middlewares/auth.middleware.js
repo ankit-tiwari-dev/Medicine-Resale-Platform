@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+import logger from "../utils/logger.js";
 
 export const verifyJWT = asyncHandler(async (req, _, next) => {
     try {
@@ -22,6 +23,13 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
         req.user = user;
         next();
     } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            logger.warn(`JWT Expired: ${error.message}`);
+        } else if (error.name === "JsonWebTokenError") {
+            logger.error(`JWT Signature/Format Error: ${error.message}`);
+        } else {
+            logger.error(`Auth Error: ${error.message}`);
+        }
         throw new ApiError(401, error?.message || "Invalid access token");
     }
 });
@@ -40,7 +48,7 @@ export const verifyRole = (...roles) => {
 };
 
 export const verifyAdmin = (req, res, next) => {
-    if (req.user.role !== 'admin') {
+    if (!req.user || req.user.role !== 'admin') {
         throw new ApiError(403, "Admin access required");
     }
     next();

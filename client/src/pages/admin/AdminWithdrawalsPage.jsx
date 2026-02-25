@@ -82,20 +82,20 @@ const AdminWithdrawalsPage = () => {
         </div>
       </div>
 
-      {/* Summary Bar */}
-      <div className="grid sm:grid-cols-3 gap-4 mb-8">
+      {/* Stats Summary Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[
           { label: 'Pending Authorizations', value: items.filter(i => i.status === 'pending').length, color: 'text-muted-amber', bg: 'bg-muted-amber/10', icon: Clock },
           { label: 'Net Pending Value', value: `₹${items.filter(i => i.status === 'pending').reduce((a, b) => a + (b.amount || 0), 0).toLocaleString('en-IN')}`, color: 'text-primary', bg: 'bg-primary/10', icon: Wallet },
           { label: 'Completed Today', value: items.filter(i => i.status !== 'pending').length, color: 'text-emerald-green', bg: 'bg-emerald-green/10', icon: ShieldCheck }
         ].map((s, i) => (
-          <div key={i} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-4">
-            <div className={`w-12 h-12 ${s.bg} ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-              <s.icon size={22} />
+          <div key={i} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
+            <div className={`w-12 h-12 ${s.bg} ${s.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+              <s.icon size={24} />
             </div>
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{s.label}</p>
-              <p className="text-xl font-black text-foreground">{s.value}</p>
+              <p className="text-2xl font-black text-foreground">{s.value}</p>
             </div>
           </div>
         ))}

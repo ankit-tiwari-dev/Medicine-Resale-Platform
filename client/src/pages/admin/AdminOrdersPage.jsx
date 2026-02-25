@@ -107,6 +107,25 @@ const AdminOrdersPage = () => {
         </div>
       </div>
 
+      {/* Stats Summary Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {[
+          { label: 'Pending Dispatches', count: (query.data || []).filter(o => o.status === 'paid').length, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'Active Shipments', count: (query.data || []).filter(o => o.status === 'shipped').length, icon: Truck, color: 'text-soft-cyan', bg: 'bg-soft-cyan/10' },
+          { label: 'Completed Trades', count: (query.data || []).filter(o => o.status === 'delivered').length, icon: CheckCircle, color: 'text-emerald-green', bg: 'bg-emerald-green/10' }
+        ].map((s, i) => (
+          <div key={i} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
+            <div className={`w-12 h-12 ${s.bg} ${s.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+              <s.icon size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{s.label}</p>
+              <p className="text-2xl font-black text-foreground">{s.count}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {query.loading && orders.length === 0 ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => <div key={i} className="h-28 bg-card rounded-[2rem] animate-pulse border border-border" />)}
@@ -118,43 +137,50 @@ const AdminOrdersPage = () => {
       ) : (
         <div className="bg-card rounded-[2.5rem] border border-border shadow-md overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
+            <table className="w-full text-left border-collapse min-w-[1000px]">
               <thead>
                 <tr className="bg-muted/30 border-b border-border">
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Procurement ID</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Current State</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Registered</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">State Override</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Procurement Manifest</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Current State</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Synchronization</th>
+                  <th className="px-10 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">State Override</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {orders.map((order) => (
                   <tr key={order._id} className="hover:bg-muted/10 transition-colors group">
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex flex-col">
-                        <span className="font-mono text-xs font-black text-foreground">#{order._id?.slice(-10).toUpperCase()}</span>
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 italic">Clinical Lot</span>
+                        <span className="font-mono text-xs font-black text-foreground group-hover:text-primary transition-colors">
+                          ORD-{order._id?.slice(-8).toUpperCase()}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1 italic">
+                          Institutional Lot Target
+                        </span>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-widest ${getStatusStyle(order.status)}`}>
+                    <td className="px-10 py-6">
+                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest ${getStatusStyle(order.status)}`}>
                         {order.status || 'PENDING'}
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-xs font-bold text-muted-foreground italic">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
-                      </span>
+                    <td className="px-10 py-6">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-foreground uppercase tracking-widest italic flex items-center gap-1.5">
+                          <Clock size={12} className="text-primary" />
+                          {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex justify-end">
                         <select
-                          className="h-10 px-4 rounded-xl border-2 border-border bg-muted/30 text-[10px] font-black uppercase tracking-widest outline-none focus:border-primary transition-all cursor-pointer"
+                          className="h-12 px-6 rounded-2xl border-2 border-border bg-card text-[10px] font-black uppercase tracking-widest outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all cursor-pointer shadow-sm"
                           defaultValue=""
                           onChange={(e) => onStatusChange(order._id, e.target.value)}
                           disabled={updatingId === order._id}
                         >
-                          <option value="" disabled>Override State</option>
+                          <option value="" disabled>Lifecycle Override</option>
                           {STATUS_OPTIONS.map(o => (
                             <option key={o.value} value={o.value}>{o.label}</option>
                           ))}

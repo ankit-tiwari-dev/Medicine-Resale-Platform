@@ -38,9 +38,9 @@ export default function Button({
             {...props}
         >
             {loading ? (
-                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span className={`${children ? 'mr-2' : ''} h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent`} />
             ) : Icon ? (
-                <span className="mr-2">
+                <span className={children ? 'mr-2' : ''}>
                     <Icon size={size === "sm" ? 14 : size === "lg" ? 20 : 18} />
                 </span>
             ) : null}

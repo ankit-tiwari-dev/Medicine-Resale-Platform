@@ -66,13 +66,39 @@ const AdminRidersKycPage = () => {
               <input
                 type="text"
                 placeholder="Search Partner Name..."
-                className="w-full h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest"
+                className="w-full h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <Button
+              variant="outline"
+              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center transition-all hover:bg-primary/5"
+              onClick={() => query.execute()}
+              loading={query.loading}
+              icon={Activity}
+            />
           </div>
         </div>
+      </div>
+
+      {/* Stats Summary Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {[
+          { id: 'total', label: 'Total Applications', count: riders.length, icon: UserCheck, color: 'text-primary', bg: 'bg-primary/10' },
+          { id: 'pending', label: 'Pending Audits', count: riders.filter(r => r.verificationStatus === 'pending').length, icon: Clock, color: 'text-muted-amber', bg: 'bg-muted-amber/10' },
+          { id: 'verified', label: 'Certified Partners', count: riders.filter(r => r.verificationStatus === 'approved').length, icon: ShieldCheck, color: 'text-emerald-green', bg: 'bg-emerald-green/10' }
+        ].map(stat => (
+          <div key={stat.id} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
+            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+              <stat.icon size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+              <p className="text-2xl font-black text-foreground">{stat.count}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       {query.loading && riders.length === 0 ? (

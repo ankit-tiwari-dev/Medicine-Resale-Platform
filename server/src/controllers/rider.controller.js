@@ -62,6 +62,12 @@ export const confirmCollection = asyncHandler(async (req, res) => {
 });
 
 export const getRiderStats = asyncHandler(async (req, res) => {
+    const rider = await Rider.findOne({ userId: req.user._id });
+
+    if (!rider) {
+        throw new ApiError(404, "Rider profile not found");
+    }
+
     const totalCollected = await Medicine.countDocuments({
         riderId: req.user._id,
         status: 'collected'
@@ -73,7 +79,32 @@ export const getRiderStats = asyncHandler(async (req, res) => {
     });
 
     return res.status(200).json(
-        new ApiResponse(200, { totalCollected, pendingPickups }, "Rider stats fetched successfully")
+        new ApiResponse(200, {
+            totalCollected,
+            pendingPickups,
+            earnings: rider.earnings,
+            isActive: rider.isActive,
+            trustScore: rider.verificationScores?.overall || 0,
+            verificationStatus: rider.verificationStatus
+        }, "Rider stats fetched successfully")
+    );
+});
+
+export const updateDutyStatus = asyncHandler(async (req, res) => {
+    const { isActive } = req.body;
+
+    const rider = await Rider.findOneAndUpdate(
+        { userId: req.user._id },
+        { $set: { isActive } },
+        { new: true }
+    );
+
+    if (!rider) {
+        throw new ApiError(404, "Rider profile not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { isActive: rider.isActive }, "Duty status updated successfully")
     );
 });
 

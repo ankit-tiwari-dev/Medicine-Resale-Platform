@@ -9,22 +9,9 @@ export const securityHeaders = helmet();
 
 // 2. NoSQL Injection Prevention
 export const sanitizeData = (req, res, next) => {
-    mongoSanitize.sanitize(req.body);
-    mongoSanitize.sanitize(req.params);
-    if (req.query) {
-        // Create a deep copy to sanitize
-        const queryCopy = JSON.parse(JSON.stringify(req.query));
-        mongoSanitize.sanitize(queryCopy);
-
-        // Sync back only the values to avoid replacing the possibly read-only req.query object
-        Object.keys(req.query).forEach(key => {
-            if (queryCopy[key] === undefined) {
-                delete req.query[key];
-            } else {
-                req.query[key] = queryCopy[key];
-            }
-        });
-    }
+    if (req.body) mongoSanitize.sanitize(req.body);
+    if (req.params) mongoSanitize.sanitize(req.params);
+    if (req.query) mongoSanitize.sanitize(req.query);
     next();
 };
 

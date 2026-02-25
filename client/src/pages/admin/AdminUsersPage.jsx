@@ -92,25 +92,24 @@ const AdminUsersPage = () => {
             </div>
             <Button
               variant="outline"
-              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center"
+              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center transition-all hover:bg-primary/5"
               onClick={() => query.execute()}
               loading={query.loading}
-            >
-              <RefreshCw size={18} />
-            </Button>
+              icon={RefreshCw}
+            />
           </div>
         </div>
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {['user', 'rider', 'admin'].map(role => {
           const cfg = ROLE_CONFIG[role];
           const count = (query.data?.users || []).filter(u => u.role === role).length;
           return (
-            <div key={role} className={`bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-4`}>
-              <div className={`w-12 h-12 ${cfg.bg} ${cfg.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <cfg.icon size={22} />
+            <div key={role} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
+              <div className={`w-12 h-12 ${cfg.bg} ${cfg.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                <cfg.icon size={24} />
               </div>
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{cfg.label}s</p>
@@ -129,13 +128,13 @@ const AdminUsersPage = () => {
       ) : (
         <div className="bg-card rounded-[2.5rem] border border-border shadow-md overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
+            <table className="w-full text-left border-collapse min-w-[1000px]">
               <thead>
                 <tr className="bg-muted/30 border-b border-border">
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Identity</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Contact Node</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Privilege Level</th>
-                  <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Governance Controls</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Identity Manifest</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Communication Node</th>
+                  <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Privilege Level</th>
+                  <th className="px-10 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Governance Controls</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -144,67 +143,66 @@ const AdminUsersPage = () => {
                   const isDelete = confirmDelete === user._id;
                   return (
                     <tr key={user._id} className="hover:bg-muted/10 transition-colors group">
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 ${roleCfg.bg} ${roleCfg.color} rounded-xl flex items-center justify-center text-sm font-black flex-shrink-0`}>
+                      <td className="px-10 py-6">
+                        <div className="flex items-center gap-6">
+                          <div className={`w-14 h-14 ${roleCfg.bg} ${roleCfg.color} rounded-2xl flex items-center justify-center text-lg font-black flex-shrink-0 border ${roleCfg.border} shadow-sm`}>
                             {user.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-foreground">{user.name}</p>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
-                              ID #{user._id?.slice(-6)}
+                            <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{user.name}</p>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
+                              Network ID: {user._id?.slice(-8)}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-5">
-                        <p className="text-xs font-bold text-muted-foreground italic">{user.email}</p>
+                      <td className="px-10 py-6">
+                        <p className="text-xs font-bold text-muted-foreground font-sans lowercase opacity-80">{user.email}</p>
                       </td>
-                      <td className="px-8 py-5">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-widest ${roleCfg.bg} ${roleCfg.color} ${roleCfg.border}`}>
+                      <td className="px-10 py-6">
+                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest ${roleCfg.bg} ${roleCfg.color} ${roleCfg.border}`}>
                           <roleCfg.icon size={10} />
                           {roleCfg.label}
                         </div>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-10 py-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {['user', 'rider', 'admin'].map(role => (
                             <Button
                               key={role}
                               variant="outline"
-                              className={`h-9 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${user.role === role ? 'bg-primary text-white border-primary' : 'hover:border-primary/30'}`}
+                              className={`h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${user.role === role ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'hover:border-primary/30 hover:bg-primary/5'}`}
                               onClick={() => updateRole(user._id, role)}
                               disabled={user.role === role}
                             >
                               {role}
                             </Button>
                           ))}
-                          <div className="w-px h-6 bg-border mx-1" />
+                          <div className="w-px h-6 bg-border mx-2" />
                           {!isDelete ? (
                             <Button
                               variant="outline"
-                              className="h-9 w-9 p-0 rounded-xl text-red-500 hover:bg-red-500 hover:text-white border-2 transition-all"
+                              className="h-10 w-10 p-0 rounded-xl text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/30 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100"
                               onClick={() => setConfirmDelete(user._id)}
                               title="Expunge Identity"
-                            >
-                              <Trash2 size={16} />
-                            </Button>
+                              icon={Trash2}
+                            />
                           ) : (
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-red-500 italic">Confirm?</span>
+                            <div className="flex items-center gap-3 animate-in slide-in-from-right-2 duration-300">
+                              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Confirm?</span>
                               <Button
                                 variant="outline"
-                                className="h-9 px-3 rounded-xl border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black"
+                                className="h-10 px-4 rounded-xl border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest"
                                 onClick={() => removeUser(user._id)}
                               >
-                                Yes
+                                Commit
                               </Button>
                               <Button
                                 variant="outline"
-                                className="h-9 px-3 rounded-xl border-2 text-[10px] font-black"
+                                className="h-10 px-4 rounded-xl border-2 text-[10px] font-black uppercase tracking-widest hover:bg-muted"
                                 onClick={() => setConfirmDelete(null)}
                               >
-                                No
+                                Abort
                               </Button>
                             </div>
                           )}

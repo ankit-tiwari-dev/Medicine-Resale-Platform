@@ -7,7 +7,9 @@ import {
   Clock,
   Database,
   ArrowRight,
-  Terminal
+  Terminal,
+  Search,
+  ExternalLink
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import EmptyState from "../../components/common/EmptyState";
@@ -26,31 +28,33 @@ const AdminLogsPage = () => {
   return (
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="mb-10">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" />
-          Admin Terminal
+      <div className="mb-12">
+        <Link to="/admin" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Admin Terminal / System Node
         </Link>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
               <Activity size={12} />
-              System Audit Trail
+              Immutable Audit Trail
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
               Operational <span className="text-primary">Logs</span>
             </h1>
-            <p className="text-muted-foreground mt-2 font-sans font-medium">
-              Immutable chronological record of system-wide administrative interventions.
+            <p className="text-muted-foreground mt-2 font-sans font-medium max-w-2xl">
+              Chronological ledger of system-wide administrative interventions and core protocol shifts.
             </p>
           </div>
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <input
-              type="text"
-              placeholder="Search by Action or Target..."
-              className="h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest w-72"
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+              <input
+                type="text"
+                placeholder="Search Action/Target..."
+                className="h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest w-72 shadow-sm"
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -1,17 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
-  ClipboardCheck,
   Search,
   ShieldCheck,
   ShieldAlert,
-  AlertTriangle,
   ExternalLink,
-  Check,
-  X,
+  CheckCircle2,
+  XCircle,
   Clock,
   ChevronLeft,
   Filter,
-  ArrowRight,
   FlaskConical
 } from "lucide-react";
 import { getAdminMedicines, verifyAdminMedicine } from "../../api/adminApi";
@@ -21,10 +18,23 @@ import { extractErrorMessage } from "../../utils/errors";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
+const TABS = [
+  { id: 'pending', label: 'Pending Audits', icon: Clock, color: 'text-primary' },
+  { id: 'verified', label: 'Verified Assets', icon: CheckCircle2, color: 'text-emerald-green' },
+  { id: 'rejected', label: 'Rejected Lots', icon: XCircle, color: 'text-red-500' },
+  { id: 'all', label: 'Archive View', icon: ShieldCheck, color: 'text-muted-foreground' }
+];
+
 const AdminMedicinesReviewPage = () => {
-  const fetcher = useCallback(() => getAdminMedicines({ status: "pending" }), []);
+  const [activeTab, setActiveTab] = useState('pending');
+  const fetcher = useCallback(() => getAdminMedicines({ status: activeTab === 'all' ? undefined : activeTab }), [activeTab]);
   const query = useApiQuery(fetcher, true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Re-fetch when tab changes
+  useEffect(() => {
+    query.execute();
+  }, [activeTab, query.execute]);
 
   const submitAction = async (medicineId, action) => {
     try {
@@ -38,14 +48,14 @@ const AdminMedicinesReviewPage = () => {
 
   const filteredData = (query.data || []).filter(item =>
     item?.extractedData?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item?.seller?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item?.sellerId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item?.extractedData?.genericName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="mb-10 lg:mb-12">
+      <div className="mb-8">
         <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
           <ChevronLeft className="w-4 h-4" />
           Admin Terminal
@@ -76,27 +86,41 @@ const AdminMedicinesReviewPage = () => {
             </div>
             <Button
               variant="outline"
-              className="h-14 px-6 rounded-2xl border-2 font-bold flex items-center gap-2 w-full sm:w-auto"
+              className="h-14 px-6 rounded-2xl border-2 font-bold flex items-center gap-2 w-full sm:w-auto hover:bg-primary/5"
               onClick={() => query.execute()}
               loading={query.loading}
+              icon={Activity}
             >
-              <Activity size={18} /> Refresh Queue
+              Refresh Queue
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Queue Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-card p-6 rounded-[1.5rem] border border-border shadow-sm flex items-center gap-6">
-          <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center flex-shrink-0">
-            <Clock size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Queue</p>
-            <p className="text-2xl font-black text-foreground">{filteredData.length}</p>
-          </div>
-        </div>
+      {/* Audit Tabs */}
+      <div className="flex flex-wrap items-center gap-2 mb-8 bg-card p-2 rounded-[2rem] border border-border shadow-sm">
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isActive
+                ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+            >
+              <tab.icon size={14} className={isActive ? 'text-white' : tab.color} />
+              {tab.label}
+              {query.data && (
+                <span className={`ml-2 px-1.5 py-0.5 rounded-md text-[9px] ${isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                  }`}>
+                  {(query.data || []).filter(i => (tab.id === 'all' ? true : i.status === tab.id)).length}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Audit Surface */}
@@ -105,11 +129,11 @@ const AdminMedicinesReviewPage = () => {
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Medical Unit Manifest</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Provider Node</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">AI Confidence</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Clinical Expiry</th>
-                <th className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Governance Actions</th>
+                <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Medical Unit Manifest</th>
+                <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Provider Node</th>
+                <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center">Audit Status</th>
+                <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Clinical Expiry</th>
+                <th className="px-10 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Governance Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -122,74 +146,85 @@ const AdminMedicinesReviewPage = () => {
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-8 py-20 text-center text-sm text-muted-foreground italic font-medium">
-                    The verification queue is currently clear. No pending forensic audits.
+                    The {activeTab} queue is currently clear. No pending forensic audits.
                   </td>
                 </tr>
               ) : filteredData.map((item) => {
-                const aiScore = item?.extractedData?.confidenceScore || 0;
-                const scoreColor = aiScore > 80 ? "text-emerald-green border-emerald-green/20 bg-emerald-green/5" : "text-muted-amber border-muted-amber/20 bg-muted-amber/5";
+                const status = item?.status?.toLowerCase();
+
+                const statusCfg = {
+                  pending: { label: 'Under AI Audit', color: 'text-primary bg-primary/5 border-primary/20', icon: Clock },
+                  verified: { label: 'Verified Safe', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20', icon: ShieldCheck },
+                  rejected: { label: 'Audit Failed', color: 'text-red-500 bg-red-500/5 border-red-500/20', icon: ShieldAlert },
+                  listed: { label: 'Active Listing', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20', icon: CheckCircle2 },
+                  uploaded: { label: 'Pending AI Scan', color: 'text-muted-amber bg-muted-amber/5 border-muted-amber/20', icon: Clock }
+                }[status] || { label: status, color: 'text-muted-foreground bg-muted/5 border-border', icon: Filter };
 
                 return (
                   <tr key={item._id} className="hover:bg-muted/10 transition-colors group">
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex flex-col">
                         <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">
                           {item?.extractedData?.name || "Unidentified Asset"}
                         </span>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight mt-1">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                           {item?.extractedData?.genericName || "Composition Review Required"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-foreground">{item?.seller?.name || "Network Provider"}</span>
+                        <span className="text-sm font-bold text-foreground">{item?.sellerId?.name || "Network Provider"}</span>
                         <div className="flex items-center gap-1.5 mt-1">
                           <ShieldCheck size={10} className="text-emerald-green" />
-                          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Verified Level-1</span>
+                          <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Verified Level-1</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex justify-center">
-                        <div className={`px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${scoreColor}`}>
-                          <Activity size={10} />
-                          {aiScore}%
+                        <div className={`px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 ${statusCfg.color}`}>
+                          <statusCfg.icon size={10} />
+                          {statusCfg.label}
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-foreground uppercase tracking-widest mb-1 italic">
+                        <span className="text-xs font-black text-foreground uppercase tracking-widest mb-1.5 italic">
                           {item?.extractedData?.expiryDate?.slice(0, 10) || "DATE_MISSING"}
                         </span>
-                        <div className="h-1 w-16 bg-muted rounded-full">
-                          <div className="h-1 bg-emerald-green rounded-full" style={{ width: '80%' }} />
+                        <div className="h-1 w-20 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-green rounded-full" style={{ width: '85%' }} />
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex items-center justify-end gap-3">
+                        {status === 'pending' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={CheckCircle2}
+                              className="h-10 w-10 p-0 text-emerald-green hover:bg-emerald-green hover:text-white border-2 border-emerald-green/30 rounded-xl transition-all"
+                              onClick={() => submitAction(item._id, "approve")}
+                              title="Authorize Network Listing"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={XCircle}
+                              className="h-10 w-10 p-0 text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/30 rounded-xl transition-all"
+                              onClick={() => submitAction(item._id, "reject")}
+                              title="Declare Malign Listing"
+                            />
+                            <div className="w-px h-6 bg-border mx-1" />
+                          </>
+                        )}
                         <Button
                           variant="outline"
-                          className="h-10 w-10 p-0 text-emerald-green hover:bg-emerald-green hover:text-white border-2 rounded-xl transition-all"
-                          onClick={() => submitAction(item._id, "approve")}
-                          title="Authorize Network Listing"
-                        >
-                          <Check size={18} />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="h-10 w-10 p-0 text-red-500 hover:bg-red-500 hover:text-white border-2 rounded-xl transition-all"
-                          onClick={() => submitAction(item._id, "reject")}
-                          title="Declare Malign Listing"
-                        >
-                          <X size={18} />
-                        </Button>
-                        <div className="w-px h-6 bg-border mx-1" />
-                        <Button
-                          variant="outline"
-                          className="h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] border-2 hover:bg-primary hover:text-white transition-all group/btn"
+                          className="h-10 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-white transition-all group/btn"
                           onClick={() => window.open(`/browse/${item._id}`, '_blank')}
                         >
                           Evidence Vault <ExternalLink size={12} className="ml-2" />
@@ -210,7 +245,7 @@ const AdminMedicinesReviewPage = () => {
             Archival Audit Trail Protection Active
           </div>
           <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-            {filteredData.length} records in current forensic window
+            {filteredData.length} active records in forensic focus
           </p>
         </div>
       </div>

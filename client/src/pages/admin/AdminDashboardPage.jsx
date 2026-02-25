@@ -26,140 +26,140 @@ export default function AdminDashboardPage() {
     activeMedicines: statsData?.totalMedicines ?? 0,
     totalRevenue: statsData?.totalRevenue ?? 0,
     verificationsPending: statsData?.verificationsPending ?? 0,
-    sellersActive: statsData?.sellersActive ?? 0,
-    ridersActive: statsData?.ridersActive ?? 0,
+    totalOrders: statsData?.totalOrders ?? 0,
+    pendingWithdrawals: statsData?.pendingWithdrawals ?? 0,
   };
 
   return (
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2 font-serif">
-          Admin Dashboard
-        </h1>
-        <p className="text-muted-foreground">Platform overview and management</p>
+      <div className="mb-10">
+        <div className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground uppercase tracking-widest mb-6 border-b-2 border-primary/20 pb-1">
+          Admin Terminal
+        </div>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+              <Terminal size={12} />
+              Central Command Infrastructure
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
+              Command <span className="text-primary">Center</span>
+            </h1>
+            <p className="text-muted-foreground mt-2 font-sans font-medium">
+              Real-time synchronization of medical assets, network participants, and logistics orchestration.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid - All cards are clickable */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-        <Link to="/admin/users" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-md transition-all group">
+        <Link to="/admin/users" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
               <Users className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{stats.totalUsers.toLocaleString()}</div>
-          <div className="text-sm text-muted-foreground">Total Users</div>
+          <div className="text-2xl font-black text-foreground mb-1">{stats.totalUsers.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Identity Registry</div>
         </Link>
 
-        <Link to="/admin/medicines-review" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-emerald-green/30 hover:shadow-md transition-all group">
+        <Link to="/admin/medicines-review" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-emerald-green/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-green/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
+            <div className="w-12 h-12 bg-emerald-green/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
               <Package className="w-6 h-6 text-emerald-green" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{stats.activeMedicines.toLocaleString()}</div>
-          <div className="text-sm text-muted-foreground">Active Medicines</div>
+          <div className="text-2xl font-black text-foreground mb-1">{stats.activeMedicines.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pharmacological Assets</div>
         </Link>
 
-        <Link to="/admin/stats" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-md transition-all group">
+        <Link to="/admin/stats" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-soft-cyan/10 rounded-lg flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
+            <div className="w-12 h-12 bg-soft-cyan/10 rounded-2xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
               <DollarSign className="w-6 h-6 text-soft-cyan" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">₹{(stats.totalRevenue / 1000).toFixed(0)}K</div>
-          <div className="text-sm text-muted-foreground">Total Revenue</div>
+          <div className="text-2xl font-black text-foreground mb-1">₹{(stats.totalRevenue / 1000).toFixed(0)}K</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Capital Throughput</div>
         </Link>
 
-        <Link to="/admin/riders-kyc" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-muted-amber/30 hover:shadow-md transition-all group">
+        <Link to="/admin/riders-kyc" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-muted-amber/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-muted-amber/10 rounded-lg flex items-center justify-center group-hover:bg-muted-amber/20 transition-colors">
+            <div className="w-12 h-12 bg-muted-amber/10 rounded-2xl flex items-center justify-center group-hover:bg-muted-amber/20 transition-colors">
               <Shield className="w-6 h-6 text-muted-amber" />
             </div>
             <Badge variant="expiring">{stats.verificationsPending}</Badge>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">Pending</div>
-          <div className="text-sm text-muted-foreground">Verifications</div>
+          <div className="text-2xl font-black text-foreground mb-1">Pending</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Audit Backlog</div>
         </Link>
 
-        <Link to="/admin/users" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-md transition-all group">
+        <Link to="/admin/orders" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <UserCheck className="w-6 h-6 text-primary" />
+            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <TrendingUp className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{stats.sellersActive}</div>
-          <div className="text-sm text-muted-foreground">Active Users</div>
+          <div className="text-2xl font-black text-foreground mb-1">{stats.totalOrders.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Order Traffic</div>
         </Link>
 
-        <Link to="/admin/riders-kyc" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-md transition-all group">
+        <Link to="/admin/withdrawals" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-soft-cyan/10 rounded-lg flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
+            <div className="w-12 h-12 bg-soft-cyan/10 rounded-2xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
               <Activity className="w-6 h-6 text-soft-cyan" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-foreground mb-1">{stats.ridersActive}</div>
-          <div className="text-sm text-muted-foreground">Active Riders</div>
+          <div className="text-2xl font-black text-foreground mb-1">{stats.pendingWithdrawals.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Withdrawal Backlog</div>
         </Link>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <h2 className="text-lg font-bold text-foreground mb-4">Quick Actions</h2>
-            <div className="space-y-2">
+          <div className="bg-card rounded-[2rem] p-8 shadow-md border border-border">
+            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 pl-2 border-l-2 border-primary/30">Strategic Controls</h2>
+            <div className="space-y-3">
               <Link
                 to="/admin/riders-kyc"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
+                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
               >
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <UserCheck className="w-5 h-5 text-primary" />
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <UserCheck className="w-6 h-6 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">Rider KYC</div>
-                  <div className="text-xs text-muted-foreground">Review new riders</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-black text-foreground text-[10px] uppercase tracking-widest">Rider KYC</div>
+                  <div className="text-[11px] text-muted-foreground font-medium truncate">Authorized Identity Audit</div>
                 </div>
                 <Badge variant={stats.verificationsPending > 0 ? "pending" : "certified"}>{stats.verificationsPending}</Badge>
               </Link>
 
               <Link
                 to="/admin/medicines-review"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
+                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
               >
-                <div className="w-10 h-10 bg-soft-cyan/10 rounded-lg flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
-                  <FileCheck className="w-5 h-5 text-soft-cyan" />
+                <div className="w-12 h-12 bg-soft-cyan/10 rounded-xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
+                  <FileCheck className="w-6 h-6 text-soft-cyan" />
                 </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">AI Scan Review</div>
-                  <div className="text-xs text-muted-foreground">Verify AI results</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-black text-foreground text-[10px] uppercase tracking-widest">Asset Review</div>
+                  <div className="text-[11px] text-muted-foreground font-medium truncate">Pharmaceutical Verification</div>
                 </div>
               </Link>
 
               <Link
                 to="/admin/users"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
+                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
               >
-                <div className="w-10 h-10 bg-emerald-green/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
-                  <Users className="w-5 h-5 text-emerald-green" />
+                <div className="w-12 h-12 bg-emerald-green/10 rounded-xl flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
+                  <Users className="w-6 h-6 text-emerald-green" />
                 </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">User Management</div>
-                  <div className="text-xs text-muted-foreground">Manage all users</div>
-                </div>
-              </Link>
-
-              <Link
-                to="/admin/assign-rider"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
-              >
-                <div className="w-10 h-10 bg-muted-amber/10 rounded-lg flex items-center justify-center group-hover:bg-muted-amber/20 transition-colors">
-                  <Package className="w-5 h-5 text-muted-amber" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">Assign Order Logistics</div>
-                  <div className="text-xs text-muted-foreground">Orchestrate riders</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-black text-foreground text-[10px] uppercase tracking-widest">User Registry</div>
+                  <div className="text-[11px] text-muted-foreground font-medium truncate">Network Participant Control</div>
                 </div>
               </Link>
             </div>

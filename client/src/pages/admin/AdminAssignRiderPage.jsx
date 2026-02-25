@@ -50,51 +50,74 @@ const AdminAssignRiderPage = () => {
   return (
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="mb-10">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" />
-          Admin Terminal
+      <div className="mb-12">
+        <Link to="/admin" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Admin Terminal / Logistics Node
         </Link>
-        <div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-            <Truck size={12} />
-            Logistics Orchestration
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+              <Truck size={12} />
+              Fleet Orchestration
+            </div>
+            <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
+              Assign <span className="text-primary">Distribution Task</span>
+            </h1>
+            <p className="text-muted-foreground mt-2 font-sans font-medium max-w-2xl">
+              Binding certified logistics partners to validated medical assets for secure network handover.
+            </p>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
-            Assign <span className="text-primary">Distribution Task</span>
-          </h1>
-          <p className="text-muted-foreground mt-2 font-sans font-medium">
-            Bind a certified logistics partner to a validated medical asset lot.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="px-5 py-3 bg-muted/30 border border-border rounded-2xl flex items-center gap-3">
+              <Activity size={14} className="text-primary animate-pulse" />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none">Fleet Status</span>
+                <span className="text-xs font-bold text-foreground tabular-nums">{riders.length} Active Nodes</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Form */}
-        <div className="lg:col-span-2">
-          <form onSubmit={onSubmit} className="bg-card rounded-[2.5rem] p-8 lg:p-12 border border-border shadow-md space-y-8">
-            <FormInput
-              id="assign-medicine-id"
-              label="Medical Lot Reference ID"
-              value={form.medicineId}
-              onChange={(e) => setForm(p => ({ ...p, medicineId: e.target.value }))}
-              placeholder="e.g. 60a7..."
-              required
-            />
+        <div className="lg:col-span-2 space-y-8">
+          <form onSubmit={onSubmit} className="bg-card rounded-[2.5rem] p-8 lg:p-12 border border-border shadow-md space-y-10">
+            <div className="space-y-4">
+              <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] pl-1">
+                Asset Identity Manifest
+              </label>
+              <FormInput
+                id="assign-medicine-id"
+                label=""
+                value={form.medicineId}
+                onChange={(e) => setForm(p => ({ ...p, medicineId: e.target.value }))}
+                placeholder="Enter 24-char ObjectID Reference..."
+                required
+                className="h-16 text-sm font-mono tracking-widest uppercase border-2 focus:ring-primary/5"
+              />
+            </div>
 
-            <div className="space-y-3">
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">
-                Select Certified Partner
+            <div className="space-y-4">
+              <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] pl-1">
+                Target Logistics Node
               </label>
 
               {ridersQuery.loading ? (
-                <div className="h-16 bg-muted rounded-2xl animate-pulse" />
+                <div className="grid grid-cols-1 gap-4">
+                  {[1, 2, 3].map(i => <div key={i} className="h-20 bg-muted rounded-2xl animate-pulse" />)}
+                </div>
               ) : riders.length === 0 ? (
-                <div className="h-16 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border text-xs text-muted-foreground font-medium italic">
-                  No active fleet partners. Verify KYC approvals.
+                <div className="h-40 flex flex-col items-center justify-center bg-muted/5 rounded-[2rem] border border-dashed border-border text-center p-8">
+                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4 opacity-30">
+                    <UserCheck size={24} />
+                  </div>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">No active fleet partners available</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Verify KYC status in the Onboarding Gate</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-4">
                   {riders.map((rider) => {
                     const rid = rider?.userId?._id || rider.userId;
                     const isSelected = form.riderId === rid;
@@ -103,22 +126,26 @@ const AdminAssignRiderPage = () => {
                         key={rider._id}
                         type="button"
                         onClick={() => setForm(p => ({ ...p, riderId: rid }))}
-                        className={`w-full p-5 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${isSelected
-                          ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
-                          : 'border-border bg-muted/10 hover:border-primary/30'
+                        className={`w-full p-6 rounded-2xl border-2 text-left flex items-center gap-5 transition-all group ${isSelected
+                          ? 'border-primary bg-primary/5 shadow-xl shadow-primary/5 scale-[1.02]'
+                          : 'border-border bg-card hover:border-primary/30'
                           }`}
                       >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black transition-all ${isSelected ? 'bg-primary text-white' : 'bg-card border border-border text-foreground shadow-sm'}`}>
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black transition-all ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-muted/50 border border-border text-foreground'}`}>
                           {rider?.userId?.name?.charAt(0) || "R"}
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-bold text-foreground">{rider?.userId?.name || "Rider"}</p>
-                          <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{rider?.userId?.name || "Rider"}</p>
+                          <div className="flex items-center gap-2 mt-1">
                             <ShieldCheck size={10} className="text-emerald-green" />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Certified Active</span>
+                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Certified Active Node</span>
                           </div>
                         </div>
-                        {isSelected && <CheckCircle size={20} className="text-primary flex-shrink-0" />}
+                        {isSelected && (
+                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20 animate-in zoom-in-50">
+                            <CheckCircle size={16} className="text-white" />
+                          </div>
+                        )}
                       </button>
                     );
                   })}
@@ -126,25 +153,27 @@ const AdminAssignRiderPage = () => {
               )}
             </div>
 
-            <div className="pt-6 border-t border-border border-dashed flex items-center gap-6">
+            <div className="pt-10 border-t border-border border-dashed space-y-6">
               <Button
                 type="submit"
                 variant="primary"
-                className="flex-1 h-16 rounded-2xl font-black text-lg shadow-2xl shadow-primary/20 flex gap-3 items-center justify-center group"
+                className="w-full h-18 rounded-2xl font-black text-lg shadow-2xl shadow-primary/20 flex gap-4 items-center justify-center group py-6"
                 loading={loading}
                 disabled={!form.medicineId || !form.riderId}
               >
-                EXECUTE ASSIGNMENT
+                AUTHORIZE DEPLOYMENT
                 <ArrowRight className="group-hover:translate-x-2 transition-transform" />
               </Button>
-            </div>
 
-            {success && (
-              <div className="p-5 bg-emerald-green/10 border border-emerald-green/20 rounded-2xl flex items-center gap-4 text-sm font-bold text-emerald-green">
-                <CheckCircle size={20} />
-                Lot-to-Rider binding recorded in logistics ledger.
-              </div>
-            )}
+              {success && (
+                <div className="p-6 bg-emerald-green/5 border-2 border-emerald-green/20 rounded-2xl flex items-center gap-4 text-xs font-black text-emerald-green uppercase tracking-widest animate-in slide-in-from-top-4">
+                  <div className="w-10 h-10 bg-emerald-green text-white rounded-xl flex items-center justify-center">
+                    <CheckCircle size={20} />
+                  </div>
+                  Protocol: Asset-Rider handshake recorded in logistics ledger.
+                </div>
+              )}
+            </div>
           </form>
         </div>
 

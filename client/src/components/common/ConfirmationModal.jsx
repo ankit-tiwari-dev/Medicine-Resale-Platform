@@ -48,26 +48,26 @@ const ConfirmationModal = ({
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-300">
-            <div className="bg-[#0f172a] border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-card border border-border rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
                 {/* Header/Icon Area */}
                 <div className="pt-12 pb-6 flex flex-col items-center">
                     <div className={`p-6 rounded-[2rem] ${styles.accent} mb-6`}>
                         {styles.icon}
                     </div>
-                    <h3 className="text-2xl font-serif font-bold text-white tracking-tight px-10 text-center leading-tight">
+                    <h3 className="text-2xl font-serif font-bold text-foreground tracking-tight px-10 text-center leading-tight">
                         {title}
                     </h3>
                 </div>
 
                 {/* Message Area */}
                 <div className="px-12 pb-12">
-                    <p className="text-gray-400 text-center font-medium leading-relaxed font-sans text-sm">
+                    <p className="text-muted-foreground text-center font-medium leading-relaxed font-sans text-sm">
                         {message}
                     </p>
                 </div>
 
                 {/* Actions Area */}
-                <div className="p-8 bg-white/[0.02] flex flex-col gap-4">
+                <div className="p-8 bg-muted/20 flex flex-col gap-4">
                     <Button
                         variant="primary"
                         className={`h-16 rounded-2xl font-bold flex items-center justify-center transition-all text-sm uppercase tracking-widest ${styles.button}`}
@@ -78,7 +78,7 @@ const ConfirmationModal = ({
                     </Button>
                     <button
                         onClick={onClose}
-                        className="h-12 rounded-xl font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-all uppercase text-[10px] tracking-[0.2em] font-sans"
+                        className="h-12 rounded-xl font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all uppercase text-[10px] tracking-[0.2em] font-sans"
                     >
                         {cancelLabel}
                     </button>

@@ -28,8 +28,8 @@ const medicineSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['uploaded', 'verified', 'rejected', 'pickup_assigned', 'collected', 'listed', 'sold'],
-            default: 'uploaded'
+            enum: ['uploaded', 'pending', 'verified', 'rejected', 'pickup_assigned', 'collected', 'listed', 'sold'],
+            default: 'pending'
         },
         isExpired: {
             type: Boolean,
@@ -77,5 +77,6 @@ const medicineSchema = new mongoose.Schema(
 
 // Text index for fuzzy search
 medicineSchema.index({ "extractedData.name": "text", "description": "text" });
+medicineSchema.index({ createdAt: -1 });
 
 export const Medicine = mongoose.model('Medicine', medicineSchema);

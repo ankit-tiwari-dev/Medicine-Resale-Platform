@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   RefreshCw
@@ -34,6 +34,18 @@ const UploadMedicinePage = () => {
     price: "", // Selling Price
     description: ""
   });
+
+  // Auto-calculate fair trade price (30% below MRP)
+  useEffect(() => {
+    if (form.originalPrice) {
+      const calculatedPrice = (parseFloat(form.originalPrice) * 0.7).toFixed(2);
+      if (calculatedPrice !== form.price) {
+        setForm(prev => ({ ...prev, price: calculatedPrice }));
+      }
+    } else {
+      setForm(prev => ({ ...prev, price: "" }));
+    }
+  }, [form.originalPrice, form.price]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -79,7 +91,7 @@ const UploadMedicinePage = () => {
             batchNumber: data.batchNumber || prev.batchNumber,
             expiryDate: data.expiryDate ? new Date(data.expiryDate).toISOString().split('T')[0] : prev.expiryDate,
             originalPrice: data.mrp || prev.originalPrice,
-            price: data.mrp ? (data.mrp * 0.8).toFixed(2) : prev.price,
+            // Price is handled by useEffect auto-calculation
             description: data.description || prev.description
           }));
 
@@ -119,28 +131,95 @@ const UploadMedicinePage = () => {
       return;
     }
 
-    setStep('verifying');
+    // Only show verifying step if not already validated by manual scan
+    if (!isValidated) {
+      setStep('verifying');
+    }
     setLoading(true);
 
     const formData = new FormData();
     formData.append("image", image);
-    // Append all fields to FormData
-    Object.keys(form).forEach(key => {
-      formData.append(key, form[key]);
-    });
+
+    // Pass extracted data to avoid redundant backend scan
+    if (isValidated) {
+      // Frontend Expiry Guard
+      const expiryDate = new Date(form.expiryDate);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      expiryDate.setHours(0, 0, 0, 0);
+
+      const diffTime = expiryDate.getTime() - now.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (isNaN(expiryDate.getTime())) {
+        toast.error("Please provide a valid expiry date.");
+        setLoading(false);
+        return;
+      }
+
+      if (diffDays < 30) {
+        toast.error(diffDays < 0
+          ? "This medicine appears to be expired. It cannot be listed."
+          : "Medicine must have at least 30 days of shelf life remaining.");
+        setLoading(false);
+        return;
+      }
+
+      const extractedData = {
+        name: form.name,
+        genericName: form.genericName,
+        manufacturer: form.manufacturer,
+        batchNumber: form.batchNumber,
+        expiryDate: form.expiryDate,
+        mrp: form.originalPrice,
+        description: form.description
+      };
+      formData.append("extractedData", JSON.stringify(extractedData));
+    }
+
+    // Append other fields
+    formData.append("stock", form.stock);
+    formData.append("description", form.description);
 
     try {
       await uploadMedicine(formData);
-      // Simulate AI extraction delay for UI feedback
-      setTimeout(() => {
+
+      // If already validated, transition to success immediately
+      if (isValidated) {
         setStep('success');
         setLoading(false);
-      }, 3000);
+      } else {
+        // Just in case they didn't scan, show the animation for a bit
+        setTimeout(() => {
+          setStep('success');
+          setLoading(false);
+        }, 2000);
+      }
     } catch (error) {
-      toast.error("Failed to upload listing. Check your network.");
+      toast.error(error?.response?.data?.message || "Failed to upload listing.");
       setStep('details');
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setForm({
+      name: "",
+      genericName: "",
+      manufacturer: "",
+      category: MEDICINE_CATEGORIES[1],
+      batchNumber: "",
+      expiryDate: "",
+      stock: 1,
+      originalPrice: "",
+      price: "",
+      description: ""
+    });
+    setImage(null);
+    setPreview(null);
+    setAiFeedback(null);
+    setIsValidated(false);
+    setStep('details');
   };
 
   if (step === 'success') {
@@ -163,12 +242,7 @@ const UploadMedicinePage = () => {
               <Button
                 variant="outline"
                 className="w-full h-14 rounded-2xl"
-                onClick={() => {
-                  setStep('details');
-                  setForm({ ...form, name: "", batchNumber: "", expiryDate: "" });
-                  setImage(null);
-                  setPreview(null);
-                }}
+                onClick={resetForm}
               >
                 List Another Medicine
               </Button>
@@ -413,8 +487,8 @@ const UploadMedicinePage = () => {
                         type="number"
                         placeholder="0.00"
                         value={form.price}
-                        onChange={(e) => setForm({ ...form, price: e.target.value })}
-                        className="w-full px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans pl-8"
+                        className="w-full px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl focus:outline-none text-sm font-sans pl-8 text-primary font-bold cursor-not-allowed"
+                        readOnly
                         required
                       />
                     </div>

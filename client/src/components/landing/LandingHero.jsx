@@ -27,12 +27,10 @@ const LandingHero = ({ healthStatus, healthLoading, healthError }) => {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/browse">
-                <Link to="/browse">
-                  <Button variant="primary" size="lg" className="w-full !bg-emerald-green hover:!bg-emerald-green/90 border-none shadow-lg shadow-emerald-green/20 !text-white">
-                    Browse Medicines
-                    <Search className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
+                <Button variant="primary" size="lg" className="w-full !bg-emerald-green hover:!bg-emerald-green/90 border-none shadow-lg shadow-emerald-green/20 !text-white">
+                  Browse Medicines
+                  <Search className="ml-2 w-5 h-5" />
+                </Button>
               </Link>
               <Link to="/sell">
                 <Button variant="outline" size="lg" className="w-full border-white/20 !text-white hover:bg-white/10 !bg-transparent">

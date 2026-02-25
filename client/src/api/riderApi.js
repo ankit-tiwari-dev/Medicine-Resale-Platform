@@ -2,6 +2,7 @@ import axiosInstance from "./axiosInstance";
 
 export const getRiderTasks = (params = {}) => axiosInstance.get("/rider/tasks", { params });
 export const getRiderStats = () => axiosInstance.get("/rider/stats");
+export const updateRiderDutyStatus = (isActive) => axiosInstance.patch("/rider/duty-status", { isActive });
 
 export const confirmCollection = ({ medicineId, proof }) => {
   const formData = new FormData();
