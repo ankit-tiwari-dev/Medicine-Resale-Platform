@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   }
 
   if (roles.length > 0 && !roles.includes(user?.role)) {
-    return <Navigate to={user?.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+    return <Navigate to={user?.role === 'admin' ? '/admin' : user?.role === 'rider' ? '/rider' : '/dashboard'} replace />;
   }
 
   return children;

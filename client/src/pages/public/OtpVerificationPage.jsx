@@ -24,7 +24,7 @@ const OtpVerificationPage = () => {
     setInfo("");
 
     const payload = otpSession?.userId
-      ? { userId: otpSession.userId, userOtp: otp }
+      ? { sessionId: otpSession.userId, userOtp: otp }
       : { email, otp };
 
     const result = await submitOtp(payload);

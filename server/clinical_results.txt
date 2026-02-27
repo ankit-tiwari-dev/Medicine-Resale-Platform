@@ -1,0 +1,13 @@
+[TEST] Starting clinical test for email: repro_1772214096992@test.com 
+[TEST] Connecting to DB: MedAImart 
+[TEST] User exists before: false 
+[TEST] Calling /register... 
+[TEST] Register Result: 201 Registration successful. Please verify your email. 
+[TEST] Response Data: {
+  "userId": "69a1d7655415aa1928bb60f3"
+}
+[TEST] --- CLINICAL RESULTS --- 
+[TEST] User created? true 
+[TEST] Rider created? false 
+[TEST] Otp created? false 
+[TEST] ❌ FAILED: User/Rider created before OTP verification! 

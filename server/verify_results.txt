@@ -1,0 +1,19 @@
+Testing with email: Verify_1772138316347@Example.com
+A. Calling /register with MixedCase email...
+- Registration Status: 201
+- Response Data: {
+  "statusCode": 201,
+  "data": {
+    "sessionId": "69a0af4ebccf5a48874b6faf",
+    "email": "verify_1772138316347@example.com"
+  },
+  "message": "Registration successful. Please verify your email.",
+  "success": true
+}
+- SessionId received: 69a0af4ebccf5a48874b6faf
+B. Premature User check: ✅ PASSED (No user created)
+C. OTP Record created with normalized email: ❌ NO
+D. Calling /resend-otp with different casing...
+- Resend Status: 200 (should be 200)
+
+✅ Normalization and Clarity tests passed!

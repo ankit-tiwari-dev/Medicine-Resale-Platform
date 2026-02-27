@@ -158,22 +158,22 @@ const AdminRidersKycPage = () => {
               </div>
 
               <div className="pt-8 border-t border-border border-dashed flex flex-wrap items-center justify-between gap-4">
-                <div className="flex gap-2">
+                <div className="flex gap-4">
                   <Button
                     variant="outline"
-                    className="h-10 w-10 p-0 text-emerald-green hover:bg-emerald-green hover:text-white border-2 rounded-xl transition-all"
+                    className="h-12 w-12 p-0 text-emerald-green bg-emerald-green/5 hover:bg-emerald-green hover:text-white border-2 border-emerald-green/20 rounded-2xl transition-all shadow-sm shadow-emerald-green/10"
                     onClick={() => onAction(rider._id, "approve")}
                     title="Authorize Partner"
                   >
-                    <Check size={18} />
+                    <Check size={24} strokeWidth={2.5} />
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-10 w-10 p-0 text-red-500 hover:bg-red-500 hover:text-white border-2 rounded-xl transition-all"
+                    className="h-12 w-12 p-0 text-red-500 bg-red-500/5 hover:bg-red-500 hover:text-white border-2 border-red-500/20 rounded-2xl transition-all shadow-sm shadow-red-500/10"
                     onClick={() => onAction(rider._id, "reject")}
                     title="Ban Identity"
                   >
-                    <X size={18} />
+                    <X size={24} strokeWidth={2.5} />
                   </Button>
                 </div>
                 <div className="flex items-center gap-4">

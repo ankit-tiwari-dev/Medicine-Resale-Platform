@@ -106,8 +106,9 @@ export const AuthProvider = ({ children }) => {
     setIsSubmitting(true);
     try {
       const response = await registerUser(payload);
-      const userId = response?.data?.data?.userId || response?.data?.userId || null;
-      setOtpSession({ email: payload.email, userId });
+      // Backend now returns sessionId to clarify that account creation is deferred
+      const sessionId = response?.data?.data?.sessionId || response?.data?.sessionId || null;
+      setOtpSession({ email: payload.email, userId: sessionId }); // Keep key as userId for internal state if preferred, but mapper to sessionId
       setRateLimit({ active: false, retryAfter: null, message: "" });
       return { success: true, otpRequired: true };
     } catch (error) {

@@ -1,12 +1,22 @@
 import { google } from 'googleapis';
-import { oauth2Client } from '../config/google.js';
 
-const sendEmail = async (to, subject, htmlBody) => {
-    oauth2Client.setCredentials({
+// Dedicated OAuth2 client for mailer — separate from the shared singleton
+// used for Google login, so they never contaminate each other's credentials.
+const getMailerClient = () => {
+    const client = new google.auth.OAuth2(
+        process.env.CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        process.env.REDIRECT_URI
+    );
+    client.setCredentials({
         refresh_token: process.env.SYSTEM_REFRESH_TOKEN
     });
+    return client;
+};
 
-    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+const sendEmail = async (to, subject, htmlBody) => {
+    const mailerClient = getMailerClient();
+    const gmail = google.gmail({ version: 'v1', auth: mailerClient });
 
     const str = [
         `To: ${to}`,

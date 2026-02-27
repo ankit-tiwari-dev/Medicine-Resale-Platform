@@ -447,14 +447,22 @@ export const verifyRiderKYC = asyncHandler(async (req, res) => {
         rider.verificationStatus = 'verified';
         rider.isVerified = true;
 
-        // Notify Rider
-        await sendKycApprovalEmail(rider.userId.email, rider.userId.name);
+        // Notify Rider - wrapped in try-catch to prevent 500 if mail service fails
+        try {
+            await sendKycApprovalEmail(rider.userId.email, rider.userId.name);
+        } catch (emailError) {
+            logger.error(`Failed to send KYC approval email to ${rider.userId.email}: ${emailError.message}`);
+        }
     } else if (action === 'reject') {
         rider.verificationStatus = 'rejected';
         rider.isVerified = false;
 
-        // Notify Rider
-        await sendKycRejectionEmail(rider.userId.email, rider.userId.name, reason);
+        // Notify Rider - wrapped in try-catch to prevent 500 if mail service fails
+        try {
+            await sendKycRejectionEmail(rider.userId.email, rider.userId.name, reason);
+        } catch (emailError) {
+            logger.error(`Failed to send KYC rejection email to ${rider.userId.email}: ${emailError.message}`);
+        }
     } else {
         throw new ApiError(400, "Invalid action. Use 'approve' or 'reject'");
     }

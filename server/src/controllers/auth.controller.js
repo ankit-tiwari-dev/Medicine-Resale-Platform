@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 import { User } from '../models/user.model.js';
+import { Otp } from '../models/otp.model.js';
+import { Rider } from '../models/rider.model.js';
 import { oauth2Client } from '../config/google.js';
 import { sendOTP, sendWelcome } from '../utils/mailer.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -42,9 +44,10 @@ const generateAccessAndRefereshTokens = async (userId) => {
 };
 
 export const verifyOTP = asyncHandler(async (req, res) => {
-    const { email, userId, otp, userOtp } = req.body;
+    let { email, userId, sessionId, otp, userOtp } = req.body;
+    if (email) email = email.toLowerCase();
 
-    const identifier = userId || email;
+    const identifier = sessionId || userId || email;
     const providedOtp = otp || userOtp;
 
     if (!identifier) {
@@ -55,32 +58,74 @@ export const verifyOTP = asyncHandler(async (req, res) => {
         throw new ApiError(400, "OTP is required");
     }
 
-    // Find user by ID or Email
-    const user = await User.findOne({
+    // First try to find in existing Users (for those who somehow have otp set in old flow, though it shouldn't happen for new flow)
+    // But since the new flow registers to Otp, we check Otp first.
+    let otpRecord = await Otp.findOne({
         $or: [
             { _id: mongoose.Types.ObjectId.isValid(identifier) ? identifier : null },
             { email: identifier }
         ].filter(q => q._id !== null || q.email)
     });
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+    let pendingUserMode = true;
+    let target = otpRecord;
+
+    // Fallback to check if User was actually created in old implementation (backwards compatibility for already registered but unverified users)
+    if (!target) {
+        target = await User.findOne({
+            $or: [
+                { _id: mongoose.Types.ObjectId.isValid(identifier) ? identifier : null },
+                { email: identifier }
+            ].filter(q => q._id !== null || q.email)
+        });
+        pendingUserMode = false;
     }
 
-    if (user.otpExpires < Date.now()) {
+    if (!target) {
+        throw new ApiError(404, "Verification session expired or user not found");
+    }
+
+    if (target.otpExpires < Date.now()) {
         throw new ApiError(400, "OTP has expired. Please request a new one.");
     }
 
-    const isMatch = await bcrypt.compare(providedOtp, user.otp);
+    const isMatch = await bcrypt.compare(providedOtp, target.otp);
 
     if (!isMatch) {
         throw new ApiError(400, "Invalid verification code");
     }
 
-    user.isVerified = true;
-    user.otp = undefined;
-    user.otpExpires = undefined;
-    await user.save();
+    let user;
+    if (pendingUserMode) {
+        // Create user since OTP is valid
+        user = await User.create({
+            email: target.email,
+            password: target.userData.password,
+            name: target.userData.name,
+            phone: target.userData.phone,
+            role: target.userData.role,
+            isVerified: true
+        });
+
+        // If the user registered as a rider, initialize their Rider profile 
+        if (user.role === 'rider') {
+            await Rider.create({
+                userId: user._id,
+                isVerified: false,
+                isActive: false
+            });
+        }
+
+        await Otp.findByIdAndDelete(target._id);
+    } else {
+        // Old flow fallback
+        user = target;
+        user.isVerified = true;
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        await user.save();
+    }
+
     await sendWelcome(user.email, user.name);
 
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
@@ -90,13 +135,14 @@ export const verifyOTP = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, cookieOptions)
         .cookie("refreshToken", refreshToken, refreshCookieOptions)
         .json(new ApiResponse(200, {
-            user: { id: user._id, name: user.name, email: user.email },
+            user: { id: user._id, name: user.name, email: user.email, role: user.role },
             accessToken
         }, "Email verified successfully!"));
 });
 
 export const loginLocal = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    if (email) email = email.toLowerCase();
 
     if (!email || !password) {
         throw new ApiError(400, "Email and password are required");
@@ -245,7 +291,8 @@ export const googleAuthCallback = asyncHandler(async (req, res) => {
 });
 
 export const registerLocal = asyncHandler(async (req, res) => {
-    const { email, password, name } = req.body;
+    let { email, password, name, phone, role } = req.body;
+    if (email) email = email.toLowerCase();
 
     if (!email || !password || !name) {
         throw new ApiError(400, "Email, password, and name are required");
@@ -262,17 +309,24 @@ export const registerLocal = asyncHandler(async (req, res) => {
 
     const randomOTP = crypto.randomInt(100000, 999999).toString();
     const hashedOTP = await bcrypt.hash(randomOTP, 10);
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-        email,
-        password: hashedPassword,
-        name,
-        isVerified: false,
-        otp: hashedOTP,
-        otpExpires: Date.now() + 600000
-    });
+    // Save temporary data to Otp collection instead of creating User immediately
+    const otpRecord = await Otp.findOneAndUpdate(
+        { email },
+        {
+            email,
+            otp: hashedOTP,
+            otpExpires: Date.now() + 60 * 10 * 1000, // 10 mins
+            userData: {
+                name,
+                password: hashedPassword,
+                phone: phone || undefined,
+                role: role || 'user'
+            }
+        },
+        { upsert: true, new: true }
+    );
 
     // Try to send OTP email, but don't fail registration if it fails
     try {
@@ -281,32 +335,55 @@ export const registerLocal = asyncHandler(async (req, res) => {
         console.error('Failed to send OTP email:', emailError.message);
     }
 
-    res.status(201).json(new ApiResponse(201, { userId: user._id }, "Registration successful. Please verify your email."));
+    // Return sessionId instead of userId to clarify that account is NOT yet created.
+    // Account creation happens ONLY after successful OTP verification in verifyOTP.
+    res.status(201).json(new ApiResponse(201, { sessionId: otpRecord._id, email }, "Registration successful. Please verify your email."));
 });
 
 export const resendOTP = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+    let { email } = req.body;
+    if (email) email = email.toLowerCase();
 
     if (!email) {
         throw new ApiError(400, "Email is required");
     }
 
-    const user = await User.findOne({ email });
+    // Verify existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        if (existingUser.isVerified) {
+            throw new ApiError(400, "This account is already verified. Please login.");
+        }
+        // Fallback for old mechanism
+        const randomOTP = crypto.randomInt(100000, 999999).toString();
+        const hashedOTP = await bcrypt.hash(randomOTP, 10);
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+        existingUser.otp = hashedOTP;
+        existingUser.otpExpires = Date.now() + 600000;
+        await existingUser.save();
+
+        try {
+            await sendOTP(email, randomOTP);
+        } catch (emailError) {
+            console.error('Failed to resend OTP email:', emailError.message);
+            throw new ApiError(500, "Failed to send verification email. Please try again later.");
+        }
+        return res.status(200).json(new ApiResponse(200, {}, "A new verification code has been sent to your email."));
     }
 
-    if (user.isVerified) {
-        throw new ApiError(400, "This account is already verified. Please login.");
+    // Handle new OTP flow via Otp collection
+    const otpRecord = await Otp.findOne({ email });
+
+    if (!otpRecord) {
+        throw new ApiError(404, "User registration not found. Please register again.");
     }
 
     const randomOTP = crypto.randomInt(100000, 999999).toString();
     const hashedOTP = await bcrypt.hash(randomOTP, 10);
 
-    user.otp = hashedOTP;
-    user.otpExpires = Date.now() + 600000; // 10 minutes
-    await user.save();
+    otpRecord.otp = hashedOTP;
+    otpRecord.otpExpires = Date.now() + 600000; // 10 minutes
+    await otpRecord.save();
 
     try {
         await sendOTP(email, randomOTP);
