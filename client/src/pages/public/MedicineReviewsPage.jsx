@@ -3,17 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { getMedicineReviews } from "../../api/reviewApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Star,
-  ShieldCheck,
-  User,
-  ChevronLeft,
-  FlaskConical,
-  MessageSquare,
-  History,
-  FileText,
-  ArrowRight
-} from "lucide-react";
 import EmptyState from "../../components/common/EmptyState";
 
 const MedicineReviewsPage = () => {
@@ -24,14 +13,8 @@ const MedicineReviewsPage = () => {
 
   const renderStars = (rating) => {
     return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star
-            key={s}
-            size={12}
-            className={s <= rating ? "fill-primary text-primary" : "text-muted border-muted"}
-          />
-        ))}
+      <div className="flex gap-1 text-[10px] font-black uppercase tracking-widest text-primary">
+        RATING: {rating} / 5
       </div>
     );
   };
@@ -41,13 +24,12 @@ const MedicineReviewsPage = () => {
       <Container className="py-8 lg:py-12 max-w-[900px]">
         {/* Header */}
         <div className="mb-10 lg:text-center">
-          <Link to={medicineId === "all" ? "/browse" : `/browse/${medicineId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Unit Details
+          <Link to={medicineId === "all" ? "/browse" : `/browse/${medicineId}`} className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-[0.2em] mb-6">
+            BACK TO UNIT DETAILS
           </Link>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3">
-              <FlaskConical size={14} />
+            <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3">
+              LOGS
               Efficacy Audits
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -75,15 +57,15 @@ const MedicineReviewsPage = () => {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-primary font-bold">
-                        {review.userId?.name?.charAt(0) || <User size={18} />}
+                      <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-primary font-black uppercase tracking-widest text-[10px]">
+                        {review.userId?.name?.charAt(0) || "U"}
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Verified User</p>
                         <p className="font-bold text-sm text-foreground">{review.userId?.name || "Participant"}</p>
                       </div>
                     </div>
-                    <ShieldCheck className="text-emerald-green" size={20} />
+                    <div className="text-[10px] font-black uppercase tracking-widest bg-emerald-green/10 text-emerald-green px-2 py-1 rounded-sm">VERIFIED</div>
                   </div>
                   <div className="mb-6">{renderStars(review.rating)}</div>
                   <p className="text-sm text-muted-foreground font-medium italic leading-relaxed mb-6">
@@ -92,11 +74,10 @@ const MedicineReviewsPage = () => {
                 </div>
                 <div className="mt-4 pt-6 border-t border-border border-dashed flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                   <span className="flex items-center gap-1">
-                    <History size={12} />
                     {new Date(review.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                   </span>
-                  <Link to={`/browse/${medicineId}`} className="text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Inspect Unit <ArrowRight size={10} />
+                  <Link to={`/browse/${medicineId}`} className="text-primary flex items-center gap-1 group-hover:gap-2 transition-all hover:underline">
+                    INSPECT UNIT
                   </Link>
                 </div>
               </div>

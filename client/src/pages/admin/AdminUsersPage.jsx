@@ -3,26 +3,13 @@ import { deleteAdminUser, getAdminUsers, updateAdminUser } from "../../api/admin
 import Button from "../../components/common/Button";
 import { useApiQuery } from "../../hooks/useApiQuery";
 import { extractErrorMessage } from "../../utils/errors";
-import {
-  Users,
-  ChevronLeft,
-  Search,
-  Trash2,
-  ShieldCheck,
-  Crown,
-  Truck,
-  User,
-  RefreshCw,
-  AlertTriangle,
-  MoreHorizontal
-} from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 const ROLE_CONFIG = {
-  admin: { icon: Crown, color: 'text-muted-amber', bg: 'bg-muted-amber/10', border: 'border-muted-amber/20', label: 'Administrator' },
-  rider: { icon: Truck, color: 'text-soft-cyan', bg: 'bg-soft-cyan/10', border: 'border-soft-cyan/20', label: 'Logistics Partner' },
-  user: { icon: User, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', label: 'Platform User' }
+  admin: { color: 'text-muted-amber', bg: 'bg-muted-amber/10', border: 'border-muted-amber/20', label: 'Administrator' },
+  rider: { color: 'text-soft-cyan', bg: 'bg-soft-cyan/10', border: 'border-soft-cyan/20', label: 'Logistics Partner' },
+  user: { color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', label: 'Platform User' }
 };
 
 const AdminUsersPage = () => {
@@ -62,15 +49,13 @@ const AdminUsersPage = () => {
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-10">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" />
-          Admin Terminal
+        <Link to="/admin" className="inline-flex items-center text-[10px] font-black text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.2em] mb-8">
+          Back to Admin Terminal
         </Link>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <Users size={12} />
-              Network Identity Registry
+              Privileged Identity Registry
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
               Participant <span className="text-primary">Management</span>
@@ -80,23 +65,23 @@ const AdminUsersPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <div className="relative group">
               <input
                 type="text"
-                placeholder="Name, Email, or Role..."
-                className="h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest w-72"
+                placeholder="Search Identity Registry..."
+                className="h-14 pl-6 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-foreground focus:ring-4 focus:ring-foreground/5 transition-all text-[10px] font-black uppercase tracking-widest w-72"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button
               variant="outline"
-              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center transition-all hover:bg-primary/5"
+              className="h-14 px-8 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px] hover:bg-foreground/5"
               onClick={() => query.execute()}
               loading={query.loading}
-              icon={RefreshCw}
-            />
+            >
+              Sync
+            </Button>
           </div>
         </div>
       </div>
@@ -107,14 +92,9 @@ const AdminUsersPage = () => {
           const cfg = ROLE_CONFIG[role];
           const count = (query.data?.users || []).filter(u => u.role === role).length;
           return (
-            <div key={role} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
-              <div className={`w-12 h-12 ${cfg.bg} ${cfg.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                <cfg.icon size={24} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{cfg.label}s</p>
-                <p className="text-2xl font-black text-foreground">{count}</p>
-              </div>
+            <div key={role} className="bg-card rounded-[1.5rem] p-8 border border-border shadow-sm group hover:border-foreground/30 transition-all">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{cfg.label}s</p>
+              <p className="text-3xl font-black text-foreground tracking-tighter">{count.toLocaleString()}</p>
             </div>
           );
         })}
@@ -160,8 +140,7 @@ const AdminUsersPage = () => {
                         <p className="text-xs font-bold text-muted-foreground font-sans lowercase opacity-80">{user.email}</p>
                       </td>
                       <td className="px-10 py-6">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest ${roleCfg.bg} ${roleCfg.color} ${roleCfg.border}`}>
-                          <roleCfg.icon size={10} />
+                        <div className={`inline-flex items-center px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest ${roleCfg.bg} ${roleCfg.color} ${roleCfg.border}`}>
                           {roleCfg.label}
                         </div>
                       </td>
@@ -171,7 +150,7 @@ const AdminUsersPage = () => {
                             <Button
                               key={role}
                               variant="outline"
-                              className={`h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${user.role === role ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' : 'hover:border-primary/30 hover:bg-primary/5'}`}
+                              className={`h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${user.role === role ? 'bg-foreground text-background border-foreground shadow-lg shadow-foreground/10' : 'hover:border-foreground/30 hover:bg-muted/40'}`}
                               onClick={() => updateRole(user._id, role)}
                               disabled={user.role === role}
                             >
@@ -182,11 +161,11 @@ const AdminUsersPage = () => {
                           {!isDelete ? (
                             <Button
                               variant="outline"
-                              className="h-10 w-10 p-0 rounded-xl text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/30 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100"
+                              className="h-10 px-4 rounded-xl text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/30 transition-all text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100"
                               onClick={() => setConfirmDelete(user._id)}
-                              title="Expunge Identity"
-                              icon={Trash2}
-                            />
+                            >
+                              Expunge
+                            </Button>
                           ) : (
                             <div className="flex items-center gap-3 animate-in slide-in-from-right-2 duration-300">
                               <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Confirm?</span>
@@ -214,27 +193,23 @@ const AdminUsersPage = () => {
               </tbody>
             </table>
           </div>
-          <div className="px-8 py-5 bg-muted/20 border-t border-border flex justify-between items-center">
-            <div className="flex items-center gap-3 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-              <ShieldCheck size={14} className="text-primary" />
-              Identity Audit Trail Active
+          <div className="px-10 py-6 bg-muted/20 border-t border-border flex justify-between items-center">
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+              Security Protocol Active
             </div>
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-              {users.length} identities in registry
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest font-mono">
+              Identity_Registry_Size: {users.length}
             </p>
           </div>
         </div>
       )}
 
       {/* Warning Context */}
-      <div className="mt-10 p-8 bg-red-500/5 border border-red-500/20 rounded-[2rem] flex items-start gap-5">
-        <AlertTriangle size={24} className="text-red-500 flex-shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-sm font-bold text-foreground uppercase tracking-widest mb-1">Destructive Action Protocol</h4>
-          <p className="text-xs text-muted-foreground font-medium leading-relaxed italic">
-            Identity expungement is irreversible. All associated transaction history, escrow funds, and audit records remain archived for regulatory compliance, but the user will permanently lose platform access.
-          </p>
-        </div>
+      <div className="mt-10 p-8 bg-red-500/5 border border-red-500/20 rounded-[2.5rem] flex flex-col gap-2">
+        <h4 className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-1">Destructive Action Protocol</h4>
+        <p className="text-xs text-muted-foreground font-medium leading-relaxed italic">
+          Identity expungement is irreversible. All associated transaction history, escrow funds, and audit records remain archived for regulatory compliance, but the user will permanently lose platform access.
+        </p>
       </div>
     </div>
   );

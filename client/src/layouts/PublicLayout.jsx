@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
 import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
 
 const PublicLayout = () => {
   return (
@@ -9,6 +10,7 @@ const PublicLayout = () => {
       <main>
         <Outlet />
       </main>
+      <Footer />
     </AppShell>
   );
 };

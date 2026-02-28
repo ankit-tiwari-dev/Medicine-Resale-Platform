@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Menu, X, LayoutDashboard, Pill, Upload, History, Wallet, ShoppingCart, User, ChevronRight, LogOut } from "lucide-react";
 import { AppLogo } from "../components/common/AppLogo";
+
 import ThemeSwitcher from "../components/common/ThemeSwitcher";
 import { useAuth } from "../hooks/useAuth";
 
 const links = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/dashboard/my-medicines", label: "My Medicines", icon: Pill },
-  { to: "/dashboard/upload-medicine", label: "Upload Medicine", icon: Upload },
-  { to: "/dashboard/orders", label: "Orders", icon: History },
-  { to: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { to: "/cart", label: "Cart", icon: ShoppingCart },
-  { to: "/dashboard/profile", label: "Profile", icon: User }
+  { to: "/dashboard", label: "Overview" },
+  { to: "/dashboard/my-medicines", label: "My Medicines" },
+  { to: "/dashboard/upload-medicine", label: "Upload Medicine" },
+  { to: "/dashboard/orders", label: "Orders" },
+  { to: "/dashboard/wallet", label: "Wallet" },
+  { to: "/cart", label: "Cart" },
+  { to: "/dashboard/profile", label: "Profile" }
 ];
 
 const AppLayout = () => {
@@ -32,7 +32,8 @@ const AppLayout = () => {
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 text-foreground-muted hover:text-primary transition-colors"
           >
-            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            <span className="text-[10px] font-black uppercase tracking-widest">{isSidebarOpen ? "CLOSE" : "MENU"}</span>
+
           </button>
         </div>
       </header>
@@ -62,23 +63,17 @@ const AppLayout = () => {
                   end={link.to === "/dashboard"}
                   onClick={() => setIsSidebarOpen(false)}
                   className={({ isActive }) => `
-                    flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all group
+                    flex items-center px-6 py-4 rounded-xl text-xs font-black uppercase tracking-[0.15em] transition-all group
                     ${isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                      : "text-foreground-muted hover:bg-surface-muted hover:text-primary"}
+                      ? "bg-white text-black shadow-lg shadow-white/10"
+                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"}
                   `}
                 >
                   {({ isActive }) => (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <link.icon
-                          size={18}
-                          className={isActive ? "text-primary-foreground" : "text-primary"}
-                        />
-                        {link.label}
-                      </div>
-                      <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </>
+                    <div className="w-full flex justify-between items-center group/item text-inherit">
+                      <span className="text-inherit">{link.label}</span>
+                      <span className={`opacity-0 -translate-x-2 transition-all duration-300 group-hover/item:opacity-40 group-hover/item:translate-x-0 active:opacity-10 font-black ${isActive ? 'text-black' : 'text-primary'}`}>&rarr;</span>
+                    </div>
                   )}
                 </NavLink>
               ))}
@@ -87,9 +82,8 @@ const AppLayout = () => {
             <div className="mt-auto pt-6 border-t border-border">
               <button
                 onClick={logout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500/5 transition-all group"
+                className="w-full flex items-center px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/5 transition-all"
               >
-                <LogOut size={18} />
                 Logout Session
               </button>
             </div>

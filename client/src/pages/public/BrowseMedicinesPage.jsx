@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Search, Filter, SlidersHorizontal, ChevronRight, X, Shield } from "lucide-react";
 import medicineService from "../../services/medicineService";
 import Section from "../../components/layout/Section";
 import Container from "../../components/layout/Container";
@@ -78,22 +77,20 @@ const BrowseMedicinesPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative w-full md:w-80 group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <div className="relative w-full md:w-80 group text-[10px] font-black uppercase tracking-widest text-primary mb-2 md:mb-0">
               <input
                 type="text"
                 placeholder="Search by name or generic..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans"
+                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans"
               />
             </div>
             <Button
               variant="outline"
-              className="lg:hidden gap-2 bg-card h-[46px] rounded-xl px-4"
+              className="lg:hidden gap-2 bg-card h-[46px] rounded-xl px-4 font-black text-[10px] uppercase tracking-widest"
               onClick={() => setShowMobileFilters(true)}
             >
-              <SlidersHorizontal className="w-4 h-4" />
               Filters
             </Button>
           </div>
@@ -105,7 +102,6 @@ const BrowseMedicinesPage = () => {
             <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-24 space-y-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-primary" />
                   <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">Filters</h2>
                 </div>
                 <button onClick={resetFilters} className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight">
@@ -191,8 +187,8 @@ const BrowseMedicinesPage = () => {
               </div>
             ) : items.length === 0 ? (
               <div className="bg-card border border-border rounded-2xl p-20 text-center shadow-sm">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="w-10 h-10 text-muted-foreground" />
+                <div className="w-20 h-20 bg-muted text-muted-foreground rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-black uppercase">
+                  ZERO
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">No medicines found</h3>
                 <p className="text-muted-foreground max-w-xs mx-auto text-sm leading-relaxed mb-8">
@@ -260,7 +256,7 @@ const BrowseMedicinesPage = () => {
               </Button>
 
               <div className="flex items-center gap-2 p-3 bg-emerald-green/5 border border-emerald-green/20 rounded-xl">
-                <Shield className="w-4 h-4 text-emerald-green flex-shrink-0" />
+                <span className="text-[10px] font-black uppercase text-emerald-green tracking-widest flex-shrink-0">SECURE:</span>
                 <p className="text-[10px] font-medium text-emerald-green italic leading-tight">
                   Secured by Escrow Architecture. Listed medicines are AI-Verified.
                 </p>
@@ -278,8 +274,8 @@ const BrowseMedicinesPage = () => {
             <div className="w-12 h-1 bg-border rounded-full mx-auto mb-8" />
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-serif font-bold text-foreground">Advanced Filters</h2>
-              <button onClick={() => setShowMobileFilters(false)} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-foreground ring-1 ring-border">
-                <X size={18} />
+              <button onClick={() => setShowMobileFilters(false)} className="px-4 h-10 bg-muted rounded-xl flex items-center justify-center text-foreground ring-1 ring-border text-[10px] font-black uppercase tracking-widest">
+                CLOSE
               </button>
             </div>
 

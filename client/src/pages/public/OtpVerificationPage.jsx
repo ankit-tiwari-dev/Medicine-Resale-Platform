@@ -5,7 +5,6 @@ import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
 import { useAuth } from "../../hooks/useAuth";
 import AuthCard from "../../components/layout/AuthCard";
-import { ChevronRight, KeyRound } from "lucide-react";
 
 const OtpVerificationPage = () => {
   const navigate = useNavigate();
@@ -56,10 +55,10 @@ const OtpVerificationPage = () => {
 
   return (
     <AuthCard
-      title="Verify Session"
-      subtitle={`A unique 6-digit medical authorization code was sent to ${email}.`}
+      title="Enter Code"
+      subtitle={`Enter the 6-digit code sent to ${email}.`}
     >
-      <form onSubmit={onVerify} className="space-y-6" noValidate>
+      <form onSubmit={onVerify} className="space-y-8" noValidate>
         <div className="space-y-2">
           {error && <AlertMessage variant="destructive" message={error} />}
           {(rateLimit.active || info) && (
@@ -67,39 +66,38 @@ const OtpVerificationPage = () => {
           )}
         </div>
 
-        <div className="relative group">
-          <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <div className="relative">
           <FormInput
             id="otp-code"
             name="otp"
-            label="Clinical Authorization Code"
+            label="6-digit Code"
             labelClassName="hidden"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             required
             maxLength={6}
             placeholder="000000"
-            className="text-center text-3xl lg:text-4xl tracking-[0.4em] font-sans font-black h-16 lg:h-20 pl-0 border-2 border-primary/20 focus:border-primary transition-all rounded-2xl bg-surface-muted/50"
+            className="text-center text-4xl lg:text-5xl tracking-[0.4em] font-black h-20 lg:h-24 pb-2 border-border/40 focus:border-foreground transition-all rounded-3xl bg-muted/50"
           />
         </div>
 
-        <div className="space-y-3">
-          <Button type="submit" loading={isSubmitting} disabled={!canSubmit} className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20">
-            Authorize Access
+        <div className="space-y-4">
+          <Button type="submit" loading={isSubmitting} disabled={!canSubmit} className="w-full h-14 text-sm font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-full">
+            Verify
           </Button>
           <button
             type="button"
             onClick={onResend}
             disabled={isSubmitting}
-            className="w-full text-xs font-bold text-primary hover:text-emerald-green transition-colors uppercase tracking-[0.2em] py-2"
+            className="w-full text-[10px] font-bold text-muted-foreground hover:text-foreground transition-all uppercase tracking-widest py-2"
           >
-            Request New Code
+            Resend Code
           </button>
         </div>
 
-        <div className="pt-6 border-t border-border text-center">
-          <Link className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2 group" to="/login">
-            Back to Secure Login
+        <div className="pt-8 border-t border-border/40 text-center">
+          <Link className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-all uppercase tracking-widest" to="/login">
+            Back to Login
           </Link>
         </div>
       </form>

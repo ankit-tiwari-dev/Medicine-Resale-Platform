@@ -1,27 +1,17 @@
 import { getRiderStats } from "../../api/riderApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  BarChart3,
-  ChevronLeft,
-  TrendingUp,
-  Award,
-  Clock,
-  CheckCircle,
-  Wallet,
-  ArrowUpRight,
-  Search
-} from "lucide-react";
+
 import { Link } from "react-router-dom";
 
 const RiderStatsPage = () => {
   const { data, loading, error } = useApiQuery(getRiderStats, true);
 
   const metrics = [
-    { label: 'Weekly Earnings', value: '₹4,850', sub: '+12% from last cycle', icon: Wallet, color: 'text-emerald-green' },
-    { label: 'Successful Handovers', value: data?.totalCollected ?? 0, sub: '99.8% Success Rate', icon: CheckCircle, color: 'text-primary' },
-    { label: 'Avg. Turnaround', value: '72m', sub: 'Industry Rank: top 5%', icon: Clock, color: 'text-soft-cyan' },
-    { label: 'Trust Coefficient', value: '98/100', sub: 'Verified across 42 lots', icon: Award, color: 'text-muted-amber' }
+    { label: 'Weekly Earnings', value: '₹4,850', sub: '+12% from last cycle', type: 'WALLET' },
+    { label: 'Successful Handovers', value: data?.totalCollected ?? 0, sub: '99.8% Success Rate', type: 'SUCCESS' },
+    { label: 'Avg. Turnaround', value: '72m', sub: 'Industry Rank: top 5%', type: 'TIME' },
+    { label: 'Trust Coefficient', value: '98/100', sub: 'Verified across 42 lots', type: 'TRUST' }
   ];
 
   if (loading) {
@@ -43,14 +33,12 @@ const RiderStatsPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/rider" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Command
+          <Link to="/rider" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-6">
+            BACK TO COMMAND
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <BarChart3 size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
                 Performance Ledger
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -66,14 +54,13 @@ const RiderStatsPage = () => {
         {/* Metrics Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {metrics.map((m, i) => (
-            <div key={i} className="bg-card rounded-[2rem] p-8 border border-border shadow-sm group hover:border-primary/20 transition-all">
-              <div className={`w-12 h-12 bg-muted/50 ${m.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <m.icon size={24} />
+            <div key={i} className="bg-surface rounded-[2rem] p-8 border border-border shadow-sm group hover:border-primary/20 transition-all">
+              <div className="w-10 h-10 bg-foreground text-background rounded-xl flex items-center justify-center mb-6 font-black text-[9px]">
+                {m.type}
               </div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{m.label}</p>
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">{m.label}</p>
               <div className="text-3xl font-black text-foreground mb-1">{m.value}</div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter flex items-center gap-1">
-                <TrendingUp size={10} className="text-emerald-green" />
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                 {m.sub}
               </p>
             </div>
@@ -112,17 +99,15 @@ const RiderStatsPage = () => {
           </div>
 
           {/* Quick Audit */}
-          <div className="bg-clinical-navy rounded-[2.5rem] p-10 text-white shadow-xl shadow-clinical-navy/10 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-soft-cyan opacity-[0.05] rounded-full blur-[80px] -mr-32 -mt-32"></div>
-            <h3 className="text-xl font-bold mb-8 font-serif flex items-center gap-3">
-              <Search className="text-soft-cyan" size={24} />
+          <div className="bg-foreground rounded-[2.5rem] p-10 text-background shadow-2xl relative overflow-hidden group">
+            <h3 className="text-xl font-black mb-8 font-serif uppercase tracking-tight">
               Cycle Audit
             </h3>
             <div className="space-y-6">
               {[
-                { label: 'Revenues', value: '₹12,400', color: 'text-white' },
-                { label: 'Deductions', value: '₹0.00', color: 'text-emerald-green' },
-                { label: 'Net Disbursal', value: '₹12,400', color: 'text-soft-cyan font-black' }
+                { label: 'Revenues', value: '₹12,400', color: 'text-inherit opacity-90' },
+                { label: 'Deductions', value: '₹0.00', color: 'text-inherit opacity-60' },
+                { label: 'Net Disbursal', value: '₹12,400', color: 'text-inherit font-black' }
               ].map((row, i) => (
                 <div key={i} className="flex justify-between items-center border-b border-white/10 pb-4">
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{row.label}</span>
@@ -130,8 +115,8 @@ const RiderStatsPage = () => {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-10 h-14 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-widest hover:bg-white/20 transition-all backdrop-blur-md">
-              Download Tax Ledger <ArrowUpRight size={14} />
+            <button className="w-full mt-10 h-14 bg-background border border-border rounded-2xl flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest hover:bg-muted transition-all">
+              Download Tax Ledger
             </button>
           </div>
         </div>

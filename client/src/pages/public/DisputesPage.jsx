@@ -2,21 +2,10 @@ import { useState } from "react";
 import { getDisputes } from "../../api/disputeApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  ShieldAlert,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FileText,
-  MessageSquare,
-  ChevronRight,
-  Search,
-  History,
-  Plus
-} from "lucide-react";
 import Button from "../../components/common/Button";
 import EmptyState from "../../components/common/EmptyState";
 import { Link } from "react-router-dom";
+
 
 const DisputesPage = () => {
   const { data, loading, error } = useApiQuery(getDisputes, true);
@@ -33,14 +22,7 @@ const DisputesPage = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'resolved': return <CheckCircle size={14} />;
-      case 'refunded': return <ShieldAlert size={14} />;
-      case 'investigating': return <Search size={14} />;
-      default: return <Clock size={14} />;
-    }
-  };
+
 
   const filteredDisputes = disputes.filter(d => {
     if (activeTab === 'all') return true;
@@ -52,8 +34,8 @@ const DisputesPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-            <History size={12} />
+          <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+            LOG
             Resolution Network
           </div>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -66,8 +48,8 @@ const DisputesPage = () => {
               </p>
             </div>
             <Link to="/disputes/raise">
-              <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-bold flex items-center gap-2 hover:bg-primary/5">
-                <Plus size={20} /> File New Incident
+              <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 hover:bg-primary/5">
+                FILE NEW INCIDENT
               </Button>
             </Link>
           </div>
@@ -112,9 +94,8 @@ const DisputesPage = () => {
                 <div className="flex flex-col lg:flex-row gap-8">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <div className={`px-3 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${getStatusStyles(dispute.status)}`}>
-                        {getStatusIcon(dispute.status)}
-                        {dispute.status || 'Auditing'}
+                      <div className={`px-3 py-1 rounded-sm border text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 ${getStatusStyles(dispute.status)}`}>
+                        {dispute.status || 'AUDITING'}
                       </div>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1 rounded-lg border border-border">
                         ID: #{(dispute._id || "").slice(-8).toUpperCase()}
@@ -130,15 +111,12 @@ const DisputesPage = () => {
 
                     <div className="flex flex-wrap gap-6 pt-6 border-t border-border border-dashed text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                       <div className="flex items-center gap-2">
-                        <FileText size={14} className="text-primary" />
                         Order: {(dispute.orderId?._id || dispute.orderId || "").slice(-8).toUpperCase()}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock size={14} className="text-primary" />
                         Reported: {new Date(dispute.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
                       <div className="flex items-center gap-2">
-                        <MessageSquare size={14} className="text-primary" />
                         {dispute.messages?.length || 0} Communications
                       </div>
                     </div>
@@ -151,8 +129,8 @@ const DisputesPage = () => {
                         {dispute.status === 'pending' ? 'Awaiting clinical review' : 'Resolution under arbitration'}
                       </p>
                     </div>
-                    <Button variant="primary" className="h-12 w-full rounded-xl font-bold flex items-center justify-center gap-2">
-                      Open Audit Log <ChevronRight size={14} />
+                    <Button variant="primary" className="h-12 w-full rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">
+                      OPEN AUDIT LOG
                     </Button>
                   </div>
                 </div>

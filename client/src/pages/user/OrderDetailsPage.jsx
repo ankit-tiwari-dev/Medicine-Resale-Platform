@@ -3,19 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getOrderDetails } from "../../api/orderApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Package,
-  Shield,
-  Truck,
-  MapPin,
-  ChevronLeft,
-  CheckCircle,
-  FileText,
-  Clock,
-  AlertCircle,
-  ShoppingBag
-} from "lucide-react";
 import Button from "../../components/common/Button";
+
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
@@ -41,8 +30,9 @@ const OrderDetailsPage = () => {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <div className="text-center p-8 bg-card rounded-2xl shadow-sm border border-border">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <div className="w-12 h-12 text-destructive font-black text-xl uppercase tracking-widest mx-auto mb-4 flex items-center justify-center">ERR</div>
           <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Sync Error</h2>
+
           <p className="text-muted-foreground mb-6">Unable to retrieve order details from the clinical network.</p>
           <Link to="/dashboard/orders">
             <Button variant="primary">Back to History</Button>
@@ -66,14 +56,15 @@ const OrderDetailsPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/dashboard/orders" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to History
+          <Link to="/dashboard/orders" className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-widest mb-6">
+            <span className="tracking-widest">BACK TO</span> History
           </Link>
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <FileText size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                DOC
+
                 Order Manifest
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -83,8 +74,9 @@ const OrderDetailsPage = () => {
                 Initialized on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
-            <div className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg ${getStatusStyles(order.status)}`}>
-              <Truck size={16} />
+            <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg ${getStatusStyles(order.status)}`}>
+              LOGISTICS
+
               {order.status || 'Processing'}
             </div>
           </div>
@@ -95,8 +87,9 @@ const OrderDetailsPage = () => {
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-card rounded-[2rem] border border-border shadow-sm overflow-hidden">
               <div className="p-6 border-b border-border bg-muted/20 flex items-center gap-3">
-                <ShoppingBag className="text-primary" size={18} />
+                <div className="text-[10px] text-primary font-black uppercase tracking-widest">ITEMS</div>
                 <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Procedural Items</h2>
+
               </div>
               <div className="divide-y divide-border">
                 {(order.orderItems || []).map((item) => (
@@ -129,9 +122,10 @@ const OrderDetailsPage = () => {
             <div className="bg-primary rounded-[2rem] p-8 text-primary-foreground relative overflow-hidden group shadow-xl shadow-primary/10">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-[80px] group-hover:opacity-10 transition-opacity"></div>
               <div className="flex items-start gap-6 relative z-10">
-                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10">
-                  <Shield className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10 font-black text-xs uppercase tracking-widest text-white">
+                  SECURE
                 </div>
+
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2 font-serif">Escrow Protection Status</h3>
                   <p className="text-xs text-primary-foreground/70 mb-6 leading-relaxed font-sans">
@@ -139,12 +133,14 @@ const OrderDetailsPage = () => {
                   </p>
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
                     <div className="flex items-center gap-3">
-                      <CheckCircle size={14} className="text-soft-cyan" />
+                      <div className="text-[10px] text-soft-cyan font-black uppercase">OK</div>
                       <span className="text-[10px] font-bold uppercase tracking-widest">Payment Verified by Razorpay</span>
+
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock size={14} className="text-white/40" />
+                      <div className="text-[10px] text-white/40 font-black uppercase">WAIT</div>
                       <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">Awaiting Rider Collection</span>
+
                     </div>
                   </div>
                 </div>
@@ -155,9 +151,10 @@ const OrderDetailsPage = () => {
           {/* Sidebar: logistics */}
           <div className="space-y-6">
             <div className="bg-card rounded-[2rem] p-8 border border-border shadow-md">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <MapPin size={16} className="text-primary" />
+              <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <span className="text-primary">DESTINATION</span>
                 Clinical Handover
+
               </h3>
               <div className="space-y-6">
                 <div>
@@ -173,9 +170,10 @@ const OrderDetailsPage = () => {
             </div>
 
             <div className="bg-card rounded-[2rem] p-8 border border-border shadow-md">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Truck size={16} className="text-emerald-green" />
+              <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <span className="text-emerald-green">LOGISTICS</span>
                 Logistics Tracking
+
               </h3>
               <Link to={`/buyer/orders/${order._id}/tracking`}>
                 <Button variant="outline" className="w-full h-14 rounded-xl font-bold border-2">

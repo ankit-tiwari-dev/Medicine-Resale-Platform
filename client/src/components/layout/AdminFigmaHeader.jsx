@@ -1,5 +1,5 @@
-import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { useAuth } from "../../hooks/useAuth";
 import ThemeSwitcher from "../common/ThemeSwitcher";
 import { useTheme } from "../../theme/ThemeContext";
@@ -48,10 +48,11 @@ export default function AdminFigmaHeader() {
 
                         <button
                             onClick={logout}
-                            className="p-2.5 rounded-xl border border-border text-muted-foreground hover:text-danger hover:border-danger hover:bg-danger/5 transition-all shadow-sm"
+                            className="px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-danger hover:border-danger hover:bg-danger/5 transition-all shadow-sm flex items-center justify-center font-black text-[10px] uppercase tracking-widest"
                             title="Secure Logout"
                         >
-                            <LogOut size={18} />
+                            LOGOUT
+
                         </button>
                     </div>
                 </div>

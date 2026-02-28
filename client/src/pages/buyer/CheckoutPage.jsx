@@ -4,18 +4,8 @@ import { createPaymentOrder, verifyPayment } from "../../api/paymentApi";
 import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
 import { extractErrorMessage } from "../../utils/errors";
-import {
-  Shield,
-  CreditCard,
-  ChevronLeft,
-  CheckCircle,
-  Lock,
-  Info,
-  Truck,
-  Building2,
-  Wallet
-} from "lucide-react";
 import toast from "react-hot-toast";
+
 
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
@@ -84,9 +74,10 @@ const CheckoutPage = () => {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Container className="max-w-md">
           <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
-            <div className="w-24 h-24 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <CheckCircle size={40} className="text-emerald-green" />
+            <div className="w-24 h-24 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner font-black text-[10px] uppercase text-emerald-green tracking-widest">
+              OK
             </div>
+
             <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Payment Authorized</h2>
             <p className="text-muted-foreground mb-4 font-medium italic">Order Ref: #{(orderId || "").slice(-8).toUpperCase()}</p>
             <p className="text-muted-foreground mb-8 text-sm leading-relaxed font-medium">
@@ -115,14 +106,15 @@ const CheckoutPage = () => {
       <Container className="py-8 lg:py-12 max-w-[1000px]">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/dashboard/cart" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Cart
+          <Link to="/dashboard/cart" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors tracking-widest uppercase mb-6">
+            <span className="tracking-widest">BACK TO</span> Cart
           </Link>
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <Lock size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                SECURE
+
                 Secure Checkout
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -133,7 +125,8 @@ const CheckoutPage = () => {
               </p>
             </div>
             <div className="bg-primary px-6 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-primary/10">
-              <Shield className="text-soft-cyan" size={20} />
+              <div className="text-[10px] font-black text-soft-cyan uppercase tracking-widest">SAFE</div>
+
               <div className="text-[10px] uppercase font-bold text-primary-foreground tracking-widest leading-tight">
                 Escrow Protection <br /> Active & Bonded
               </div>
@@ -146,17 +139,19 @@ const CheckoutPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Summary Section */}
             <div className="bg-card rounded-[2rem] p-8 lg:p-10 border border-border shadow-sm">
-              <h2 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
-                <Building2 className="text-primary" size={20} />
+              <h2 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-8 flex items-center gap-3">
+                <span className="text-primary">DESTINATION</span>
                 Delivery Manifest
               </h2>
+
               <div className="space-y-6">
                 <div className="p-5 bg-muted/30 rounded-2xl border border-border">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Target Address</p>
                   <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center border border-border shadow-sm flex-shrink-0">
-                      <MapPin size={18} className="text-primary" />
+                    <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center border border-border shadow-sm flex-shrink-0 text-[10px] font-black text-primary uppercase tracking-widest">
+                      LOC
                     </div>
+
                     <p className="text-sm font-bold text-foreground leading-relaxed">
                       Secondary validation address required. Please ensure your registered handover address is correct in your profile.
                     </p>
@@ -165,16 +160,17 @@ const CheckoutPage = () => {
 
                 <div className="p-5 border border-border border-dashed rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center flex-shrink-0">
-                      <CreditCard size={18} className="text-muted-foreground" />
+                    <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center flex-shrink-0 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      PAY
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">Razorpay Secure Network</p>
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">UPI / Card / NetBanking</p>
                     </div>
                   </div>
-                  <CheckCircle className="text-emerald-green" size={20} />
+                  <div className="text-[10px] font-black text-emerald-green uppercase tracking-widest">OK</div>
                 </div>
+
               </div>
             </div>
 
@@ -182,9 +178,10 @@ const CheckoutPage = () => {
             <div className="bg-clinical-navy rounded-[2rem] p-8 text-white relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-soft-cyan opacity-[0.05] rounded-full blur-[80px] -mr-20 -mt-20"></div>
               <div className="relative z-10 flex gap-6">
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10">
-                  <Shield size={28} className="text-soft-cyan" />
+                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10 font-black text-[10px] text-soft-cyan uppercase tracking-widest">
+                  SAFE
                 </div>
+
                 <div>
                   <h3 className="text-xl font-bold mb-4 font-serif">Escrow Bonded Transaction</h3>
                   <div className="grid sm:grid-cols-2 gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
@@ -239,21 +236,15 @@ const CheckoutPage = () => {
 
               <Button
                 variant="primary"
-                className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20 text-lg font-bold flex gap-3 items-center justify-center group"
+                className="w-full h-16 rounded-2xl shadow-xl shadow-primary/20 text-[12px] uppercase tracking-widest font-black flex gap-3 items-center justify-center group"
                 onClick={onCreatePayment}
                 loading={loading}
                 disabled={!canPay}
               >
-                <Lock size={20} />
-                Authorize Capital
+                PAY NOW / AUTHORIZE CAPITAL
               </Button>
-
-              <div className="mt-8 pt-8 border-t border-border flex flex-wrap justify-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                <div className="h-6 flex items-center"><Building2 size={24} /></div>
-                <div className="h-6 flex items-center"><Wallet size={24} /></div>
-                <div className="h-6 flex items-center"><Shield size={24} /></div>
-              </div>
             </div>
+
           </div>
         </div>
       </Container>
@@ -261,22 +252,5 @@ const CheckoutPage = () => {
   );
 };
 
-// Placeholder for MapPin if not imported correctly or to ensure it matches common naming if needed
-const MapPin = ({ size, className }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
 export default CheckoutPage;
+

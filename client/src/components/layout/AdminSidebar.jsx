@@ -1,41 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import ThemeSwitcher from '../common/ThemeSwitcher';
-import {
-    LayoutDashboard,
-    ClipboardCheck,
-    Users,
-    ShieldCheck,
-    Truck,
-    History,
-    BarChart3,
-    Wallet,
-    Settings,
-    ShieldAlert,
-    LogOut
-} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const navItems = [
     {
         group: "Operations", items: [
-            { to: "/admin/medicines-review", label: "Verification Queue", icon: ClipboardCheck },
-            { to: "/admin/riders-kyc", label: "Rider KYC Audit", icon: ShieldCheck },
-            { to: "/admin/assign-rider", label: "Rider Assignment", icon: Truck },
+            { to: "/admin/medicines-review", label: "Verification Queue" },
+            { to: "/admin/riders-kyc", label: "Rider KYC Audit" },
+            { to: "/admin/assign-rider", label: "Rider Assignment" },
         ]
     },
     {
         group: "Management", items: [
-            { to: "/admin/orders", label: "Order Pipeline", icon: History },
-            { to: "/admin/users", label: "Network Users", icon: Users },
-            { to: "/admin/withdrawals", label: "Payout Controls", icon: Wallet },
+            { to: "/admin/orders", label: "Order Pipeline" },
+            { to: "/admin/users", label: "Network Users" },
+            { to: "/admin/withdrawals", label: "Payout Controls" },
         ]
     },
     {
         group: "System", items: [
-            { to: "/admin/stats", label: "System Health", icon: BarChart3 },
-            { to: "/admin/logs", label: "Audit Logs", icon: ShieldAlert },
-            { to: "/admin/settings", label: "Global Settings", icon: Settings },
+            { to: "/admin/stats", label: "System Health" },
+            { to: "/admin/logs", label: "Audit Logs" },
+            { to: "/admin/settings", label: "Global Settings" },
         ]
     }
 ];
@@ -74,14 +61,13 @@ export default function AdminSidebar() {
                                     key={item.to}
                                     to={item.to}
                                     className={({ isActive }) => `
-                    flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all
+                    flex items-center px-4 py-3 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all
                     ${isActive
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "text-foreground-muted hover:bg-surface-muted hover:text-primary"}
+                                            ? "bg-foreground text-background shadow-md shadow-foreground/10"
+                                            : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"}
                   `}
                                 >
-                                    <item.icon size={18} />
-                                    <span>{item.label}</span>
+                                    {item.label}
                                 </NavLink>
                             ))}
                         </div>
@@ -90,23 +76,19 @@ export default function AdminSidebar() {
             </nav>
 
             {/* Sidebar Footer */}
-            <div className="p-4 border-t border-border bg-surface-muted/30 space-y-3">
-                <div className="flex items-center gap-3 px-2 py-3 rounded-lg border border-border bg-surface shadow-low">
-                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <ShieldCheck size={16} />
-                    </div>
+            <div className="p-4 border-t border-border bg-muted/20 space-y-3">
+                <div className="flex items-center gap-4 px-4 py-4 rounded-xl border border-border bg-card shadow-sm">
                     <div className="flex flex-col">
-                        <span className="text-xs font-bold text-primary">Admin Node #1</span>
-                        <span className="text-[9px] text-foreground-muted">v7.3.1-Production</span>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Admin Node #1</span>
+                        <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter mt-0.5">v7.3.1-Production</span>
                     </div>
                 </div>
 
                 <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-bold text-red-500 hover:bg-red-500/5 transition-all group"
+                    className="w-full flex items-center px-4 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:bg-red-500/5 transition-all"
                 >
-                    <LogOut size={16} />
-                    <span>System Logout</span>
+                    System Logout
                 </button>
             </div>
         </aside>

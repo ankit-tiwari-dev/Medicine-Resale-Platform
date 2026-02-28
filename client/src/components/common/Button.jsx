@@ -9,7 +9,6 @@ export default function Button({
     size = "md",
     loading = false,
     disabled = false,
-    icon: Icon,
     children,
     ...props
 }) {
@@ -39,10 +38,6 @@ export default function Button({
         >
             {loading ? (
                 <span className={`${children ? 'mr-2' : ''} h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent`} />
-            ) : Icon ? (
-                <span className={children ? 'mr-2' : ''}>
-                    <Icon size={size === "sm" ? 14 : size === "lg" ? 20 : 18} />
-                </span>
             ) : null}
             {children}
         </button>

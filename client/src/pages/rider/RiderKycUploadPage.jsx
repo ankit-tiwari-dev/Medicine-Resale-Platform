@@ -2,28 +2,17 @@ import { useState } from "react";
 import { uploadKycDocuments } from "../../api/kycApi";
 import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
-import {
-  Upload,
-  FileText,
-  CheckCircle,
-  ChevronLeft,
-  ShieldCheck,
-  Info,
-  Camera,
-  CreditCard,
-  Building2,
-  ArrowRight
-} from "lucide-react";
+
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 
 const requiredDocs = [
-  { key: "aadharFront", label: "Aadhaar Frontal", icon: CreditCard },
-  { key: "aadharBack", label: "Aadhaar Posterior", icon: CreditCard },
-  { key: "panFront", label: "PAN Certification", icon: FileText },
-  { key: "licenseFront", label: "Driving License", icon: ShieldCheck },
-  { key: "bankProof", label: "Payout Account Proof", icon: Building2 },
-  { key: "selfie", label: "Live Identity Scan", icon: Camera }
+  { key: "aadharFront", label: "Aadhaar Frontal", type: "ID_A" },
+  { key: "aadharBack", label: "Aadhaar Posterior", type: "ID_B" },
+  { key: "panFront", label: "PAN Certification", type: "TAX" },
+  { key: "licenseFront", label: "Driving License", type: "DL" },
+  { key: "bankProof", label: "Payout Account Proof", type: "BANK" },
+  { key: "selfie", label: "Live Identity Scan", type: "FACE" }
 ];
 
 const RiderKycUploadPage = () => {
@@ -65,14 +54,12 @@ const RiderKycUploadPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/rider/kyc/consent" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Consent
+          <Link to="/rider/kyc/consent" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-6">
+            BACK TO CONSENT
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <Upload size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
                 Document Vault v1.0
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -86,8 +73,8 @@ const RiderKycUploadPage = () => {
         </div>
 
         <form onSubmit={onSubmit} className="bg-card rounded-[2.5rem] p-8 lg:p-12 border border-border shadow-sm">
-          <div className="p-6 bg-muted/30 border border-border rounded-2xl flex gap-4 mb-10">
-            <Info className="text-primary flex-shrink-0" size={20} />
+          <div className="p-6 bg-muted/30 border border-border rounded-2xl flex gap-4 mb-10 font-black text-[10px] uppercase tracking-widest text-primary">
+            SECURITY PROTOCOL
             <div className="text-xs text-muted-foreground leading-relaxed font-medium">
               <p className="font-bold text-foreground mb-1">Audit Precision Requirements</p>
               Ensure all documents are sharp, well-lit, and untruncated. Artifacts with glare or motion blur will be rejected by the automated forensic scanner.
@@ -98,8 +85,8 @@ const RiderKycUploadPage = () => {
             {requiredDocs.map((doc) => (
               <div key={doc.key} className={`relative group p-6 rounded-2xl border-2 border-dashed transition-all ${docs[doc.key] ? 'bg-emerald-green/5 border-emerald-green/30' : 'bg-muted/10 border-border hover:border-primary/30'}`}>
                 <div className="flex flex-col items-center text-center">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all ${docs[doc.key] ? 'bg-emerald-green text-white' : 'bg-card text-muted-foreground border border-border shadow-sm'}`}>
-                    {docs[doc.key] ? <CheckCircle size={24} /> : <doc.icon size={24} />}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all font-black text-[10px] ${docs[doc.key] ? 'bg-emerald-green text-white' : 'bg-card text-muted-foreground border border-border shadow-sm'}`}>
+                    {docs[doc.key] ? "DONE" : doc.type}
                   </div>
                   <h3 className="text-xs font-bold text-foreground mb-1 uppercase tracking-widest">{doc.label}</h3>
                   <p className="text-[10px] text-muted-foreground font-medium truncate w-full px-4">
@@ -118,8 +105,8 @@ const RiderKycUploadPage = () => {
 
           <div className="pt-8 border-t border-border border-dashed flex items-center justify-between gap-6">
             <div className="hidden md:flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all ${isComplete ? 'border-emerald-green bg-emerald-green/10' : 'border-muted bg-muted/30'}`}>
-                {isComplete && <CheckCircle size={14} className="text-emerald-green" />}
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all font-black text-[8px] ${isComplete ? 'border-emerald-green bg-emerald-green/10 text-emerald-green' : 'border-muted bg-muted/30'}`}>
+                {isComplete ? '100%' : '...'}
               </div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
                 Vault Integrity <br />
@@ -134,7 +121,6 @@ const RiderKycUploadPage = () => {
               disabled={!isComplete}
             >
               SYNCHRONIZE VAULT
-              <ArrowRight className="group-hover:translate-x-2 transition-transform" />
             </Button>
           </div>
         </form>

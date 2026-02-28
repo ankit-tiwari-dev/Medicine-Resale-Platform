@@ -3,19 +3,6 @@ import { getPendingKycRiders, verifyRiderKyc } from "../../api/adminApi";
 import Button from "../../components/common/Button";
 import { useApiQuery } from "../../hooks/useApiQuery";
 import { extractErrorMessage } from "../../utils/errors";
-import {
-  UserCheck,
-  ChevronLeft,
-  ShieldCheck,
-  Clock,
-  FileText,
-  Check,
-  X,
-  ExternalLink,
-  AlertCircle,
-  Activity,
-  Search
-} from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
@@ -43,14 +30,12 @@ const AdminRidersKycPage = () => {
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-10 lg:mb-12">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" />
-          Admin Terminal
+        <Link to="/admin" className="inline-flex items-center text-[10px] font-black text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.2em] mb-8">
+          Back to Admin Terminal
         </Link>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <UserCheck size={12} />
               Human Resource Governance
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -62,22 +47,22 @@ const AdminRidersKycPage = () => {
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative w-full sm:w-80">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search Partner Name..."
-                className="w-full h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest shadow-sm"
+                placeholder="Search Partner Registry..."
+                className="w-full h-14 pl-6 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-foreground focus:ring-4 focus:ring-foreground/5 transition-all text-[10px] font-black uppercase tracking-widest"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button
               variant="outline"
-              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center transition-all hover:bg-primary/5"
+              className="h-14 px-8 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px] w-full sm:w-auto hover:bg-foreground/5"
               onClick={() => query.execute()}
               loading={query.loading}
-              icon={Activity}
-            />
+            >
+              Sync
+            </Button>
           </div>
         </div>
       </div>
@@ -85,18 +70,13 @@ const AdminRidersKycPage = () => {
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[
-          { id: 'total', label: 'Total Applications', count: riders.length, icon: UserCheck, color: 'text-primary', bg: 'bg-primary/10' },
-          { id: 'pending', label: 'Pending Audits', count: riders.filter(r => r.verificationStatus === 'pending').length, icon: Clock, color: 'text-muted-amber', bg: 'bg-muted-amber/10' },
-          { id: 'verified', label: 'Certified Partners', count: riders.filter(r => r.verificationStatus === 'approved').length, icon: ShieldCheck, color: 'text-emerald-green', bg: 'bg-emerald-green/10' }
+          { id: 'total', label: 'Total Applications', count: riders.length },
+          { id: 'pending', label: 'Pending Audits', count: riders.filter(r => r.verificationStatus === 'pending').length },
+          { id: 'verified', label: 'Certified Partners', count: riders.filter(r => r.verificationStatus === 'approved').length }
         ].map(stat => (
-          <div key={stat.id} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
-            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-              <stat.icon size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-foreground">{stat.count}</p>
-            </div>
+          <div key={stat.id} className="bg-card rounded-[1.5rem] p-8 border border-border shadow-sm flex flex-col justify-center group hover:border-foreground/30 transition-all">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+            <p className="text-3xl font-black text-foreground tracking-tighter">{stat.count}</p>
           </div>
         ))}
       </div>
@@ -106,53 +86,42 @@ const AdminRidersKycPage = () => {
           {[1, 2, 3].map(i => <div key={i} className="h-40 bg-card rounded-[2.5rem] animate-pulse border border-border" />)}
         </div>
       ) : filteredRiders.length === 0 ? (
-        <div className="py-20 text-center bg-card rounded-[2.5rem] border border-border shadow-sm">
-          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 opacity-30">
-            <UserCheck size={32} />
-          </div>
-          <h3 className="text-xl font-bold text-foreground font-serif mb-2">Queue Exhausted</h3>
-          <p className="text-sm text-muted-foreground font-medium italic">No distribution partner applications require forensic review at this time.</p>
+        <div className="py-24 text-center bg-card rounded-[2.5rem] border border-border shadow-sm">
+          <h3 className="text-2xl font-black text-foreground uppercase tracking-widest mb-2">Queue Clear</h3>
+          <p className="text-xs text-muted-foreground font-medium italic">No distribution partner applications require forensic review at this time.</p>
         </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-6">
           {filteredRiders.map((rider) => (
-            <div key={rider._id} className="bg-card rounded-[2.5rem] p-8 lg:p-10 border border-border shadow-md group hover:border-primary/20 transition-all flex flex-col justify-between">
+            <div key={rider._id} className="bg-card rounded-[2.5rem] p-8 lg:p-10 border border-border shadow-md transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center text-2xl font-black shadow-xl shadow-primary/20">
+                <div className="flex items-center justify-between mb-10">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-foreground text-background rounded-2xl flex items-center justify-center text-3xl font-black shadow-xl">
                       {rider?.userId?.name?.charAt(0) || "R"}
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-foreground font-serif group-hover:text-primary transition-colors">{rider?.userId?.name || "Anonymous Partner"}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <div className="w-2 h-2 rounded-full bg-muted-amber animate-pulse" />
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Digital Audit Level-2</span>
+                      <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">{rider?.userId?.name || "Anonymous Partner"}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-70">Privilege_Identity_Level_2</span>
                       </div>
                     </div>
                   </div>
                   <div className="hidden sm:flex flex-col items-end">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Status Code</p>
-                    <div className="px-3 py-1 bg-muted/50 border border-border rounded-lg text-[10px] font-black uppercase tracking-widest">
-                      {rider?.verificationStatus || 'PENDING'}
+                    <div className="px-3 py-1 bg-muted/50 border border-border rounded-lg text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                      AUDIT_{rider?.verificationStatus || 'PENDING'}
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="p-4 bg-muted/20 border border-border rounded-2xl">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <FileText size={10} className="text-primary" />
-                      Docs Synchronized
-                    </p>
-                    <p className="text-xs font-bold text-foreground italic">10 of 10 Uploaded</p>
+                <div className="grid grid-cols-2 gap-4 mb-10">
+                  <div className="p-6 bg-muted/20 border border-border rounded-[1.5rem]">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em] mb-2">Docs Synchronized</p>
+                    <p className="text-xs font-black text-foreground italic">10_OF_10_AUDITED</p>
                   </div>
-                  <div className="p-4 bg-muted/20 border border-border rounded-2xl">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
-                      <ShieldCheck size={10} className="text-emerald-green" />
-                      Risk Scoring
-                    </p>
-                    <p className="text-xs font-bold text-emerald-green">LOW (9.2/10)</p>
+                  <div className="p-6 bg-muted/20 border border-border rounded-[1.5rem]">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em] mb-2">Risk Scoring</p>
+                    <p className="text-xs font-black text-foreground">LOW_PRECISION: 0.8%</p>
                   </div>
                 </div>
               </div>
@@ -161,24 +130,26 @@ const AdminRidersKycPage = () => {
                 <div className="flex gap-4">
                   <Button
                     variant="outline"
-                    className="h-12 w-12 p-0 text-emerald-green bg-emerald-green/5 hover:bg-emerald-green hover:text-white border-2 border-emerald-green/20 rounded-2xl transition-all shadow-sm shadow-emerald-green/10"
+                    className="h-10 px-4 text-emerald-green hover:bg-emerald-green hover:text-white border-2 border-emerald-green/30 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest"
                     onClick={() => onAction(rider._id, "approve")}
-                    title="Authorize Partner"
                   >
-                    <Check size={24} strokeWidth={2.5} />
+                    Authorize
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-12 w-12 p-0 text-red-500 bg-red-500/5 hover:bg-red-500 hover:text-white border-2 border-red-500/20 rounded-2xl transition-all shadow-sm shadow-red-500/10"
+                    className="h-10 px-4 text-red-500 hover:bg-red-500 hover:text-white border-2 border-red-500/30 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest"
                     onClick={() => onAction(rider._id, "reject")}
-                    title="Ban Identity"
                   >
-                    <X size={24} strokeWidth={2.5} />
+                    Restrict
                   </Button>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="ghost" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 hover:text-primary">
-                    <ExternalLink size={14} /> View Document Vault
+                  <Button
+                    variant="ghost"
+                    className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
+                    onClick={() => { }}
+                  >
+                    Vault Evidence
                   </Button>
                 </div>
               </div>
@@ -188,15 +159,12 @@ const AdminRidersKycPage = () => {
       )}
 
       {/* Audit Context */}
-      <div className="mt-12 bg-clinical-navy rounded-[2.5rem] p-10 text-white shadow-xl shadow-clinical-navy/20 flex flex-col md:flex-row items-center gap-8 border border-white/5 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-soft-cyan opacity-[0.05] rounded-full blur-[80px] -mr-32 -mt-32 transition-transform group-hover:scale-110"></div>
-        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md">
-          <AlertCircle size={32} className="text-soft-cyan" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-xl font-bold font-serif mb-2">Partner Background Protocol</h3>
-          <p className="text-sm text-slate-400 font-medium leading-relaxed italic">
-            Authorization triggers automated criminal record checks and Aadhaar metadata validation. Fraudulent submissions will result in immutable IP bans across the MedAImart network.
+      <div className="mt-12 bg-foreground rounded-[2.5rem] p-10 text-background shadow-2xl relative overflow-hidden group border border-border">
+        <div className="relative z-10">
+          <h4 className="text-[10px] font-black opacity-70 uppercase tracking-[0.3em] mb-2">Background Protocol</h4>
+          <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">Partner Integrity Audit</h3>
+          <p className="text-sm opacity-80 font-medium leading-relaxed italic max-w-2xl">
+            Authorization triggers automated criminal record checks and Aadhaar metadata validation. Fraudulent submissions will result in immutable IP bans across the registry network.
           </p>
         </div>
       </div>

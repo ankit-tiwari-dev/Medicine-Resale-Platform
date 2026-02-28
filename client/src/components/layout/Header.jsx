@@ -1,137 +1,105 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Search, LogIn, ShoppingBag } from "lucide-react";
 import ThemeSwitcher from "../common/ThemeSwitcher";
-import { useTheme } from "../../theme/ThemeContext";
+
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../hooks/useAuth";
-import blackLogo from "../../assets/black-theme-logo.png";
-import whiteLogo from "../../assets/white-theme-logo.png";
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { isDarkMode } = useTheme();
     const { cartCount } = useCart();
-    const { user, logout, isAuthenticated } = useAuth();
-    const logoSrc = isDarkMode ? blackLogo : whiteLogo;
+    const { user, isAuthenticated } = useAuth();
+
+    const navLinks = [
+        { name: "Home", path: "/" },
+        { name: "How It Works", path: "/#how-it-works", isHash: true },
+        { name: "Sell Medicines", path: "/register" },
+    ];
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-border bg-surface">
-            <div className="h-16 lg:h-18 flex items-center">
-                <div className="max-w-container mx-auto w-full px-[var(--spacing-container-px)] flex items-center justify-between gap-4 lg:gap-8">
+        <header className="sticky top-0 z-50 w-full bg-background border-b border-border/40 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2 group z-50">
-                        <img src={logoSrc} alt="MedAImart Logo" className="h-9 lg:h-10 w-auto transition-transform group-hover:scale-105" />
-                        <span className="font-display text-xl font-bold tracking-tight text-primary">
-                            MedAImart
-                        </span>
-                    </Link>
+                {/* Logo */}
+                <Link to="/" className="text-lg font-black tracking-tighter text-foreground uppercase">
+                    MedAImart
+                </Link>
 
-                    {/* Search Bar - Center (Hidden on small mobile) */}
-                    <div className="hidden sm:flex flex-1 max-w-md relative group">
-                        <input
-                            type="text"
-                            placeholder="Search verified medicines..."
-                            className="w-full h-10 bg-surface-muted border border-border rounded-lg px-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                        />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted group-focus-within:text-primary transition-colors">
-                            <Search size={18} />
-                        </div>
-                    </div>
-
-                    <nav className="hidden lg:flex items-center gap-6">
-                        <ThemeSwitcher />
-                        <Link to="/cart" className="relative text-foreground-muted hover:text-primary transition-colors flex items-center">
-                            <ShoppingBag className="w-5 h-5" />
-                            {cartCount > 0 && (
-                                <span className="absolute -top-1.5 -right-2 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
-                        <Link to="/browse" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
-                            Browse
-                        </Link>
-                        {isAuthenticated ? (
-                            <Link to="/dashboard" className="text-sm font-medium text-primary font-bold transition-colors">
-                                Dashboard
-                            </Link>
+                {/* Desktop Nav */}
+                <nav className="hidden lg:flex items-center gap-8">
+                    {navLinks.map((link) => (
+                        link.isHash ? (
+                            <a key={link.name} href={link.path} className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                                {link.name}
+                            </a>
                         ) : (
-                            <Link to="/login" className="text-sm font-medium text-foreground-muted hover:text-primary transition-colors">
+                            <Link key={link.name} to={link.path} className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                                {link.name}
+                            </Link>
+                        )
+                    ))}
+
+                    <div className="h-3 w-px bg-border/40 mx-2" />
+
+                    {isAuthenticated ? (
+                        <Link to="/dashboard" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                            Account
+                        </Link>
+                    ) : (
+                        <>
+                            <Link to="/login" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
                                 Login
                             </Link>
-                        )}
-                        <Link
-                            to="/register"
-                            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-low hover:shadow-medium hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        >
-                            Sell Medicines
-                        </Link>
-                    </nav>
+                            <Link to="/register" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                                Register
+                            </Link>
+                        </>
+                    )}
 
-                    {/* Mobile Controls */}
-                    <div className="flex items-center gap-4 lg:hidden">
+                    <div className="flex items-center gap-6 ml-4">
+                        <Link to="/cart" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                            Cart
+                            {cartCount > 0 && <span>({cartCount})</span>}
+                        </Link>
                         <ThemeSwitcher />
-                        <Link to="/cart" className="relative text-foreground-muted hover:text-primary transition-colors flex items-center pr-2">
-                            <ShoppingBag className="w-5 h-5" />
-                            {cartCount > 0 && (
-                                <span className="absolute -top-1.5 0 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
-                        <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="p-2 text-foreground-muted hover:text-primary transition-colors z-50"
-                            aria-label="Toggle Menu"
-                        >
-                            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
                     </div>
+                </nav>
 
+                {/* Mobile Controls */}
+                <div className="flex lg:hidden items-center gap-4">
+                    <ThemeSwitcher />
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-foreground">
+                        <span className="text-[10px] font-black uppercase tracking-widest">{isMenuOpen ? "CLOSE" : "MENU"}</span>
+
+                    </button>
                 </div>
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Menu */}
             {isMenuOpen && (
-                <div className="fixed inset-0 bg-surface z-40 lg:hidden animate-in fade-in duration-200">
-                    <nav className="flex flex-col h-full pt-24 px-6 gap-2">
-                        <Link
-                            to="/browse"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
-                        >
-                            <ShoppingBag className="text-primary" />
-                            Browse Medicines
+                <div className="lg:hidden absolute top-16 left-0 w-full bg-background border-b border-border/40 p-8 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
+                    {navLinks.map((link) => (
+                        <Link key={link.name} to={link.path} onClick={() => setIsMenuOpen(false)} className="text-lg font-bold uppercase tracking-tight text-foreground">
+                            {link.name}
                         </Link>
-                        {isAuthenticated ? (
-                            <Link
-                                to="/dashboard"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
-                            >
-                                <LogIn className="text-primary" />
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <Link
-                                to="/login"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="flex items-center gap-4 p-4 text-lg font-bold text-foreground border-b border-border/50"
-                            >
-                                <LogIn className="text-primary" />
-                                Secure Login
-                            </Link>
-                        )}
-                        <Link
-                            to="/register"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="mt-4 bg-primary text-primary-foreground p-4 rounded-xl text-center text-lg font-bold shadow-lg shadow-primary/20"
-                        >
-                            Sell on MedAImart
+                    ))}
+                    {isAuthenticated ? (
+                        <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold uppercase tracking-tight text-foreground">
+                            Account
                         </Link>
-                    </nav>
+                    ) : (
+                        <>
+                            <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold uppercase tracking-tight text-foreground">
+                                Login
+                            </Link>
+                            <Link to="/register" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold uppercase tracking-tight text-foreground">
+                                Register
+                            </Link>
+                        </>
+                    )}
+                    <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold uppercase tracking-tight text-foreground">
+                        Cart ({cartCount})
+                    </Link>
                 </div>
             )}
         </header>

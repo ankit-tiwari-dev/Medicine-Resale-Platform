@@ -3,20 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getOrderTracking } from "../../api/orderApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Package,
-  Truck,
-  CheckCircle,
-  ChevronLeft,
-  Clock,
-  Shield,
-  MapPin,
-  Search,
-  History,
-  FileText,
-  ArrowRight
-} from "lucide-react";
 import Button from "../../components/common/Button";
+
 
 const OrderTrackingPage = () => {
   const { id } = useParams();
@@ -36,11 +24,12 @@ const OrderTrackingPage = () => {
   }
 
   const steps = [
-    { status: 'ordered', label: 'Order Initialized', icon: FileText, desc: 'Medical requisition received and audited.' },
-    { status: 'paid', label: 'Capital Secured', icon: Shield, desc: 'Funds locked in clinical escrow vault.' },
-    { status: 'shipped', label: 'In Transit', icon: Truck, desc: 'Certified rider has collected the unit.' },
-    { status: 'delivered', label: 'Handover Complete', icon: CheckCircle, desc: 'Procurement cycle finalized.' }
+    { status: 'ordered', label: 'Order Initialized', initial: 'DOC', desc: 'Medical requisition received and audited.' },
+    { status: 'paid', label: 'Capital Secured', initial: 'SEC', desc: 'Funds locked in clinical escrow vault.' },
+    { status: 'shipped', label: 'In Transit', initial: 'TRK', desc: 'Certified rider has collected the unit.' },
+    { status: 'delivered', label: 'Handover Complete', initial: 'OK', desc: 'Procurement cycle finalized.' }
   ];
+
 
   const currentStatus = order?.status?.toLowerCase() || 'pending';
   const statusHistory = order?.statusHistory || [];
@@ -50,14 +39,15 @@ const OrderTrackingPage = () => {
       <Container className="py-8 lg:py-12 max-w-[900px]">
         {/* Header */}
         <div className="mb-10">
-          <Link to={`/dashboard/orders/${id}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Manifest
+          <Link to={`/dashboard/orders/${id}`} className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-widest mb-6">
+            <span className="tracking-widest">BACK TO</span> Manifest
           </Link>
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <History size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                TIME
+
                 Logistics Pulse
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -90,7 +80,8 @@ const OrderTrackingPage = () => {
                     <div key={step.status} className={`relative flex gap-8 group ${!isCompleted && 'opacity-40'}`}>
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center z-10 transition-all shadow-lg ${isCompleted ? 'bg-primary text-white scale-110 shadow-primary/20' : 'bg-muted text-muted-foreground'
                         }`}>
-                        <step.icon size={20} />
+                        <div className="text-[10px] font-black uppercase tracking-widest">{step.initial}</div>
+
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
@@ -113,7 +104,8 @@ const OrderTrackingPage = () => {
               </div>
 
               <div className="mt-16 p-6 bg-muted/20 border border-border border-dashed rounded-[1.5rem] flex items-center gap-4">
-                <Search className="text-primary" size={20} />
+                <div className="text-primary text-[10px] font-black uppercase tracking-widest">LOC</div>
+
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Current Node</p>
                   <p className="text-sm font-bold text-foreground">Hub Processing Center — Bengaluru South</p>
@@ -124,9 +116,9 @@ const OrderTrackingPage = () => {
             {currentStatus === 'shipped' && (
               <Link to={`/buyer/orders/${id}/confirm-delivery`}>
                 <Button className="w-full h-16 rounded-2xl shadow-xl shadow-primary/10 text-lg font-bold flex gap-3 items-center justify-center">
-                  <CheckCircle size={24} />
                   Declare Delivery Success
                 </Button>
+
               </Link>
             )}
           </div>
@@ -134,10 +126,11 @@ const OrderTrackingPage = () => {
           {/* Sidebar: Rider info */}
           <div className="space-y-6">
             <div className="bg-card rounded-[2rem] p-8 border border-border shadow-md">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Truck size={16} className="text-primary" />
+              <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                <span className="text-primary">LOGISTICS</span>
                 Logistics Lead
               </h3>
+
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 bg-muted rounded-2xl overflow-hidden border border-border">
                   <img
@@ -165,16 +158,18 @@ const OrderTrackingPage = () => {
 
             <div className="bg-primary rounded-[2rem] p-8 text-primary-foreground shadow-lg shadow-primary/10 group cursor-pointer overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform"></div>
-              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                <Shield size={16} className="text-soft-cyan" />
+              <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="text-soft-cyan">SECURE</span>
                 Escrow Protection
               </h3>
+
               <p className="text-[10px] leading-relaxed opacity-70 mb-6 font-medium">
                 Funds will remain locked in our secure network vault until you inspect the medicine and declare a successful handover.
               </p>
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] group-hover:gap-4 transition-all">
-                Protocol Details <ArrowRight size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] group-hover:gap-4 transition-all pb-1">
+                Protocol Details &rarr;
               </div>
+
             </div>
           </div>
         </div>

@@ -5,7 +5,6 @@ import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
 import { useAuth } from "../../hooks/useAuth";
 import AuthCard from "../../components/layout/AuthCard";
-import { ChevronRight, ShieldCheck } from "lucide-react";
 
 const RiderRegisterPage = () => {
   const navigate = useNavigate();
@@ -46,7 +45,7 @@ const RiderRegisterPage = () => {
         {rateLimit.active && <AlertMessage variant="warning" message={rateLimit.message} />}
 
         <div className="bg-emerald-green/5 border border-emerald-green/20 rounded-2xl p-4 flex gap-3 mb-2 shadow-sm">
-          <ShieldCheck className="w-5 h-5 text-emerald-green flex-shrink-0" />
+          <div className="text-[10px] font-black uppercase text-emerald-green tracking-widest flex-shrink-0 pt-0.5">SECURE</div>
           <p className="text-[11px] text-emerald-green font-bold uppercase tracking-widest leading-relaxed">
             Certified riders undergo mandatory document verification and compliance training.
           </p>
@@ -102,7 +101,7 @@ const RiderRegisterPage = () => {
 
         <div className="pt-6 border-t border-border mt-2">
           <p className="text-sm text-center text-muted-foreground font-sans">
-            Already a network rider? <Link className="font-bold text-primary hover:text-emerald-green transition-colors inline-flex items-center gap-1" to="/login">Secure Sign In <ChevronRight size={14} /></Link>
+            Already a network rider? <Link className="font-bold text-primary hover:text-emerald-green transition-colors inline-flex items-center gap-1" to="/login">Secure Sign In</Link>
           </p>
         </div>
       </form>

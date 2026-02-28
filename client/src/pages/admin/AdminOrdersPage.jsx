@@ -3,30 +3,19 @@ import { getAdminOrders, updateAdminOrderStatus } from "../../api/adminApi";
 import Button from "../../components/common/Button";
 import { useApiQuery } from "../../hooks/useApiQuery";
 import { extractErrorMessage } from "../../utils/errors";
-import {
-  Package,
-  ChevronLeft,
-  Search,
-  Filter,
-  Clock,
-  CheckCircle,
-  Truck,
-  XCircle,
-  ShieldAlert,
-  RefreshCw,
-  ArrowRight
-} from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
+
 const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending", icon: Clock, color: "text-muted-amber" },
-  { value: "paid", label: "Capital Secured", icon: CheckCircle, color: "text-primary" },
-  { value: "shipped", label: "In Transit", icon: Truck, color: "text-soft-cyan" },
-  { value: "delivered", label: "Handover Complete", icon: CheckCircle, color: "text-emerald-green" },
-  { value: "cancelled", label: "Voided", icon: XCircle, color: "text-red-500" },
-  { value: "disputed", label: "Under Investigation", icon: ShieldAlert, color: "text-muted-amber" }
+  { value: "pending", label: "Pending", color: "text-muted-amber" },
+  { value: "paid", label: "Capital Secured", color: "text-primary" },
+  { value: "shipped", label: "In Transit", color: "text-soft-cyan" },
+  { value: "delivered", label: "Handover Complete", color: "text-emerald-green" },
+  { value: "cancelled", label: "Voided", color: "text-red-500" },
+  { value: "disputed", label: "Under Investigation", color: "text-muted-amber" }
 ];
+
 
 const getStatusStyle = (status) => {
   switch (status?.toLowerCase()) {
@@ -67,14 +56,12 @@ const AdminOrdersPage = () => {
     <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="mb-10">
-        <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" />
-          Admin Terminal
+        <Link to="/admin" className="inline-flex items-center text-[10px] font-black text-muted-foreground hover:text-foreground transition-colors uppercase tracking-[0.2em] mb-8">
+          Back to Admin Terminal
         </Link>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <Package size={12} />
               Procurement Ledger
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -86,22 +73,21 @@ const AdminOrdersPage = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Order ID or Status..."
-                className="h-14 pl-12 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all text-xs font-bold uppercase tracking-widest w-64"
+                placeholder="Search State Registry..."
+                className="h-14 pl-6 pr-6 rounded-2xl bg-card border border-border outline-none focus:border-foreground focus:ring-4 focus:ring-foreground/5 transition-all text-[10px] font-black uppercase tracking-widest w-64"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button
               variant="outline"
-              className="h-14 w-14 rounded-2xl border-2 p-0 flex items-center justify-center"
+              className="h-14 px-8 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px]"
               onClick={() => query.execute()}
               loading={query.loading}
             >
-              <RefreshCw size={18} />
+              Sync Queue
             </Button>
           </div>
         </div>
@@ -110,18 +96,13 @@ const AdminOrdersPage = () => {
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[
-          { label: 'Pending Dispatches', count: (query.data || []).filter(o => o.status === 'paid').length, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
-          { label: 'Active Shipments', count: (query.data || []).filter(o => o.status === 'shipped').length, icon: Truck, color: 'text-soft-cyan', bg: 'bg-soft-cyan/10' },
-          { label: 'Completed Trades', count: (query.data || []).filter(o => o.status === 'delivered').length, icon: CheckCircle, color: 'text-emerald-green', bg: 'bg-emerald-green/10' }
+          { label: 'Pending Dispatches', count: (query.data || []).filter(o => o.status === 'paid').length },
+          { label: 'Active Shipments', count: (query.data || []).filter(o => o.status === 'shipped').length },
+          { label: 'Completed Trades', count: (query.data || []).filter(o => o.status === 'delivered').length }
         ].map((s, i) => (
-          <div key={i} className="bg-card rounded-[1.5rem] p-6 border border-border shadow-sm flex items-center gap-6 group hover:border-primary/30 transition-all">
-            <div className={`w-12 h-12 ${s.bg} ${s.color} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-              <s.icon size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{s.label}</p>
-              <p className="text-2xl font-black text-foreground">{s.count}</p>
-            </div>
+          <div key={i} className="bg-card rounded-[1.5rem] p-8 border border-border shadow-sm flex flex-col justify-center group hover:border-foreground/30 transition-all">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{s.label}</p>
+            <p className="text-3xl font-black text-foreground tracking-tighter">{s.count}</p>
           </div>
         ))}
       </div>
@@ -166,9 +147,8 @@ const AdminOrdersPage = () => {
                     </td>
                     <td className="px-10 py-6">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-foreground uppercase tracking-widest italic flex items-center gap-1.5">
-                          <Clock size={12} className="text-primary" />
-                          {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
+                        <span className="text-[10px] font-black text-foreground uppercase tracking-[0.2em] italic">
+                          SYNC_{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }).toUpperCase() : 'PENDING'}
                         </span>
                       </div>
                     </td>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Search, UserCircle, LogOut } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeSwitcher from '../common/ThemeSwitcher';
 
@@ -31,9 +31,9 @@ export default function AdminTopHeader() {
                 </div>
 
                 {/* Notifications */}
-                <button className="relative p-2 text-foreground-muted hover:text-primary transition-colors">
-                    <Bell size={20} />
-                    <span className="absolute top-1 right-1 size-2 bg-danger rounded-full border-2 border-surface" />
+                <button className="relative px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all">
+                    Alerts
+                    <span className="absolute -top-0.5 -right-0.5 size-1.5 bg-red-500 rounded-full" />
                 </button>
 
                 <div className="h-6 w-px bg-border" />
@@ -41,15 +41,15 @@ export default function AdminTopHeader() {
                 {/* User Menu */}
                 <div className="flex items-center gap-4">
                     <div className="flex flex-col items-end">
-                        <span className="text-sm font-bold text-primary">System Admin</span>
-                        <span className="text-[10px] text-foreground-muted font-medium">{user?.email || 'admin@medaimart.com'}</span>
+                        <span className="text-sm font-bold text-foreground">System Admin</span>
+                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{user?.email || 'admin@medaimart.com'}</span>
                     </div>
                     <button
                         onClick={logout}
-                        className="p-2 rounded-full border border-border text-foreground-muted hover:text-danger hover:border-danger hover:bg-danger/5 transition-all shadow-low"
+                        className="px-4 py-2 rounded-xl border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-red-500 hover:border-red-500 hover:bg-red-500/5 transition-all shadow-sm"
                         title="Secure Logout"
                     >
-                        <LogOut size={18} />
+                        Logout
                     </button>
                 </div>
             </div>

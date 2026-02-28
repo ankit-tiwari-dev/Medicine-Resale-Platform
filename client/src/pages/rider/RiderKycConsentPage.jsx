@@ -2,17 +2,7 @@ import { useState } from "react";
 import { submitKycConsent } from "../../api/kycApi";
 import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
-import {
-  ShieldCheck,
-  FileText,
-  CheckSquare,
-  ChevronLeft,
-  Lock,
-  Info,
-  UserCheck,
-  Scale,
-  ArrowRight
-} from "lucide-react";
+
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -40,9 +30,8 @@ const RiderKycConsentPage = () => {
       <Container className="py-8 lg:py-12 max-w-[800px]">
         {/* Header */}
         <div className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3">
-            <Scale size={14} />
-            Clinical Governance
+          <div className="flex items-center justify-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3">
+            Governance Audit
           </div>
           <h1 className="text-3xl lg:text-5xl font-serif font-bold text-foreground">
             Certified Partner <span className="text-primary">Consent</span>
@@ -59,22 +48,22 @@ const RiderKycConsentPage = () => {
                 {
                   title: "Document Authenticity",
                   desc: "I swear under clinical oath that all provided identification and certification documents are legitimate and un-tampered.",
-                  icon: FileText
+                  type: "AUTH"
                 },
                 {
                   title: "Operational Compliance",
                   desc: "I agree to adhere to MedAImart's cold-chain and medical handling protocols during all distribution assignments.",
-                  icon: ShieldCheck
+                  type: "SAFE"
                 },
                 {
                   title: "Data Forensic Authorization",
                   desc: "I consent to the forensic analysis of my identification data through third-party government and financial verification APIs.",
-                  icon: Lock
+                  type: "DATA"
                 }
               ].map((point, i) => (
                 <div key={i} className="flex gap-6">
-                  <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center flex-shrink-0 text-primary">
-                    <point.icon size={24} />
+                  <div className="w-12 h-12 bg-foreground text-background rounded-2xl flex items-center justify-center flex-shrink-0 font-black text-[10px]">
+                    {point.type}
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-foreground mb-1 group">{point.title}</h3>
@@ -112,15 +101,13 @@ const RiderKycConsentPage = () => {
                   disabled={!consentGiven}
                 >
                   AUTHORIZE AUDIT
-                  <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </form>
           </div>
 
-          <div className="bg-muted/30 p-6 flex items-center gap-4 text-xs font-medium text-muted-foreground italic border-t border-border">
-            <Info size={16} className="text-primary flex-shrink-0" />
-            MedAImart uses AES-256 encryption for all document storage. Your data is strictly used for clinical compliance.
+          <div className="bg-muted/30 p-6 flex items-center gap-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-t border-border">
+            SECURE: MedAImart uses AES-256 encryption for all document storage. Your data is strictly used for clinical compliance.
           </div>
         </div>
       </Container>

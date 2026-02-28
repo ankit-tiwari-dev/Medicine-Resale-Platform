@@ -3,16 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { getSellerReviews } from "../../api/reviewApi";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Star,
-  ShieldCheck,
-  User,
-  ChevronLeft,
-  MessageSquare,
-  TrendingUp,
-  Award,
-  Clock
-} from "lucide-react";
 import EmptyState from "../../components/common/EmptyState";
 
 const SellerReviewsPage = () => {
@@ -25,14 +15,8 @@ const SellerReviewsPage = () => {
 
   const renderStars = (rating) => {
     return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star
-            key={s}
-            size={14}
-            className={s <= rating ? "fill-soft-cyan text-soft-cyan" : "text-muted border-muted"}
-          />
-        ))}
+      <div className="flex gap-1 text-[10px] font-black uppercase tracking-widest text-soft-cyan">
+        RATING: {rating} / 5
       </div>
     );
   };
@@ -42,14 +26,13 @@ const SellerReviewsPage = () => {
       <Container className="py-8 lg:py-12 max-w-[900px]">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/browse" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Marketplace
+          <Link to="/browse" className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-[0.2em] mb-6">
+            BACK TO MARKETPLACE
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <Award size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                RATING
                 Trust Ledger
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -93,8 +76,7 @@ const SellerReviewsPage = () => {
         ) : (
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2">
-              <MessageSquare className="text-primary" size={18} />
-              <h2 className="text-xs font-bold text-foreground uppercase tracking-[0.2em]">Verified Depositions</h2>
+              <h2 className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">Verified Depositions</h2>
             </div>
 
             <div className="space-y-4">
@@ -102,18 +84,17 @@ const SellerReviewsPage = () => {
                 <div key={review._id} className="bg-card rounded-[1.5rem] p-8 border border-border shadow-sm group hover:border-primary/20 transition-all">
                   <div className="flex items-start justify-between gap-6 mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-primary font-bold shadow-inner">
-                        {review.userId?.name?.charAt(0) || <User size={18} />}
+                      <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-primary font-black shadow-inner uppercase tracking-widest text-[10px]">
+                        {review.userId?.name?.charAt(0) || "U"}
                       </div>
                       <div>
                         <div className="font-bold text-foreground text-sm flex items-center gap-2">
                           {review.userId?.name || "Verified Participant"}
-                          <ShieldCheck size={14} className="text-emerald-green" />
+                          <div className="text-[8px] font-black uppercase tracking-widest bg-emerald-green/10 text-emerald-green px-1.5 py-0.5 rounded-sm">VERIFIED</div>
                         </div>
                         <div className="flex items-center gap-3 pt-0.5">
                           {renderStars(review.rating)}
                           <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter flex items-center gap-1">
-                            <Clock size={10} />
                             {new Date(review.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                           </span>
                         </div>

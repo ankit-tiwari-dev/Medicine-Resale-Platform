@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle, Clock, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
 import Button from './Button';
 import TrustBadge from './TrustBadge';
 import { useCart } from '../../context/CartContext';
@@ -51,27 +50,27 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                 <img
                     src={image || images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400'}
                     alt={medicineName}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover"
                 />
 
                 {/* Verification Status Badge */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 font-sans">
                     {adminVerified && (
-                        <div className="px-2 py-1 rounded-md bg-emerald-green text-white text-[10px] font-semibold flex items-center gap-1 shadow-sm">
-                            <CheckCircle size={10} /> AI Verified
+                        <div className="px-2 py-1 rounded-md bg-emerald-green text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                            AI Verified
                         </div>
                     )}
                     {riderVerified && (
-                        <div className="px-2 py-1 rounded-md bg-soft-cyan text-white text-[10px] font-semibold flex items-center gap-1 shadow-sm">
-                            <Shield size={10} /> Rider Certified
+                        <div className="px-2 py-1 rounded-md bg-soft-cyan text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                            Rider Certified
                         </div>
                     )}
                 </div>
 
                 {/* Expiry Warning Strip */}
                 {isExpiringSoon && (
-                    <div className="absolute bottom-0 inset-x-0 bg-soft-red/90 text-white py-1.5 px-3 text-[10px] font-bold flex items-center justify-center gap-1.5 backdrop-blur-sm">
-                        <Clock size={12} /> EXPIRING SOON
+                    <div className="absolute bottom-0 inset-x-0 bg-soft-red/90 text-white py-1.5 px-3 text-[10px] font-bold flex items-center justify-center uppercase tracking-widest backdrop-blur-sm">
+                        EXPIRING SOON
                     </div>
                 )}
             </div>
@@ -98,10 +97,8 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                         <span className="text-xl font-bold text-primary">₹{Number(price).toLocaleString('en-IN')}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5" title="Secured by Escrow">
-                        <div className="p-2 bg-emerald-green/10 rounded-full">
-                            <Shield size={16} className="text-emerald-green" />
-                        </div>
+                    <div className="flex items-center" title="Secured by Escrow">
+                        <span className="text-[10px] font-black text-emerald-green uppercase tracking-widest">Escrow Active</span>
                     </div>
                 </div>
             </div>
@@ -121,33 +118,32 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                                     updateQuantity(medicine._id, quantity - 1);
                                 }
                             }}
-                            className="w-9 h-9 flex items-center justify-center rounded-lg bg-card text-foreground-muted hover:text-red-500 hover:bg-red-500/5 transition-all shadow-sm border border-border"
+                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-card text-foreground-muted hover:text-red-500 hover:bg-red-500/5 transition-all shadow-sm border border-border text-lg font-bold"
                         >
-                            {quantity === 1 ? <Trash2 size={16} /> : <Minus size={16} />}
+                            -
                         </button>
 
                         <div className="flex flex-col items-center">
-                            <span className="text-[10px] font-bold text-primary uppercase tracking-tighter leading-none">In Cart</span>
+                            <span className="text-[10px] font-black text-primary uppercase tracking-tighter leading-none">In Cart</span>
                             <span className="text-sm font-bold text-foreground">{quantity}</span>
                         </div>
 
                         <button
                             onClick={() => updateQuantity(medicine._id, quantity + 1)}
-                            className="w-9 h-9 flex items-center justify-center rounded-lg bg-card text-primary hover:bg-primary/5 transition-all shadow-sm border border-border"
+                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-card text-primary hover:bg-primary/5 transition-all shadow-sm border border-border text-lg font-bold"
                         >
-                            <Plus size={16} />
+                            +
                         </button>
                     </div>
                 ) : (
                     <Button
                         variant="primary"
-                        className="w-full h-10 font-semibold"
+                        className="w-full h-10 font-bold uppercase tracking-widest text-xs rounded-full"
                         onClick={(e) => {
                             e.stopPropagation();
                             addItem(medicine);
                         }}
                         loading={loading}
-                        icon={ShoppingCart}
                     >
                         Add to Cart
                     </Button>

@@ -2,18 +2,7 @@ import { useState } from "react";
 import { verifyAadhar, verifyKycDoc, verifyPayout } from "../../api/kycApi";
 import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
-import {
-  Search,
-  ChevronLeft,
-  ShieldCheck,
-  Clock,
-  CheckCircle,
-  CreditCard,
-  Building2,
-  AlertCircle,
-  ArrowRight,
-  Activity
-} from "lucide-react";
+
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
@@ -45,9 +34,9 @@ const RiderKycVerificationPage = () => {
   };
 
   const steps = [
-    { key: 'aadhar', label: 'E-KYC Aadhaar Link', icon: CreditCard, desc: 'Biometric and OTP-based identity bridge.' },
-    { key: 'doc', label: 'PAN/License OCR', icon: Search, desc: 'Optical character matching and forgery scan.' },
-    { key: 'payout', label: 'Financial Channel', icon: Building2, desc: 'Escrow account link and bank verification.' }
+    { key: 'aadhar', label: 'E-KYC Aadhaar Link', type: 'GOVT', desc: 'Biometric and OTP-based identity bridge.' },
+    { key: 'doc', label: 'PAN/License OCR', type: 'DOCS', desc: 'Optical character matching and forgery scan.' },
+    { key: 'payout', label: 'Financial Channel', type: 'BANK', desc: 'Escrow account link and bank verification.' }
   ];
 
   return (
@@ -55,14 +44,12 @@ const RiderKycVerificationPage = () => {
       <Container className="py-8 lg:py-12 max-w-[900px]">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/rider" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Command
+          <Link to="/rider" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-6">
+            BACK TO COMMAND
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <Activity size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
                 Forensic Engine Active
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -82,11 +69,11 @@ const RiderKycVerificationPage = () => {
               <div className="space-y-10">
                 {steps.map((step) => (
                   <div key={step.key} className="flex gap-6 relative group">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all shadow-md ${verificationState[step.key] === 'success'
-                        ? 'bg-emerald-green text-white'
-                        : 'bg-muted/50 text-primary border border-primary/10 group-hover:bg-primary/5'
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all shadow-md font-black text-[10px] ${verificationState[step.key] === 'success'
+                      ? 'bg-emerald-green text-white'
+                      : 'bg-muted/50 text-primary border border-primary/10 group-hover:bg-primary/5'
                       }`}>
-                      {verificationState[step.key] === 'success' ? <CheckCircle size={28} /> : <step.icon size={28} />}
+                      {verificationState[step.key] === 'success' ? "DONE" : step.type}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -115,8 +102,8 @@ const RiderKycVerificationPage = () => {
 
             <div className="p-8 bg-clinical-navy rounded-[2.5rem] text-white flex items-center gap-6 shadow-xl shadow-clinical-navy/20 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-48 h-48 bg-soft-cyan opacity-[0.05] rounded-full blur-[80px] -mr-24 -mt-24"></div>
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md">
-                <ShieldCheck size={32} className="text-soft-cyan" />
+              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md font-black text-[10px] text-soft-cyan">
+                SECURE
               </div>
               <div>
                 <h4 className="text-lg font-bold font-serif mb-1">Administrative Lock</h4>
@@ -130,8 +117,7 @@ const RiderKycVerificationPage = () => {
           {/* Sidebar context */}
           <div className="space-y-6">
             <div className="bg-card rounded-[2rem] p-8 border border-border shadow-md">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Clock size={16} className="text-primary" />
+              <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">
                 Audit Velocity
               </h3>
               <div className="space-y-6">
@@ -146,14 +132,11 @@ const RiderKycVerificationPage = () => {
               </div>
             </div>
 
-            <div className="bg-muted-amber rounded-[2rem] p-8 text-amber-950 flex gap-4 shadow-lg shadow-muted-amber/10">
-              <AlertCircle size={24} className="flex-shrink-0" />
-              <div>
-                <h4 className="text-sm font-bold uppercase tracking-widest mb-1">Risk Sync</h4>
-                <p className="text-[10px] font-medium opacity-80 leading-relaxed italic">
-                  Any archival inconsistency between Aadhaar and PAN will trigger a mandatory manual forensic interview with MedAImart compliance.
-                </p>
-              </div>
+            <div className="bg-muted-amber rounded-[2rem] p-8 text-amber-950 flex flex-col gap-2 shadow-lg shadow-muted-amber/10">
+              <div className="text-[10px] font-black uppercase tracking-widest bg-amber-950/10 w-fit px-2 py-1 rounded-lg mb-1">Risk Sync</div>
+              <p className="text-[10px] font-bold opacity-80 leading-relaxed italic">
+                Any archival inconsistency between Aadhaar and PAN will trigger a mandatory manual forensic interview with MedAImart compliance.
+              </p>
             </div>
           </div>
         </div>

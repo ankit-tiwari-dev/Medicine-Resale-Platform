@@ -5,7 +5,6 @@ import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
 import { useAuth } from "../../hooks/useAuth";
 import AuthCard from "../../components/layout/AuthCard";
-import { ChevronRight } from "lucide-react";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -32,7 +31,7 @@ const RegisterPage = () => {
   return (
     <AuthCard
       title="Create Account"
-      subtitle="Join India's most trusted AI-verified medicine resale network."
+      subtitle="Join our platform to buy and sell medicines."
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {error && <AlertMessage variant="destructive" message={error} />}
@@ -72,17 +71,17 @@ const RegisterPage = () => {
           className="font-sans"
         />
 
-        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-base font-bold shadow-lg shadow-primary/20">
+        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-sm font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-full mt-4">
           Create Account
         </Button>
 
-        <p className="text-[10px] text-muted-foreground text-center font-medium leading-relaxed px-4">
-          By creating an account, you agree to our clinical compliance standards and escrow safety protocols.
+        <p className="text-[10px] text-muted-foreground/60 text-center font-bold uppercase tracking-widest px-4">
+          By creating an account, you agree to our terms.
         </p>
 
-        <div className="pt-6 border-t border-border mt-2">
-          <p className="text-sm text-center text-muted-foreground font-sans">
-            Already registered? <Link className="font-bold text-primary hover:text-emerald-green transition-colors inline-flex items-center gap-1" to="/login">Sign in to Session <ChevronRight size={14} /></Link>
+        <div className="pt-6 border-t border-border/40 mt-2">
+          <p className="text-xs text-center text-muted-foreground font-bold uppercase tracking-widest">
+            Already registered? <Link className="text-foreground border-b border-foreground/20 hover:border-foreground transition-all ml-1" to="/login">Login</Link>
           </p>
         </div>
       </form>

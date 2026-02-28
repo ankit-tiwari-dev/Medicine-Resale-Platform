@@ -4,18 +4,8 @@ import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
 import { FormInput } from "../../components/forms/FormInput";
 import { extractErrorMessage } from "../../utils/errors";
-import {
-  ShieldAlert,
-  ChevronLeft,
-  Upload,
-  FileText,
-  CheckCircle,
-  Info,
-  AlertCircle,
-  Camera
-} from "lucide-react";
-import toast from "react-hot-toast";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+
 
 const RaiseDisputePage = () => {
   const navigate = useNavigate();
@@ -71,8 +61,8 @@ const RaiseDisputePage = () => {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Container className="max-w-md">
           <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
-            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <CheckCircle size={40} className="text-primary" />
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner font-black text-xl text-primary tracking-widest uppercase">
+              DONE
             </div>
             <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Report Initialized</h2>
             <p className="text-muted-foreground mb-8 text-sm leading-relaxed font-medium">
@@ -94,14 +84,13 @@ const RaiseDisputePage = () => {
       <Container className="py-8 lg:py-12 max-w-[800px]">
         {/* Header */}
         <div className="mb-10">
-          <Link to="/disputes" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Reconciliation
+          <Link to="/disputes" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors mb-6">
+            BACK TO RECONCILIATION
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <ShieldAlert size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                WARN
                 Audit Initialization
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -176,7 +165,7 @@ const RaiseDisputePage = () => {
             {step === 2 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 <div className="p-6 bg-muted/30 border border-border rounded-2xl flex gap-4">
-                  <Info className="text-primary flex-shrink-0" size={20} />
+                  <div className="text-primary flex-shrink-0 font-black text-[10px] uppercase tracking-widest">INFO</div>
                   <div className="text-xs text-muted-foreground leading-relaxed font-medium">
                     <p className="font-bold text-foreground mb-1">Evidence Integrity Shield</p>
                     Auditors require visual proof of damaged goods, wrong labels, or unapproved handovers. Non-tamperable photo evidence speeds up the resolution cycle.
@@ -192,8 +181,8 @@ const RaiseDisputePage = () => {
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
                   <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center border border-border shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                      <Camera className="text-primary" size={28} />
+                    <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center border border-border shadow-sm mb-4 group-hover:scale-110 transition-transform font-black text-[10px] text-primary uppercase tracking-widest">
+                      IMG
                     </div>
                     <h3 className="text-base font-bold text-foreground mb-1">Upload Evidence Artifacts</h3>
                     <p className="text-xs text-muted-foreground font-medium">Maximum 5 attachments. PNG, JPG, or PDF supported.</p>
@@ -204,7 +193,7 @@ const RaiseDisputePage = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {form.evidence.map((file, i) => (
                       <div key={i} className="bg-card border border-border p-3 rounded-xl flex flex-col items-center gap-2 overflow-hidden">
-                        <FileText className="text-primary" size={20} />
+                        <div className="text-primary font-black uppercase text-[10px] tracking-widest">DOC</div>
                         <span className="text-[10px] font-bold truncate w-full text-center">{file.name}</span>
                       </div>
                     ))}

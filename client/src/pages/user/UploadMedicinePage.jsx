@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  RefreshCw
-} from "lucide-react";
-import { uploadMedicine, scanMedicine } from "../../api/medicineApi";
+
 import Container from "../../components/layout/Container";
 import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
@@ -328,9 +325,9 @@ const UploadMedicinePage = () => {
                     {isScanning && (
                       <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] rounded-xl flex items-center justify-center">
                         <div className="flex flex-col items-center gap-3">
-                          <RefreshCw className="w-10 h-10 text-white animate-spin" />
-                          <span className="text-xs font-bold text-white uppercase tracking-widest">Scanning...</span>
+                          <span className="text-xs font-black text-white uppercase tracking-widest">Scanning...</span>
                         </div>
+
                       </div>
                     )}
                   </div>
@@ -359,9 +356,10 @@ const UploadMedicinePage = () => {
                   onClick={handleAIScan}
                   disabled={isScanning || !image}
                 >
-                  {isScanning && <RefreshCw className="animate-spin w-5 h-5" />}
+                  {isScanning && <span className="uppercase text-[10px] tracking-widest mr-2">SCANNING</span>}
                   {isValidated ? "Rescan Pharmaceutical" : "Run AI Forensic Scan"}
                 </Button>
+
 
                 <div className="bg-muted/30 rounded-2xl p-4 border border-border dashed">
                   <div>

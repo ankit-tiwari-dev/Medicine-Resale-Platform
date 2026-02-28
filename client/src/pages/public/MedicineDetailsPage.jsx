@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Shield, CheckCircle, Star, ChevronLeft, Plus, Minus, Truck, Info, Award } from "lucide-react";
 import medicineService from "../../services/medicineService";
 
 import Section from "../../components/layout/Section";
@@ -103,7 +102,7 @@ const MedicineDetailsPage = () => {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <div className="text-center p-8 bg-card rounded-2xl shadow-sm border border-border">
-          <Info className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <div className="w-12 h-12 flex items-center justify-center font-black text-xs text-muted-foreground mx-auto mb-4 bg-muted rounded-full uppercase tracking-widest">ERR</div>
           <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Medicine Not Found</h2>
           <p className="text-muted-foreground mb-6">The listing might have been removed or is unavailable.</p>
           <Link to="/browse">
@@ -122,9 +121,8 @@ const MedicineDetailsPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Breadcrumb */}
         <div className="mb-8">
-          <Link to="/browse" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Catalog
+          <Link to="/browse" className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-[0.2em]">
+            BACK TO CATALOG
           </Link>
         </div>
 
@@ -141,7 +139,7 @@ const MedicineDetailsPage = () => {
                 {adminVerified && (
                   <div className="absolute top-4 right-4">
                     <div className="px-3 py-1.5 rounded-lg bg-emerald-green text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg backdrop-blur-md">
-                      <CheckCircle size={12} /> AI Verified
+                      VERIFIED
                     </div>
                   </div>
                 )}
@@ -166,8 +164,8 @@ const MedicineDetailsPage = () => {
             <div className="bg-emerald-green/5 border border-emerald-green/10 rounded-2xl p-8 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-green/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform"></div>
               <div className="flex items-start gap-5 relative z-10">
-                <div className="w-14 h-14 bg-card rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-emerald-green/10">
-                  <CheckCircle className="w-8 h-8 text-emerald-green" />
+                <div className="w-14 h-14 bg-card rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-emerald-green/10 font-black text-[10px] text-emerald-green uppercase tracking-widest">
+                  PASS
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-foreground mb-3 font-serif uppercase tracking-tight">AI Compliance Audit</h3>
@@ -241,7 +239,7 @@ const MedicineDetailsPage = () => {
                   <div className="font-bold text-primary text-sm px-2 py-0.5 bg-primary/5 rounded w-fit">{stock} Units</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-1.5"><Shield size={12} /> Listing Status</div>
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-1.5">Listing Status</div>
                   <div className="font-bold text-emerald-green text-sm uppercase tracking-tighter">{medicine.status || "Unknown"}</div>
                 </div>
                 <div className="space-y-1">
@@ -257,8 +255,8 @@ const MedicineDetailsPage = () => {
               <div className="bg-primary rounded-2xl p-8 text-primary-foreground relative overflow-hidden group shadow-xl shadow-primary/10 mb-10">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full blur-[60px] group-hover:opacity-10 transition-opacity"></div>
                 <div className="flex items-start gap-6 relative z-10">
-                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10">
-                    <Shield className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10 font-black text-[10px] text-white tracking-widest uppercase">
+                    ESCROW
                   </div>
                   <div>
                     <h3 className="text-xl font-bold mb-2 font-serif">Escrow Shield <span className="text-soft-cyan">Active</span></h3>
@@ -266,7 +264,7 @@ const MedicineDetailsPage = () => {
                       MedAImart secures your payment. Funds are only dispersed to the seller once you receive and confirm the medicine's integrity.
                     </p>
                     <div className="flex items-center gap-3 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 w-fit">
-                      <Truck className="w-4 h-4 text-soft-cyan" />
+                      <span className="text-[10px] font-black tracking-widest text-soft-cyan">DELIVERY</span>
                       {medicine?.isVerified && <p className="text-[10px] font-bold text-emerald-green uppercase tracking-widest mt-1">MedAImart Certified Integration</p>}
                       <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">Certified Delivery Network</span>
                     </div>
@@ -285,9 +283,9 @@ const MedicineDetailsPage = () => {
                         const isInCart = cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id));
                         if (isInCart) updateQuantity(id, newQty);
                       }}
-                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
+                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground font-black text-lg"
                     >
-                      <Minus className="w-4 h-4" />
+                      -
                     </button>
                     <span className="text-xl font-bold text-foreground w-12 text-center font-sans tracking-tight">{quantity}</span>
                     <button
@@ -297,9 +295,9 @@ const MedicineDetailsPage = () => {
                         const isInCart = cartItems.some(item => String(item?.medicineId?._id || item.medicineId || item._id) === String(id));
                         if (isInCart) updateQuantity(id, newQty);
                       }}
-                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground shadow-primary/5"
+                      className="w-10 h-10 rounded-lg bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground shadow-primary/5 font-black text-lg"
                     >
-                      <Plus className="w-4 h-4" />
+                      +
                     </button>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -335,19 +333,12 @@ const MedicineDetailsPage = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-bold text-foreground text-lg">{seller.name}</span>
-                      <div className="bg-emerald-green/10 p-1 rounded-full border border-emerald-green/20">
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-green" />
+                      <div className="bg-emerald-green/10 p-1 rounded-sm border border-emerald-green/20 text-[8px] font-black text-emerald-green uppercase tracking-widest">
+                        VERIFIED
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 font-bold text-sm text-muted-foreground font-sans">
-                      <div className="flex items-center text-muted-amber">
-                        <Star className="w-4 h-4 fill-current" />
-                        <Star className="w-4 h-4 fill-current" />
-                        <Star className="w-4 h-4 fill-current" />
-                        <Star className="w-4 h-4 fill-current" />
-                        <Star className="w-4 h-4 text-border" />
-                      </div>
-                      <span>4.2 Reliable Seller</span>
+                    <div className="flex items-center gap-2 font-black text-[10px] text-muted-foreground uppercase tracking-widest">
+                      <span>RATING 4.2 / 5 RELIABLE SELLER</span>
                     </div>
                   </div>
                 </div>
@@ -368,13 +359,13 @@ const MedicineDetailsPage = () => {
           <div className="bg-card rounded-2xl p-8 border border-border shadow-sm space-y-6">
             <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Security Trust-Store</h3>
             {[
-              { icon: CheckCircle, label: "Seal Integrity Verified", color: "text-emerald-green", bg: "bg-emerald-green/10" },
-              { icon: Award, label: "Legitimate Manufacturer", color: "text-soft-cyan", bg: "bg-soft-cyan/10" },
-              { icon: Shield, label: "Cold-Chain Compliant", color: "text-primary", bg: "bg-primary/10" }
+              { type: "SEAL", label: "Seal Integrity Verified", color: "text-emerald-green", bg: "bg-emerald-green/10" },
+              { type: "AUTH", label: "Legitimate Manufacturer", color: "text-soft-cyan", bg: "bg-soft-cyan/10" },
+              { type: "COLD", label: "Cold-Chain Compliant", color: "text-primary", bg: "bg-primary/10" }
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-4 group">
-                <div className={`w-12 h-12 ${item.bg} rounded-xl flex items-center justify-center transition-transform group-hover:scale-105`}>
-                  <item.icon className={`w-6 h-6 ${item.color}`} />
+                <div className={`w-12 h-12 ${item.bg} rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 font-black text-[10px] tracking-widest uppercase ${item.color}`}>
+                  {item.type}
                 </div>
                 <span className="text-sm font-bold text-foreground font-sans">{item.label}</span>
               </div>

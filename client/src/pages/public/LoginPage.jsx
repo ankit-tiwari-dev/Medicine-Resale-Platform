@@ -6,7 +6,6 @@ import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
 import { useAuth } from "../../hooks/useAuth";
 import AuthCard from "../../components/layout/AuthCard";
-import { ChevronRight } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -47,8 +46,8 @@ const LoginPage = () => {
 
   return (
     <AuthCard
-      title="Secure Login"
-      subtitle="Access your clinical dashboard, wallet, and verified medicine listings."
+      title="Login"
+      subtitle="Login to your account."
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {error && <AlertMessage variant="destructive" message={error} />}
@@ -70,7 +69,7 @@ const LoginPage = () => {
           <FormInput
             id="login-password"
             name="password"
-            label="Account Password"
+            label="Password"
             type="password"
             required
             value={form.password}
@@ -79,39 +78,39 @@ const LoginPage = () => {
             className="font-sans"
           />
           <div className="flex justify-end pr-1">
-            <Link to="/forgot-password" size="sm" className="text-[10px] font-bold text-primary hover:text-emerald-green transition-colors uppercase tracking-widest">
+            <Link to="/forgot-password" size="sm" className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-all uppercase tracking-widest">
               Forgot Password?
             </Link>
           </div>
         </div>
 
-        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-base font-bold shadow-lg shadow-primary/20">
-          Sign In to MedAImart
+        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-sm font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-full mt-4">
+          Login
         </Button>
 
-        <div className="relative py-4">
+        <div className="relative py-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border"></div>
+            <div className="w-full border-t border-border/40"></div>
           </div>
-          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em]">
-            <span className="bg-card px-3 text-muted-foreground">Certified Auth</span>
+          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/30">
+            <span className="bg-background px-4 font-black">OR</span>
           </div>
         </div>
 
         <a
-          className="inline-flex w-full items-center justify-center rounded-xl border border-border bg-card px-4 py-3 text-sm font-bold text-foreground hover:bg-muted transition-all shadow-sm active:scale-95"
+          className="inline-flex w-full items-center justify-center rounded-full border border-border/40 bg-background px-4 py-3 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-muted transition-all active:scale-95"
           href={getGoogleOAuthUrl()}
         >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="mr-3 h-5 w-5" />
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="mr-3 h-4 w-4" />
           Google Account
         </a>
 
-        <div className="pt-6 space-y-3 border-t border-border mt-2">
-          <p className="text-sm text-center text-muted-foreground font-sans">
-            New here? <Link className="font-bold text-primary hover:text-emerald-green transition-colors inline-flex items-center gap-1" to="/register">Create Account <ChevronRight size={14} /></Link>
+        <div className="pt-6 space-y-4 border-t border-border/40 mt-2">
+          <p className="text-xs text-center text-muted-foreground font-bold uppercase tracking-widest">
+            New here? <Link className="text-foreground border-b border-foreground/20 hover:border-foreground transition-all ml-1" to="/register">Create Account</Link>
           </p>
-          <p className="text-[11px] text-center text-muted-foreground uppercase tracking-widest font-bold">
-            Rider? <Link className="text-soft-cyan hover:text-soft-cyan-light transition-colors" to="/register-rider">Join Fleet</Link>
+          <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest opacity-40">
+            Are you a rider? <Link className="text-foreground hover:underline" to="/register-rider">Join here</Link>
           </p>
         </div>
       </form>

@@ -1,21 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import Container from "../../components/layout/Container";
-import {
-  Mail,
-  Shield,
-  Key,
-  Calendar,
-  ChevronRight,
-  UserCheck,
-  Lock,
-  Settings,
-  Camera,
-  Smartphone,
-  MapPin,
-  User as UserIcon,
-  Loader2
-} from "lucide-react";
+
 import Button from "../../components/common/Button";
 import { FormInput } from "../../components/forms/FormInput";
 import toast from "react-hot-toast";
@@ -90,8 +76,7 @@ const ProfilePage = () => {
       <Container className="py-8 lg:py-12 max-w-[900px]">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-            <Settings size={12} />
+          <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
             Personal Security
           </div>
           <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -129,17 +114,17 @@ const ProfilePage = () => {
                 className="relative inline-block cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="size-32 bg-primary/10 rounded-3xl mx-auto flex items-center justify-center text-primary font-bold text-4xl overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-all">
+                <div className="size-32 bg-primary/10 rounded-3xl mx-auto flex items-center justify-center text-primary font-black text-4xl overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-all">
                   {uploading ? (
-                    <Loader2 className="size-8 animate-spin" />
+                    <span className="text-xs uppercase tracking-widest animate-pulse">Wait</span>
                   ) : user?.avatar ? (
                     <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                   ) : (
-                    user?.name?.charAt(0) || <UserIcon size={40} />
+                    user?.name?.charAt(0) || "U"
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 p-2 bg-primary text-primary-foreground rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                  <Camera size={16} />
+                <div className="absolute -bottom-2 -right-2 px-3 py-1 bg-foreground text-background rounded-xl shadow-lg border border-border group-hover:scale-110 transition-transform text-[9px] font-black uppercase tracking-widest">
+                  Update
                 </div>
               </div>
               <h2 className="text-xl font-bold text-foreground font-serif mb-1">{user?.name || "Verified User"}</h2>
@@ -157,12 +142,11 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            <div className="bg-primary rounded-2xl p-6 text-primary-foreground shadow-lg shadow-primary/10">
-              <h3 className="text-sm font-bold mb-2 flex items-center gap-2">
-                <Shield size={16} />
+            <div className="bg-foreground rounded-2xl p-8 text-background shadow-2xl border border-border">
+              <h3 className="text-sm font-black mb-2 uppercase tracking-tight">
                 SafeAccount™
               </h3>
-              <p className="text-[10px] opacity-70 leading-relaxed font-medium">
+              <p className="text-[10px] opacity-70 leading-relaxed font-black uppercase tracking-widest">
                 Your data is protected by AES-256 clinical-grade encryption and audited daily.
               </p>
             </div>
@@ -171,8 +155,7 @@ const ProfilePage = () => {
           {/* Right: Details & Security */}
           <div className="md:col-span-2 space-y-6">
             <div className="bg-card rounded-[2rem] p-8 lg:p-10 border border-border shadow-sm">
-              <h3 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
-                <UserIcon className="text-primary" size={20} />
+              <h3 className="text-lg font-black text-foreground font-serif uppercase tracking-tight mb-8">
                 Personal Metadata
               </h3>
 
@@ -193,8 +176,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Clinical Email</p>
-                  <div className="bg-muted/40 px-4 py-3 rounded-xl border border-border text-sm font-bold text-foreground flex items-center gap-2 opacity-60 cursor-not-allowed">
-                    <Mail size={14} className="text-muted-foreground" />
+                  <div className="bg-muted/40 px-4 py-3 rounded-xl border border-border text-xs font-black text-foreground flex items-center gap-2 opacity-60 cursor-not-allowed uppercase tracking-widest">
                     {user?.email || "Not Set"}
                   </div>
                 </div>
@@ -246,20 +228,19 @@ const ProfilePage = () => {
               </div>
 
               <div className="mt-10 pt-10 border-t border-border">
-                <h3 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
-                  <Key className="text-primary" size={20} />
+                <h3 className="text-lg font-black text-foreground font-serif uppercase tracking-tight mb-8">
                   Security Credentials
                 </h3>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted/20 border border-border rounded-2xl group hover:border-primary/20 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center border border-border shadow-sm">
-                        <Lock size={18} className="text-muted-foreground" />
+                      <div className="w-12 h-12 bg-foreground text-background rounded-xl flex items-center justify-center font-black text-[10px]">
+                        KEY
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-foreground">Update Passkey</p>
-                        <p className="text-[10px] text-muted-foreground font-medium">Last modification: 2 weeks ago</p>
+                        <p className="text-sm font-black text-foreground uppercase tracking-tight">Update Passkey</p>
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Modified: 2w ago</p>
                       </div>
                     </div>
                     <Button variant="outline" size="sm" className="h-9 px-4 font-bold">Modify</Button>
@@ -267,12 +248,12 @@ const ProfilePage = () => {
 
                   <div className="flex items-center justify-between p-4 bg-muted/20 border border-border rounded-2xl group hover:border-primary/20 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-card rounded-xl flex items-center justify-center border border-border shadow-sm">
-                        <Shield size={18} className="text-emerald-green" />
+                      <div className="w-12 h-12 bg-foreground text-background rounded-xl flex items-center justify-center font-black text-[10px]">
+                        KYC
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-foreground">Identity Verification (KYC)</p>
-                        <p className="text-[10px] text-emerald-green font-bold uppercase tracking-tighter">Certified & Verified</p>
+                        <p className="text-sm font-black text-foreground uppercase tracking-tight">Identity Verification</p>
+                        <p className="text-[10px] text-emerald-foreground font-black uppercase tracking-widest">Certified & Verified</p>
                       </div>
                     </div>
                     <Button variant="outline" size="sm" className="h-9 px-4 font-bold" disabled>Audit</Button>
@@ -281,9 +262,8 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            <Button variant="primary" className="w-full h-14 rounded-2xl shadow-xl shadow-primary/10 text-lg font-bold flex items-center justify-center gap-3 group">
+            <Button variant="primary" className="w-full h-16 rounded-2xl shadow-2xl shadow-primary/10 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center group">
               Synchronize Profile Data
-              <ChevronRight className="group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
         </div>

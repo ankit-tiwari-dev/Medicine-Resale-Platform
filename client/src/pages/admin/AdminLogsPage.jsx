@@ -1,17 +1,7 @@
 import { getAdminLogs } from "../../api/adminApi";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Activity,
-  ChevronLeft,
-  ShieldAlert,
-  Clock,
-  Database,
-  ArrowRight,
-  Terminal,
-  Search,
-  ExternalLink
-} from "lucide-react";
 import { Link } from "react-router-dom";
+
 import EmptyState from "../../components/common/EmptyState";
 
 const AdminLogsPage = () => {
@@ -30,14 +20,14 @@ const AdminLogsPage = () => {
       {/* Header */}
       <div className="mb-12">
         <Link to="/admin" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
-          <ChevronLeft className="w-3.5 h-3.5" />
-          Admin Terminal / System Node
+          <span className="tracking-widest">BACK TO</span> Admin Terminal / System Node
         </Link>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <Activity size={12} />
+            <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+              LOG TRL
               Immutable Audit Trail
+
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
               Operational <span className="text-primary">Logs</span>
@@ -47,8 +37,8 @@ const AdminLogsPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <div className="relative group text-[10px] font-black uppercase text-muted-foreground">
+
               <input
                 type="text"
                 placeholder="Search Action/Target..."
@@ -81,36 +71,40 @@ const AdminLogsPage = () => {
             {logs.map((log) => (
               <div key={log._id} className="grid grid-cols-12 p-6 items-center gap-4 hover:bg-muted/10 transition-colors group">
                 <div className="col-span-1">
-                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                    <Terminal size={14} />
+                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all font-black text-[10px] uppercase">
+                    SYS
+
                   </div>
                 </div>
                 <div className="col-span-4 pl-4">
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest ${getActionColor(log.action)}`}>
-                    <ShieldAlert size={10} />
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${getActionColor(log.action)}`}>
+
                     {log.action || 'INTERVENTION'}
                   </div>
                 </div>
                 <div className="col-span-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-muted/50 rounded-md border border-border flex items-center justify-center">
-                      <Database size={10} className="text-muted-foreground" />
+                    <div className="w-6 h-6 bg-muted/50 rounded-md border border-border flex items-center justify-center text-[8px] font-black uppercase tracking-widest text-muted-foreground">
+                      DB
+
                     </div>
                     <span className="text-xs font-bold text-foreground truncate">{log.targetType || 'SYSTEM_CORE'}</span>
                   </div>
                 </div>
                 <div className="col-span-3 text-right">
                   <div className="flex flex-col items-end">
-                    <span className="text-xs font-bold text-foreground italic flex items-center gap-1">
-                      <Clock size={10} />
+                    <span className="text-xs font-black text-foreground italic flex items-center gap-1">
+                      <span className="text-[8px] uppercase tracking-widest text-muted-foreground font-black">TIME:</span>
+
                       {log.createdAt ? new Date(log.createdAt).toLocaleTimeString() : '--:--'}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-medium">{log.createdAt ? new Date(log.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Unknown'}</span>
                   </div>
                 </div>
                 <div className="col-span-1 flex justify-end">
-                  <button className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-primary transition-all">
-                    <ArrowRight size={16} />
+                  <button className="p-2 hover:bg-muted rounded-lg text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all">
+                    VIEW
+
                   </button>
                 </div>
               </div>

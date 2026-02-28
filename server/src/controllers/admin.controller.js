@@ -307,7 +307,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
     const users = await User.find(filter)
         .select("-password -otp -otpExpires -refreshToken")
-        .sort({ _id: -1 })
+        .sort({ createdAt: -1 }) // Use createdAt instead of _id for clarity, though both work
         .skip(skip)
         .limit(parseInt(limit))
         .lean();

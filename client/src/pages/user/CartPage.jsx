@@ -7,10 +7,10 @@ import ConfirmationModal from "../../components/common/ConfirmationModal";
 import EmptyState from "../../components/common/EmptyState";
 import Container from "../../components/layout/Container";
 import { extractErrorMessage } from "../../utils/errors";
-import { Trash2, Shield, Truck, ShoppingBag, ChevronRight, Info, Plus, Minus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../context/CartContext";
+
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -82,8 +82,8 @@ const CartPage = () => {
       <Container className="py-8 lg:py-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <ShoppingBag size={12} />
+            <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+              CART
               Your Selection
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -99,8 +99,9 @@ const CartPage = () => {
               onClick={() => setShowClearConfirm(true)}
               className="text-[10px] font-bold text-destructive hover:underline uppercase tracking-widest flex items-center gap-2"
             >
-              <Trash2 size={12} /> Clear Entire Cart
+              PURGE Clear Entire Cart
             </button>
+
           )}
         </div>
 
@@ -137,9 +138,10 @@ const CartPage = () => {
                       <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
                         <h3 className="font-bold text-foreground text-lg">{medicine?.extractedData?.name || "Premium Medicine"}</h3>
                         {medicine.adminVerified && (
-                          <div className="bg-emerald-green/10 p-0.5 rounded-full border border-emerald-green/20">
-                            <Shield className="w-3 h-3 text-emerald-green" />
+                          <div className="bg-emerald-green/10 p-1 px-2 rounded-full border border-emerald-green/20 text-[8px] font-black tracking-widest uppercase text-emerald-green">
+                            SECURE
                           </div>
+
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground font-sans font-medium mb-4">{medicine?.extractedData?.genericName}</p>
@@ -151,15 +153,17 @@ const CartPage = () => {
                           className="w-8 h-8 rounded bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
                           disabled={Number(item.quantity || 1) <= 1}
                         >
-                          <Minus className="w-3 h-3" />
+                          -
                         </button>
+
                         <span className="text-sm font-bold text-foreground w-8 text-center">{item.quantity || 1}</span>
                         <button
                           onClick={() => updateQuantity(medicineId, Number(item.quantity || 1) + 1)}
                           className="w-8 h-8 rounded bg-card shadow-sm border border-border hover:bg-muted transition-all flex items-center justify-center text-foreground"
                         >
-                          <Plus className="w-3 h-3" />
+                          +
                         </button>
+
                       </div>
 
                       <div className="flex items-center justify-center sm:justify-start gap-4">
@@ -175,12 +179,14 @@ const CartPage = () => {
                         className="flex-1 sm:flex-none h-10 px-3 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20"
                         onClick={() => handleRemove(medicineId)}
                       >
-                        <Trash2 size={16} />
+                        DROP
                       </Button>
+
                       <Link to={`/browse/${medicineId}`} className="flex-1 sm:flex-none">
-                        <Button variant="outline" size="sm" className="w-full h-10 px-3">
-                          <Info size={16} />
+                        <Button variant="outline" size="sm" className="w-full h-10 px-3 font-black uppercase text-[10px] tracking-widest">
+                          VIEW
                         </Button>
+
                       </Link>
                     </div>
                   </div>
@@ -225,15 +231,17 @@ const CartPage = () => {
 
                 <div className="mt-8 pt-8 border-t border-border space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-soft-cyan/10 flex items-center justify-center">
-                      <Shield className="w-4 h-4 text-soft-cyan" />
+                    <div className="w-8 h-8 rounded-lg bg-soft-cyan/10 flex items-center justify-center text-[10px] font-black text-soft-cyan">
+                      GUARANTEE
                     </div>
+
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">100% Refundable until verification</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-green/10 flex items-center justify-center">
-                      <Truck className="w-4 h-4 text-emerald-green" />
+                    <div className="w-8 h-8 rounded-lg bg-emerald-green/10 flex items-center justify-center font-black text-[10px] text-emerald-green uppercase">
+                      TRK
                     </div>
+
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Certified Cold-Chain Available</p>
                   </div>
                 </div>

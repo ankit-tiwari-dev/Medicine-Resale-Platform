@@ -1,4 +1,4 @@
-import { Users, Package, TrendingUp, DollarSign, Activity, Shield, UserCheck, FileCheck, Terminal } from 'lucide-react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAdminStats, getAdminLogs } from "../../api/adminApi";
 import { useApiQuery } from "../../hooks/useApiQuery";
@@ -40,8 +40,7 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
           <div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-              <Terminal size={12} />
-              Central Command Infrastructure
+              Infrastructure Node Active
             </div>
             <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
               Command <span className="text-primary">Center</span>
@@ -55,65 +54,37 @@ export default function AdminDashboardPage() {
 
       {/* Stats Grid - All cards are clickable */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-        <Link to="/admin/users" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <Users className="w-6 h-6 text-primary" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-foreground mb-1">{stats.totalUsers.toLocaleString()}</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Identity Registry</div>
+        <Link to="/admin/users" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="text-3xl font-black text-foreground mb-2 tracking-tighter">{stats.totalUsers.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Identity Registry</div>
         </Link>
 
-        <Link to="/admin/medicines-review" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-emerald-green/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-green/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
-              <Package className="w-6 h-6 text-emerald-green" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-foreground mb-1">{stats.activeMedicines.toLocaleString()}</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pharmacological Assets</div>
+        <Link to="/admin/medicines-review" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="text-3xl font-black text-foreground mb-2 tracking-tighter">{stats.activeMedicines.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Pharma Assets</div>
         </Link>
 
-        <Link to="/admin/stats" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-soft-cyan/10 rounded-2xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
-              <DollarSign className="w-6 h-6 text-soft-cyan" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-foreground mb-1">₹{(stats.totalRevenue / 1000).toFixed(0)}K</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Capital Throughput</div>
+        <Link to="/admin/stats" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="text-3xl font-black text-foreground mb-2 tracking-tighter">₹{(stats.totalRevenue / 1000).toFixed(0)}K</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Capital Flow</div>
         </Link>
 
-        <Link to="/admin/riders-kyc" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-muted-amber/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-muted-amber/10 rounded-2xl flex items-center justify-center group-hover:bg-muted-amber/20 transition-colors">
-              <Shield className="w-6 h-6 text-muted-amber" />
-            </div>
+        <Link to="/admin/riders-kyc" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-3xl font-black text-foreground tracking-tighter">Pending</div>
             <Badge variant="expiring">{stats.verificationsPending}</Badge>
           </div>
-          <div className="text-2xl font-black text-foreground mb-1">Pending</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Audit Backlog</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Audit Backlog</div>
         </Link>
 
-        <Link to="/admin/orders" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-primary/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <TrendingUp className="w-6 h-6 text-primary" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-foreground mb-1">{stats.totalOrders.toLocaleString()}</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Order Traffic</div>
+        <Link to="/admin/orders" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="text-3xl font-black text-foreground mb-2 tracking-tighter">{stats.totalOrders.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Order Traffic</div>
         </Link>
 
-        <Link to="/admin/withdrawals" className="bg-card rounded-[1.5rem] p-6 shadow-sm border border-border hover:border-soft-cyan/30 hover:shadow-lg transition-all group scale-100 hover:scale-[1.02]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-soft-cyan/10 rounded-2xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
-              <Activity className="w-6 h-6 text-soft-cyan" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-foreground mb-1">{stats.pendingWithdrawals.toLocaleString()}</div>
-          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Withdrawal Backlog</div>
+        <Link to="/admin/withdrawals" className="bg-card rounded-[1.5rem] p-8 shadow-sm border border-border hover:border-foreground/30 hover:shadow-lg transition-all group overflow-hidden relative">
+          <div className="text-3xl font-black text-foreground mb-2 tracking-tighter">{stats.pendingWithdrawals.toLocaleString()}</div>
+          <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-80">Payout Queue</div>
         </Link>
       </div>
 
@@ -125,11 +96,8 @@ export default function AdminDashboardPage() {
             <div className="space-y-3">
               <Link
                 to="/admin/riders-kyc"
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
+                className="flex items-center gap-4 p-5 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <UserCheck className="w-6 h-6 text-primary" />
-                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-black text-foreground text-[10px] uppercase tracking-widest">Rider KYC</div>
                   <div className="text-[11px] text-muted-foreground font-medium truncate">Authorized Identity Audit</div>
@@ -139,11 +107,8 @@ export default function AdminDashboardPage() {
 
               <Link
                 to="/admin/medicines-review"
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
+                className="flex items-center gap-4 p-5 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm"
               >
-                <div className="w-12 h-12 bg-soft-cyan/10 rounded-xl flex items-center justify-center group-hover:bg-soft-cyan/20 transition-colors">
-                  <FileCheck className="w-6 h-6 text-soft-cyan" />
-                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-black text-foreground text-[10px] uppercase tracking-widest">Asset Review</div>
                   <div className="text-[11px] text-muted-foreground font-medium truncate">Pharmaceutical Verification</div>
@@ -152,11 +117,8 @@ export default function AdminDashboardPage() {
 
               <Link
                 to="/admin/users"
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm active:scale-95"
+                className="flex items-center gap-4 p-5 rounded-2xl hover:bg-muted transition-all group border border-transparent hover:border-border shadow-sm"
               >
-                <div className="w-12 h-12 bg-emerald-green/10 rounded-xl flex items-center justify-center group-hover:bg-emerald-green/20 transition-colors">
-                  <Users className="w-6 h-6 text-emerald-green" />
-                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-black text-foreground text-[10px] uppercase tracking-widest">User Registry</div>
                   <div className="text-[11px] text-muted-foreground font-medium truncate">Network Participant Control</div>
@@ -166,27 +128,22 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Platform Health */}
-          <div className="bg-gradient-to-br from-emerald-green to-emerald-green-dark rounded-xl p-6 text-white shadow-sm border border-emerald-green/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <Activity className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-sm opacity-90 font-medium">Platform Health</div>
-                <div className="text-2xl font-bold">Excellent</div>
-              </div>
+          <div className="bg-foreground text-background rounded-[2rem] p-8 shadow-xl border border-border">
+            <div className="mb-6">
+              <div className="text-[10px] opacity-70 font-black uppercase tracking-widest mb-1">Grid Status</div>
+              <div className="text-3xl font-black tracking-tighter uppercase">Excellent</div>
             </div>
-            <div className="space-y-2 text-sm font-medium">
-              <div className="flex items-center justify-between">
-                <span className="opacity-90">Uptime</span>
+            <div className="space-y-4 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex items-center justify-between border-b border-background/10 pb-2">
+                <span className="opacity-70">Uptime</span>
                 <span>99.98%</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="opacity-90">AI Accuracy</span>
+              <div className="flex items-center justify-between border-b border-background/10 pb-2">
+                <span className="opacity-70">AI Accuracy</span>
                 <span>98.5%</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="opacity-90">Avg Response</span>
+                <span className="opacity-70">Avg Response</span>
                 <span>120ms</span>
               </div>
             </div>
@@ -196,12 +153,11 @@ export default function AdminDashboardPage() {
         {/* Revenue Chart + Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue Overview Chart */}
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-foreground">Revenue Overview</h2>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                <TrendingUp className="w-3 h-3 text-emerald-green" />
-                ₹{stats.totalRevenue.toLocaleString()} total
+          <div className="bg-card rounded-[2rem] p-8 shadow-md border border-border">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Financial Intelligence</h2>
+              <div className="text-[10px] font-black text-foreground uppercase tracking-widest">
+                ₹{stats.totalRevenue.toLocaleString()} volume (12M)
               </div>
             </div>
             {(() => {
@@ -237,21 +193,18 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <h2 className="text-lg font-bold text-foreground mb-4">Recent Activity</h2>
-            <div className="space-y-3">
+          <div className="bg-card rounded-[2rem] p-8 shadow-md border border-border">
+            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 pl-2 border-l-2 border-primary/30 text-foreground">Audit Synchronization</h2>
+            <div className="space-y-4">
               {(logsData || []).slice(0, 5).map((log, idx) => (
-                <div key={log._id || idx} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border transition-all">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10">
-                    <Terminal className="w-5 h-5 text-primary" />
-                  </div>
+                <div key={log._id || idx} className="flex items-center gap-6 p-4 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border transition-all">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-foreground text-sm">{log.adminId?.name || 'System Admin'}</div>
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest truncate">{log.action}</div>
+                    <div className="font-black text-foreground text-xs uppercase tracking-widest">{log.adminId?.name || 'System Admin'}</div>
+                    <div className="text-[10px] font-bold text-primary uppercase tracking-widest mt-0.5 opacity-80">{log.action}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-foreground font-medium truncate max-w-[120px]">{log.targetType}</div>
-                    <div className="text-[10px] text-muted-foreground whitespace-nowrap">{new Date(log.createdAt).toLocaleTimeString()}</div>
+                    <div className="text-[10px] text-foreground font-black uppercase tracking-widest">{log.targetType}</div>
+                    <div className="text-[10px] text-muted-foreground font-medium uppercase mt-0.5">{new Date(log.createdAt).toLocaleTimeString()}</div>
                   </div>
                 </div>
               ))}

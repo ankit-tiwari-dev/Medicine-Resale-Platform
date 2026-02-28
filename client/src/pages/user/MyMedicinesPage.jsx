@@ -4,21 +4,8 @@ import { getMyMedicines, updateMedicine, deleteMedicine } from "../../api/medici
 import EmptyState from "../../components/common/EmptyState";
 import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import {
-  Package,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  ChevronLeft,
-  Shield,
-  Clock,
-  AlertCircle,
-  Boxes,
-  BarChart3,
-  X
-} from "lucide-react";
 import Button from "../../components/common/Button";
+
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import toast from "react-hot-toast";
 
@@ -92,14 +79,14 @@ const MyMedicinesPage = () => {
       <Container className="py-8 lg:py-12">
         {/* Header */}
         <div className="mb-10 lg:mb-12">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6">
-            <ChevronLeft className="w-4 h-4" />
-            Command Center
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
+            <span className="tracking-widest">BACK TO</span> Command Center
           </Link>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                <Boxes size={12} />
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                DB
+
                 Asset Inventory Registry
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
@@ -111,8 +98,9 @@ const MyMedicinesPage = () => {
             </div>
             <Link to="/dashboard/upload-medicine">
               <Button variant="primary" className="h-16 px-8 rounded-2xl shadow-2xl shadow-primary/20 font-black flex items-center gap-3 text-sm">
-                <Plus size={20} /> INITIALIZE NEW LISTING
+                INITIALIZE NEW LISTING
               </Button>
+
             </Link>
           </div>
         </div>
@@ -121,16 +109,17 @@ const MyMedicinesPage = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {tabs.map(tab => (
             <div key={tab.id} className="bg-card p-6 rounded-[1.5rem] border border-border shadow-sm flex items-center gap-6">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${tab.id === 'all' ? 'bg-primary/10 text-primary' :
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-[10px] font-black uppercase tracking-widest ${tab.id === 'all' ? 'bg-primary/10 text-primary' :
                 tab.id === 'listed' ? 'bg-emerald-green/10 text-emerald-green' :
                   tab.id === 'pending' ? 'bg-muted-amber/10 text-muted-amber' :
                     'bg-red-500/10 text-red-500'
                 }`}>
-                {tab.id === 'all' ? <BarChart3 size={24} /> :
-                  tab.id === 'listed' ? <Shield size={24} /> :
-                    tab.id === 'pending' ? <Clock size={24} /> :
-                      <AlertCircle size={24} />}
+                {tab.id === 'all' ? 'ALL' :
+                  tab.id === 'listed' ? 'LIVE' :
+                    tab.id === 'pending' ? 'PEND' :
+                      'ERR'}
               </div>
+
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{tab.label}</p>
                 <p className="text-2xl font-black text-foreground">{tab.count}</p>
@@ -146,12 +135,12 @@ const MyMedicinesPage = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
-                ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
+                ? 'bg-white text-black shadow-lg shadow-white/10 scale-105'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
             >
               {tab.label}
-              <span className={`px-1.5 py-0.5 rounded-md text-[9px] ${activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+              <span className={`px-1.5 py-0.5 rounded-md text-[9px] ${activeTab === tab.id ? 'bg-black/10 text-black' : 'bg-muted text-muted-foreground'
                 }`}>
                 {tab.count}
               </span>
@@ -207,7 +196,6 @@ const MyMedicinesPage = () => {
                         </td>
                         <td className="px-10 py-6">
                           <div className={`inline-flex px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest items-center gap-2 ${statusCfg.color}`}>
-                            {item.status === 'listed' ? <Shield size={10} /> : <Clock size={10} />}
                             {statusCfg.label}
                           </div>
                         </td>
@@ -225,29 +213,33 @@ const MyMedicinesPage = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      icon={Eye}
-                                      className="h-10 w-10 p-0 rounded-xl hover:bg-primary/5 border-2 border-border transition-all"
+                                      className="h-10 px-3 rounded-xl hover:bg-primary/5 border-2 border-border transition-all font-black text-[10px] uppercase tracking-widest"
                                       title="Inspect Listing"
-                                    />
+                                    >
+                                      VIEW
+                                    </Button>
                                   </Link>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    icon={Edit}
                                     onClick={() => !isLocked && setEditItem(JSON.parse(JSON.stringify(item)))}
                                     disabled={isLocked}
-                                    className={`h-10 w-10 p-0 rounded-xl border-2 border-border transition-all ${isLocked ? '' : 'hover:bg-soft-cyan/5 hover:text-soft-cyan'}`}
+                                    className={`h-10 px-3 rounded-xl border-2 border-border transition-all font-black text-[10px] uppercase tracking-widest ${isLocked ? '' : 'hover:bg-soft-cyan/5 hover:text-soft-cyan'}`}
                                     title={isLocked ? "Listing is locked (Network Chain Active)" : "Edit Listing"}
-                                  />
+                                  >
+                                    EDIT
+                                  </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    icon={Trash2}
                                     onClick={() => !isLocked && setConfirmDeleteId(item._id)}
                                     disabled={isLocked || actionLoading}
-                                    className={`h-10 w-10 p-0 rounded-xl border-2 border-border transition-all ${isLocked ? '' : 'hover:bg-red-500/5 hover:text-red-500'}`}
+                                    className={`h-10 px-3 rounded-xl border-2 border-border transition-all font-black text-[10px] uppercase tracking-widest ${isLocked ? '' : 'hover:bg-red-500/5 hover:text-red-500'}`}
                                     title={isLocked ? "Listing is locked (Audit Requirement)" : "Purge Listing"}
-                                  />
+                                  >
+                                    DEL
+                                  </Button>
+
                                 </>
                               );
                             })()}
@@ -277,7 +269,6 @@ const MyMedicinesPage = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-foreground truncate text-lg">{item.extractedData?.name || "Medicine"}</h3>
                         <div className={`mt-2 inline-flex px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest items-center gap-2 ${statusCfg.color}`}>
-                          {item.status === 'listed' ? <Shield size={10} /> : <Clock size={10} />}
                           {statusCfg.label}
                         </div>
                       </div>
@@ -301,18 +292,21 @@ const MyMedicinesPage = () => {
                           </Link>
                           <Button
                             variant="outline"
-                            icon={Edit}
                             disabled={isLocked}
-                            className={`h-12 w-12 p-0 flex items-center justify-center rounded-xl border-2 ${isLocked ? '' : 'hover:bg-soft-cyan/5 hover:text-soft-cyan'}`}
+                            className={`h-12 px-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest ${isLocked ? '' : 'hover:bg-soft-cyan/5 hover:text-soft-cyan'}`}
                             onClick={() => !isLocked && setEditItem(JSON.parse(JSON.stringify(item)))}
-                          />
+                          >
+                            EDIT
+                          </Button>
                           <Button
                             variant="outline"
-                            icon={Trash2}
                             disabled={isLocked || actionLoading}
-                            className={`h-12 w-12 p-0 flex items-center justify-center rounded-xl border-2 ${isLocked ? '' : 'hover:bg-red-500/5 hover:text-red-500'}`}
+                            className={`h-12 px-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest ${isLocked ? '' : 'hover:bg-red-500/5 hover:text-red-500'}`}
                             onClick={() => !isLocked && setConfirmDeleteId(item._id)}
-                          />
+                          >
+                            DEL
+                          </Button>
+
                         </div>
                       );
                     })()}
@@ -323,7 +317,8 @@ const MyMedicinesPage = () => {
 
             {filteredItems.length === 0 && (
               <div className="p-20 text-center">
-                <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                <div className="w-12 h-12 text-muted-foreground/30 font-black text-xl uppercase tracking-widest mx-auto flex items-center justify-center mb-4">EMPTY</div>
+
                 <p className="text-sm text-muted-foreground font-medium italic">No listings found matching this status filter.</p>
               </div>
             )}
@@ -342,10 +337,11 @@ const MyMedicinesPage = () => {
               </div>
               <button
                 onClick={() => setEditItem(null)}
-                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
+                className="p-2 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
               >
-                <X size={24} />
+                CLOSE
               </button>
+
             </div>
 
             <form onSubmit={handleUpdate} className="p-10 space-y-8">
