@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 
-export const FormInput = ({ id, label, type = "text", value, onChange, placeholder, error, required = false, ...rest }) => {
+export const FormInput = ({ id, label, type = "text", value, onChange, placeholder, error, required = false, labelClassName = "", ...rest }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
   const isNumber = type === "number";
@@ -30,7 +30,7 @@ export const FormInput = ({ id, label, type = "text", value, onChange, placehold
 
   return (
     <div className="space-y-1.5 w-full">
-      <label htmlFor={id} className="block text-xs font-bold uppercase tracking-widest text-primary opacity-70">
+      <label htmlFor={id} className={`block text-xs font-bold uppercase tracking-widest text-primary opacity-70 ${labelClassName}`}>
         {label}
       </label>
       <div className="relative w-full group">
