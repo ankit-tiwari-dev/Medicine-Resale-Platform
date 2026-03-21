@@ -62,7 +62,7 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                 {/* Verification Status Badge */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 font-sans">
                         <div className="px-2 py-1 rounded-md bg-emerald-green text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                            Groq Verified
+                            AI Verified
                         </div>
                     {riderVerified && (
                         <div className="px-2 py-1 rounded-md bg-soft-cyan text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
