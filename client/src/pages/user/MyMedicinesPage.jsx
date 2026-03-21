@@ -23,6 +23,7 @@ import {
   Trash2,
   PackageX
 } from "lucide-react";
+import EmptyState from "../../components/common/EmptyState";
 
 const MyMedicinesPage = () => {
   const { data, loading, error, execute: refreshList } = useApiQuery(getMyMedicines, true);
@@ -34,7 +35,7 @@ const MyMedicinesPage = () => {
 
   const lifecycleSteps = [
     { id: 'uploaded', label: 'Registered', icon: FileUp },
-    { id: 'pending', label: 'Groq Audit', icon: Microscope },
+    { id: 'pending', label: 'AI Audit', icon: Microscope },
     { id: 'verified', label: 'Verified', icon: ShieldCheck },
     { id: 'pickup_assigned', label: 'Logistics', icon: Truck },
     { id: 'collected', label: 'Received', icon: Package },
@@ -44,7 +45,7 @@ const MyMedicinesPage = () => {
   const getStatusCfg = (status) => {
     switch (status?.toLowerCase()) {
       case 'listed': return { label: 'Live & Verified', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20' };
-      case 'pending': return { label: 'Under Groq Audit', color: 'text-primary bg-primary/5 border-primary/20' };
+      case 'pending': return { label: 'Under AI Audit', color: 'text-primary bg-primary/5 border-primary/20' };
       case 'verified': return { label: 'Verified', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20' };
       case 'pickup_assigned': return { label: 'Rider Assigned', color: 'text-soft-cyan bg-soft-cyan/5 border-soft-cyan/20' };
       case 'collected': return { label: 'Collected', color: 'text-soft-cyan bg-soft-cyan/5 border-soft-cyan/20' };
@@ -170,34 +171,51 @@ const MyMedicinesPage = () => {
 
         {/* Stats Summary Bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {tabs.map(tab => (
-            <div key={tab.id} className="bg-card p-6 rounded-[1.5rem] border border-border shadow-sm flex items-center gap-6">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-[10px] font-black uppercase tracking-widest ${tab.id === 'all' ? 'bg-primary/10 text-primary' :
-                tab.id === 'listed' ? 'bg-emerald-green/10 text-emerald-green' :
-                  tab.id === 'pending' ? 'bg-muted-amber/10 text-muted-amber' :
-                    'bg-red-500/10 text-red-500'
-                }`}>
-                {tab.id === 'all' ? 'ALL' :
-                  tab.id === 'listed' ? 'LIVE' :
-                    tab.id === 'pending' ? 'PEND' :
-                      'ERR'}
-              </div>
+          {tabs.map(tab => {
+            let IconBase = Package;
+            if (tab.id === 'listed') IconBase = CheckCircle2;
+            else if (tab.id === 'pending') IconBase = Microscope;
+            else if (tab.id === 'rejected') IconBase = AlertCircle;
 
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{tab.label}</p>
-                <p className="text-2xl font-black text-foreground">{tab.count}</p>
+            return (
+              <div 
+                key={tab.id} 
+                className="group relative bg-card/50 backdrop-blur-sm p-6 rounded-[1.5rem] border border-border hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden flex items-center gap-5 cursor-pointer"
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {/* Ambient glow effect */}
+                <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] opacity-10 transition-opacity duration-500 group-hover:opacity-30 -mr-10 -mt-10 pointer-events-none ${
+                    tab.id === 'all' ? 'bg-primary' :
+                    tab.id === 'listed' ? 'bg-emerald-green' :
+                    tab.id === 'pending' ? 'bg-muted-amber' :
+                    'bg-red-500'
+                }`} />
+                
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3 border ${
+                  tab.id === 'all' ? 'bg-primary/10 text-primary border-primary/20' :
+                  tab.id === 'listed' ? 'bg-emerald-green/10 text-emerald-green border-emerald-green/20' :
+                  tab.id === 'pending' ? 'bg-muted-amber/10 text-muted-amber border-muted-amber/20' :
+                  'bg-red-500/10 text-red-500 border-red-500/20'
+                  }`}>
+                  <IconBase size={20} strokeWidth={2.5} />
+                </div>
+
+                <div className="relative z-10">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-foreground transition-colors">{tab.label}</p>
+                  <p className="text-3xl font-black text-foreground font-sans leading-none tracking-tighter">{tab.count}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Audit Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mb-8 bg-card p-1.5 rounded-xl border border-border shadow-sm font-sans">
+        <div className="flex items-center gap-2 mb-8 bg-card p-1.5 rounded-xl border border-border shadow-sm font-sans overflow-x-auto no-scrollbar mask-edges">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id
+              className={`flex items-center gap-3 px-5 py-2.5 flex-shrink-0 whitespace-nowrap rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id
                 ? 'bg-primary text-primary-foreground shadow-md shadow-primary/10'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}

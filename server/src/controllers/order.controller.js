@@ -70,11 +70,12 @@ export const createOrder = asyncHandler(async (req, res) => {
     try {
         for (const sellerId in sellerGroups) {
             const sellerMedicines = sellerGroups[sellerId];
-            const totalAmount = sellerMedicines.reduce((sum, m) => sum + m.price, 0);
+            const totalAmount = sellerMedicines.reduce((sum, m) => sum + (Number(m.price || 0) * Number(m.stock || 1)), 0);
 
             const orderItems = sellerMedicines.map(m => ({
                 medicineId: m._id,
-                price: m.price
+                price: m.price,
+                quantity: m.stock || 1
             }));
 
             const [order] = await Order.create([{

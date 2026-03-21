@@ -105,7 +105,7 @@ const DashboardHomePage = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-card p-2 rounded-xl border border-border shadow-sm">
+          <div className="flex items-center gap-4 bg-card p-2 rounded-xl border border-border shadow-sm self-start md:self-auto">
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-lg border border-primary/20">
               <User size={24} />
             </div>
@@ -260,7 +260,7 @@ const DashboardHomePage = () => {
                 {/* Re-using the quickActions data for this section, but with updated styling */}
                 {[
                   { title: "Browse Catalog", description: "Search verified medicines", icon: null, link: "/browse" },
-                  { title: "Upload Medicine", description: "List for Groq verification", icon: null, link: "/dashboard/upload-medicine" },
+                  { title: "Upload Medicine", description: "List for AI verification", icon: null, link: "/dashboard/upload-medicine" },
                   { title: "Active Orders", description: "Track delivery status", icon: null, link: "/dashboard/orders" },
                   { title: "Account Safety", description: "Security & KYC audit", icon: null, link: "/dashboard/profile" },
                 ].map((action, idx) => (
@@ -351,7 +351,7 @@ const DashboardHomePage = () => {
                 </h3>
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest leading-relaxed relative z-10 opacity-80 mb-6 font-sans">
-                Your account is currently in good standing. All listed medicines undergo a mandatory 12-point Groq forensic scan.
+                Your account is currently in good standing. All listed medicines undergo a mandatory 12-point AI forensic scan.
               </p>
               <Link to="/dashboard/profile">
                 <Button variant="outline" className="w-full bg-background/20 border-background/20 hover:bg-background/20 text-background font-black h-11 rounded-xl uppercase tracking-widest text-[9px] flex items-center justify-center gap-2">

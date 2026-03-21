@@ -111,15 +111,17 @@ export const approveCollection = asyncHandler(async (req, res) => {
         wallet = await Wallet.create({ userId: medicine.sellerId, balance: 0, transactions: [] });
     }
 
+    const totalCreditAmount = Math.round((medicine.price || 0) * (medicine.stock || 1));
+
     const transaction = await Transaction.create({
         userId: medicine.sellerId,
-        amount: medicine.price,
+        amount: totalCreditAmount,
         type: 'credit',
         status: 'completed',
         medicineId: medicine._id
     });
 
-    wallet.balance += medicine.price;
+    wallet.balance += totalCreditAmount;
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
@@ -131,7 +133,7 @@ export const approveCollection = asyncHandler(async (req, res) => {
         action: 'APPROVE_COLLECTION',
         targetId: medicine._id,
         targetType: 'Medicine',
-        details: { creditedAmount: medicine.price }
+        details: { creditedAmount: totalCreditAmount, unitPrice: medicine.price, stock: medicine.stock }
     });
 
     return res.status(200).json(new ApiResponse(200, { medicine, wallet }, "Collection approved and wallet credited"));

@@ -108,7 +108,7 @@ const CartPage = () => {
           {items.length > 0 && (
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="text-[9px] font-bold text-destructive hover:underline uppercase tracking-widest flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity font-sans group"
+              className="text-[9px] font-bold text-destructive hover:underline uppercase tracking-widest flex items-center self-start md:self-auto gap-2 opacity-60 hover:opacity-100 transition-opacity font-sans group"
             >
               <Trash2 size={12} className="group-hover:scale-110 transition-transform" />
               PURGE CART

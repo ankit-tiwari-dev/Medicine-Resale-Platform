@@ -1,6 +1,7 @@
 import { Outlet, Link } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
 import ThemeSwitcher from "../components/common/ThemeSwitcher";
+import { AppLogo } from "../components/common/AppLogo";
 
 
 /**
@@ -15,8 +16,8 @@ export default function AuthSplitLayout() {
         {/* Left Side: Minimal Message (Hidden on Mobile) */}
         <aside className="hidden lg:flex lg:w-1/2 flex-col justify-center p-20 bg-black text-white px-24">
           <div className="max-w-md space-y-12">
-            <Link to="/" className="text-lg font-black tracking-tighter uppercase">
-              MedAImart
+            <Link to="/">
+              <AppLogo className="text-white" />
             </Link>
 
             <h1 className="text-6xl font-black tracking-tighter uppercase leading-[0.85]">

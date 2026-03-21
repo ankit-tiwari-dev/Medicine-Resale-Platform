@@ -50,7 +50,7 @@ const AppLayout = () => {
     <div className="relative h-screen bg-background flex flex-col overflow-hidden">
       {/* Mobile Top Header */}
       <header className="lg:hidden sticky top-0 z-40 h-16 bg-surface border-b border-border flex items-center justify-between px-4">
-        <Link to="/app" onClick={() => setIsSidebarOpen(false)}>
+        <Link to="/dashboard" onClick={() => setIsSidebarOpen(false)}>
           <AppLogo />
         </Link>
         <div className="flex items-center gap-2">

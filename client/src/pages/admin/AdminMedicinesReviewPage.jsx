@@ -87,14 +87,14 @@ const AdminMedicinesReviewPage = () => {
       </div>
 
       {/* Audit Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-8 bg-card p-1.5 rounded-xl border border-border shadow-sm">
+      <div className="flex items-center gap-1.5 mb-8 bg-card p-1.5 rounded-xl border border-border shadow-sm overflow-x-auto no-scrollbar mask-edges">
         {TABS.map(tab => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-6 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all font-sans ${isActive
+              className={`flex items-center gap-3 px-6 py-2.5 flex-shrink-0 whitespace-nowrap rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all font-sans ${isActive
                 ? 'bg-foreground text-background shadow-md'
                 : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'
                 }`}

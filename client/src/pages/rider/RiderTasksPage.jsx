@@ -38,12 +38,16 @@ const RiderTasksPage = () => {
   };
 
   const formatAddress = (seller) => {
-    if (seller?.address && typeof seller.address === 'object') {
+    if (!seller || !seller.address) return "Address Not Specified";
+    
+    if (typeof seller.address === 'object') {
       const { street, city, pincode } = seller.address;
       const parts = [street, city, pincode].filter(Boolean);
       if (parts.length > 0) return parts.join(", ");
+      return "Address Not Specified";
     }
-    return seller?.address || "Address Not Specified";
+    
+    return String(seller.address) || "Address Not Specified";
   };
 
   return (

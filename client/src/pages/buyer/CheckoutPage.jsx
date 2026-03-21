@@ -23,6 +23,16 @@ import {
   Info
 } from "lucide-react";
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 const CheckoutPage = () => {
   const { user: authUser } = useAuth();
@@ -55,6 +65,13 @@ const CheckoutPage = () => {
     try {
       const response = await createPaymentOrder({ orderId, currency: "INR" });
       const razorpayOrder = response?.data?.data;
+
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load. Check your connection.");
+        setProcessingAction(null);
+        return;
+      }
 
       if (window.Razorpay && razorpayOrder?.id) {
         const key = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -162,7 +179,7 @@ const CheckoutPage = () => {
                 Final step in securing your medical asset redistribution.
               </p>
             </div>
-            <div className="bg-primary px-6 py-3 rounded-xl flex items-center gap-4 shadow-lg shadow-primary/10">
+            <div className="bg-primary px-6 py-3 rounded-xl flex items-center self-start md:self-auto gap-4 shadow-lg shadow-primary/10">
               <ShieldCheck size={20} className="text-soft-cyan" />
               <div className="text-[10px] uppercase font-bold text-primary-foreground tracking-widest leading-tight font-sans">
                 Escrow Protection <br /> Active & Bonded
@@ -171,9 +188,9 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="grid lg:grid-cols-3 gap-8 items-start w-full">
           {/* Main Settings */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             {/* Summary Section */}
             <div className="bg-card rounded-xl p-8 lg:p-10 border border-border shadow-sm">
               <h2 className="text-[10px] font-bold text-foreground uppercase tracking-widest mb-8 flex items-center gap-3 font-sans opacity-60">

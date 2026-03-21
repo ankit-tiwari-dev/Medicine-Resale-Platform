@@ -1,18 +1,8 @@
-import { useTheme } from "../../theme/ThemeContext";
-import blackLogo from "../../assets/black-theme-logo.png";
-import whiteLogo from "../../assets/white-theme-logo.png";
-
-export const AppLogo = () => {
-  const { isDarkMode } = useTheme();
-  const logoSrc = isDarkMode ? blackLogo : whiteLogo;
-
+export const AppLogo = ({ className = "" }) => {
   return (
-    <div className="inline-flex items-center gap-3">
-      <img src={logoSrc} alt="MedAImart Logo" className="h-8 w-auto" />
-      <div>
-        <p className="text-sm font-semibold text-primary">MedAImart</p>
-        <p className="text-[10px] text-textSecondary font-bold uppercase tracking-wider">Verified Exchange</p>
-      </div>
+    <div className={`text-lg font-black tracking-tighter text-foreground uppercase flex items-center gap-2 ${className}`}>
+        <div className="flex-shrink-0 w-8 h-8 bg-foreground rounded-lg flex items-center justify-center text-background text-xs italic">M</div>
+        <span>MedAImart</span>
     </div>
   );
 };

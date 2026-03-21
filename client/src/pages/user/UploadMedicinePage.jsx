@@ -101,7 +101,7 @@ const UploadMedicinePage = () => {
           } else {
             setAiFeedback({
               type: 'success',
-              message: "Groq Scan Successful! Metadata and a professional description have been synchronized with your form."
+              message: "AI Scan Successful! Metadata and a professional description have been synchronized with your form."
             });
           }
           setIsValidated(true);
@@ -116,7 +116,7 @@ const UploadMedicinePage = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Groq Scan failed. Please check your connection.");
+      toast.error("AI Scan failed. Please check your connection.");
     } finally {
       setIsScanning(false);
     }
@@ -229,7 +229,7 @@ const UploadMedicinePage = () => {
             </div>
             <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Listing Secured</h2>
             <p className="text-muted-foreground mb-8 text-[11px] leading-relaxed font-medium opacity-70">
-              Your medicine has been initialized in our network. It is now undergoing <span className="text-primary font-bold">Groq Forensic Verification</span> before going public.
+              Your medicine has been initialized in our network. It is now undergoing <span className="text-primary font-bold">AI Forensic Verification</span> before going public.
             </p>
             <div className="space-y-3">
               <Link to="/dashboard/my-medicines">
@@ -258,9 +258,9 @@ const UploadMedicinePage = () => {
           <div className="bg-card rounded-xl p-10 shadow-xl border border-border text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse shadow-inner">
             </div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Groq Forensic Scan</h2>
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">AI Forensic Scan</h2>
             <p className="text-muted-foreground mb-10 text-[11px] leading-relaxed font-medium opacity-70">
-              Our Groq LLaVA Vision model is analyzing packaging integrity and extracting legitimate pharmaceutical metadata...
+              Our AI Vision model is analyzing packaging integrity and extracting legitimate pharmaceutical metadata...
             </p>
             <div className="space-y-3 max-w-xs mx-auto">
               {[
@@ -298,10 +298,10 @@ const UploadMedicinePage = () => {
                 Upload <span className="text-primary">Medicine</span>
               </h1>
               <p className="text-[11px] text-muted-foreground mt-1.5 font-sans font-medium max-w-lg opacity-70">
-                List unused verified medicines. Every listing requires a Groq Forensic Scan to ensure platform safety.
+                List unused verified medicines. Every listing requires an AI Forensic Scan to ensure platform safety.
               </p>
             </div>
-            <div className="bg-emerald-green/5 border border-emerald-green/10 px-5 py-2.5 rounded-xl flex items-center gap-3">
+            <div className="bg-emerald-green/5 border border-emerald-green/10 px-5 py-2.5 rounded-xl flex items-center self-start md:self-auto gap-3">
               <div className="text-[9px] uppercase font-bold text-emerald-green tracking-widest leading-tight opacity-80">
                 100% Secure <br /> Escrow System
               </div>
@@ -382,14 +382,14 @@ const UploadMedicinePage = () => {
                   disabled={isScanning || !image}
                 >
                   {isScanning && <span className="uppercase text-[9px] tracking-widest mr-2">SCANNING</span>}
-                  {isValidated ? "Rescan Pharmaceutical" : "Run Groq Forensic Scan"}
+                  {isValidated ? "Rescan Pharmaceutical" : "Run AI Forensic Scan"}
                 </Button>
 
 
                 <div className="bg-muted/30 rounded-xl p-4 border border-border border-dashed font-sans">
                   <div>
                     <h4 className="text-[11px] font-bold text-foreground mb-1 uppercase tracking-tight">Forensic Protocol</h4>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-70">Groq scanning automatically extracts metadata and verifies medical legitimacy.</p>
+                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-70">AI scanning automatically extracts metadata and verifies medical legitimacy.</p>
                   </div>
                 </div>
               </div>
@@ -445,7 +445,7 @@ const UploadMedicinePage = () => {
                 <div className="grid sm:grid-cols-3 gap-6 mt-6">
                   <FormInput
                     label="Batch No."
-                    placeholder="Groq will extract"
+                    placeholder="AI will extract"
                     value={form.batchNumber}
                     onChange={(e) => setForm({ ...form, batchNumber: e.target.value })}
                     required

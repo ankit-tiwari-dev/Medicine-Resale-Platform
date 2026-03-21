@@ -5,8 +5,8 @@ import Container from "../../components/layout/Container";
 import { FormInput } from "../../components/forms/FormInput";
 import { extractErrorMessage } from "../../utils/errors";
 import toast from "react-hot-toast";
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { ShieldCheck, Camera, FileSignature } from "lucide-react";
 
 const RiderConfirmCollectionPage = () => {
   const navigate = useNavigate();
@@ -57,8 +57,8 @@ const RiderConfirmCollectionPage = () => {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Container className="max-w-md">
           <div className="bg-card rounded-xl p-8 lg:p-10 shadow-lg shadow-black/5 border border-border text-center font-sans">
-            <div className="w-16 h-16 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <div className="text-[8px] font-bold tracking-[0.2em] uppercase text-emerald-green">SECURE</div>
+            <div className="w-16 h-16 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner text-emerald-green">
+              <ShieldCheck size={32} strokeWidth={2.5} />
             </div>
             <h2 className="text-2xl font-serif font-bold text-foreground mb-3 tracking-tight">Collection Validated</h2>
             <p className="text-[11px] text-muted-foreground mb-8 leading-relaxed font-medium opacity-70 px-4">
@@ -143,7 +143,9 @@ const RiderConfirmCollectionPage = () => {
                     </>
                   ) : (
                     <>
-                      <div className="text-muted-foreground mb-4 group-hover:scale-110 transition-transform font-bold text-xl tracking-widest uppercase text-[9px]">APP</div>
+                      <div className="text-muted-foreground mb-4 group-hover:scale-110 transition-transform">
+                        <Camera size={48} strokeWidth={1} className="opacity-40" />
+                      </div>
                       <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">Click to Open Camera</p>
                     </>
                   )}
@@ -163,7 +165,9 @@ const RiderConfirmCollectionPage = () => {
 
             <div className="pt-6 border-t border-border border-dashed flex items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <div className="text-[9px] font-bold text-muted-amber uppercase opacity-40">BOND</div>
+                <div className="text-muted-amber opacity-40">
+                  <FileSignature size={24} strokeWidth={2.5} />
+                </div>
                 <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-tight opacity-70">
                   Posession Bond <br />
                   <span className="text-foreground opacity-100">Active upon submission</span>

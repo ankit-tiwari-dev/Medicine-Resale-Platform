@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import ThemeSwitcher from "../common/ThemeSwitcher";
+import { AppLogo } from "../common/AppLogo";
 import { ShoppingCart, User, LogIn, UserPlus, Home, Info, PlusCircle } from "lucide-react";
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,9 +21,8 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
                 {/* Logo */}
-                <Link to="/" className="text-lg font-black tracking-tighter text-foreground uppercase flex items-center gap-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-xs italic">M</div>
-                    MedAImart
+                <Link to="/">
+                    <AppLogo />
                 </Link>
 
                 {/* Desktop Nav */}
@@ -66,7 +66,7 @@ export default function Header() {
                             <div className="relative">
                                 <ShoppingCart size={16} className="group-hover:text-primary transition-colors" />
                                 {cartCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background animate-in zoom-in duration-300">
+                                    <span className="absolute -top-2 -right-2 bg-destructive text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background animate-in zoom-in duration-300 shadow-sm">
                                         {cartCount}
                                     </span>
                                 )}

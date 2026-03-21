@@ -41,7 +41,7 @@ const AdminStatsPage = () => {
               Granular operational data and cross-network clinical audit trails for institutional monitoring.
             </p>
           </div>
-          <div className="flex items-center gap-3 font-sans">
+          <div className="flex items-center self-start md:self-auto gap-3 font-sans">
             <div className="px-4 py-2 bg-muted/30 border border-border rounded-xl flex items-center gap-3">
               <div className="text-[8px] font-bold text-emerald-green uppercase tracking-widest opacity-80">ACTIVE</div>
               <div className="flex flex-col">

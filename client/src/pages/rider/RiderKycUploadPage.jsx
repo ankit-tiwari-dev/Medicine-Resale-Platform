@@ -5,14 +5,15 @@ import Container from "../../components/layout/Container";
 
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { IdCard, CreditCard, FileText, Car, Building2, UserSquare, CheckCircle2 } from "lucide-react";
 
 const requiredDocs = [
-  { key: "aadharFront", label: "Aadhaar Frontal", type: "ID_A" },
-  { key: "aadharBack", label: "Aadhaar Posterior", type: "ID_B" },
-  { key: "panFront", label: "PAN Certification", type: "TAX" },
-  { key: "licenseFront", label: "Driving License", type: "DL" },
-  { key: "bankProof", label: "Payout Account Proof", type: "BANK" },
-  { key: "selfie", label: "Live Identity Scan", type: "FACE" }
+  { key: "aadharFront", label: "Aadhaar Frontal", icon: IdCard },
+  { key: "aadharBack", label: "Aadhaar Posterior", icon: CreditCard },
+  { key: "panFront", label: "PAN Certification", icon: FileText },
+  { key: "licenseFront", label: "Driving License", icon: Car },
+  { key: "bankProof", label: "Payout Account Proof", icon: Building2 },
+  { key: "selfie", label: "Live Identity Scan", icon: UserSquare }
 ];
 
 const RiderKycUploadPage = () => {
@@ -85,8 +86,8 @@ const RiderKycUploadPage = () => {
             {requiredDocs.map((doc) => (
               <div key={doc.key} className={`relative group p-6 rounded-xl border border-dashed transition-all ${docs[doc.key] ? 'bg-emerald-green/5 border-emerald-green/30' : 'bg-muted/10 border-border hover:border-primary/30'}`}>
                 <div className="flex flex-col items-center text-center">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all font-bold text-[9px] ${docs[doc.key] ? 'bg-emerald-green text-white' : 'bg-card text-muted-foreground border border-border shadow-sm'}`}>
-                    {docs[doc.key] ? "DONE" : doc.type}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all ${docs[doc.key] ? 'bg-emerald-green text-white' : 'bg-card text-muted-foreground border border-border shadow-sm'}`}>
+                    {docs[doc.key] ? <CheckCircle2 size={18} strokeWidth={2.5} /> : <doc.icon size={18} strokeWidth={2.5} />}
                   </div>
                   <h3 className="text-[9px] font-bold text-foreground mb-1 uppercase tracking-widest">{doc.label}</h3>
                   <p className="text-[8px] text-muted-foreground font-medium truncate w-full px-4 opacity-40">

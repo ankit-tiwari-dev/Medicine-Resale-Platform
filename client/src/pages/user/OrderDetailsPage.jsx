@@ -7,14 +7,14 @@ import Button from "../../components/common/Button";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import toast from "react-hot-toast";
 import { extractErrorMessage } from "../../utils/errors";
-import { useState } from "react";
-
+import { useState, useCallback } from "react";
+import { useParams, Link } from "react-router-dom";
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
   const fetcher = useCallback(() => getOrderDetails(id), [id]);
   const query = useApiQuery(fetcher, true);
-  const order = query.data;
+  const { data: order, loading, error } = query;
   const [actionLoading, setActionLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
@@ -124,37 +124,37 @@ const OrderDetailsPage = () => {
                 Initialized on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
-            <div className={`px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-black/5 ${getStatusStyles(order.status)}`}>
+            <div className={`px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest inline-flex items-center gap-2 shadow-lg shadow-black/5 self-start md:self-auto ${getStatusStyles(order.status)}`}>
               {order.status || 'Processing'}
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8 w-full">
           {/* Items List */}
-          <div className="lg:col-span-2 space-y-6 font-sans">
-            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-border bg-muted/20 flex items-center gap-3">
+          <div className="lg:col-span-2 space-y-6 font-sans min-w-0">
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden min-w-0">
+              <div className="p-4 sm:p-5 border-b border-border bg-muted/20 flex items-center gap-3">
                 <div className="text-[9px] text-primary font-bold uppercase tracking-widest opacity-60">ITEMS</div>
                 <h2 className="text-xs font-bold text-foreground uppercase tracking-widest">Procedural Items</h2>
               </div>
               <div className="divide-y divide-border">
                 {(order.orderItems || []).map((item) => (
-                  <div key={item._id} className="p-6 flex items-center gap-6 group hover:bg-muted/30 transition-colors">
-                    <div className="w-20 h-20 bg-muted rounded-xl overflow-hidden border border-border">
+                  <div key={item._id} className="p-4 sm:p-6 flex items-center gap-4 sm:gap-6 group hover:bg-muted/30 transition-colors">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-xl flex-shrink-0 overflow-hidden border border-border">
                       <img
                         src={item.medicineId?.image || item.medicineId?.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200'}
                         alt="Medicine"
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-foreground mb-1">{(item.medicineId?.extractedData?.name || "Premium Medicine")}</h3>
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">ID: {item.medicineId?._id || item._id}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-foreground mb-1 truncate text-sm sm:text-base">{(item.medicineId?.extractedData?.name || "Premium Medicine")}</h3>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tighter truncate">ID: {item.medicineId?._id || item._id}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-primary font-sans">₹{Number(item.price || 0).toLocaleString()}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70">Unit Verified</p>
+                    <div className="text-right flex-shrink-0 pl-2">
+                      <p className="text-base sm:text-lg font-bold text-primary font-sans">₹{Number(item.price || 0).toLocaleString()}</p>
+                      <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase opacity-70">Unit Verified</p>
                     </div>
                   </div>
                 ))}
@@ -166,16 +166,16 @@ const OrderDetailsPage = () => {
             </div>
 
             {/* Escrow Status Detail */}
-            <div className="bg-primary rounded-xl p-8 text-primary-foreground relative overflow-hidden group shadow-xl shadow-primary/5">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-[80px] group-hover:opacity-10 transition-opacity"></div>
+            <div className="bg-clinical-navy rounded-xl p-8 text-white relative overflow-hidden group shadow-xl shadow-clinical-navy/20">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-soft-cyan opacity-[0.05] rounded-full blur-[80px] group-hover:opacity-[0.15] transition-opacity"></div>
               <div className="flex items-start gap-6 relative z-10">
-                <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10 font-bold text-[9px] uppercase tracking-widest text-white">
+                <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur-md border border-white/10 font-bold text-[9px] uppercase tracking-widest text-soft-cyan">
                   SECURE
                 </div>
 
                 <div className="flex-1">
                   <h3 className="text-lg font-bold mb-2 font-serif tracking-tight">Escrow Protection Status</h3>
-                  <p className="text-[11px] text-primary-foreground/70 mb-6 leading-relaxed font-sans opacity-95">
+                  <p className="text-[11px] text-white/70 mb-6 leading-relaxed font-sans opacity-95">
                     Funds for this order are currently <span className="text-soft-cyan font-bold uppercase underline decoration-soft-cyan/30">Locked in Vault</span>. Release will trigger upon delivery confirmation and packaging integrity audit.
                   </p>
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
@@ -194,7 +194,7 @@ const OrderDetailsPage = () => {
           </div>
 
           {/* Sidebar: logistics */}
-          <div className="space-y-6 font-sans">
+          <div className="space-y-6 font-sans min-w-0">
             <div className="bg-card rounded-xl p-6 lg:p-8 border border-border shadow-sm">
               <h3 className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                 <span className="text-primary">DESTINATION</span>

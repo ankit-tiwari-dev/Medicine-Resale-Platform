@@ -5,6 +5,7 @@ import Container from "../../components/layout/Container";
 
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { Landmark, FileScan, Building2, CheckCircle2, LockKeyhole } from "lucide-react";
 
 const RiderKycVerificationPage = () => {
   const [docType, setDocType] = useState("pan");
@@ -34,9 +35,9 @@ const RiderKycVerificationPage = () => {
   };
 
   const steps = [
-    { key: 'aadhar', label: 'E-KYC Aadhaar Link', type: 'GOVT', desc: 'Biometric and OTP-based identity bridge.' },
-    { key: 'doc', label: 'PAN/License OCR', type: 'DOCS', desc: 'Optical character matching and forgery scan.' },
-    { key: 'payout', label: 'Financial Channel', type: 'BANK', desc: 'Escrow account link and bank verification.' }
+    { key: 'aadhar', label: 'E-KYC Aadhaar Link', icon: Landmark, desc: 'Biometric and OTP-based identity bridge.' },
+    { key: 'doc', label: 'PAN/License OCR', icon: FileScan, desc: 'Optical character matching and forgery scan.' },
+    { key: 'payout', label: 'Financial Channel', icon: Building2, desc: 'Escrow account link and bank verification.' }
   ];
 
   return (
@@ -69,11 +70,11 @@ const RiderKycVerificationPage = () => {
               <div className="space-y-10">
                 {steps.map((step) => (
                   <div key={step.key} className="flex gap-6 relative group lg:items-center">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-sm font-bold text-[9px] ${verificationState[step.key] === 'success'
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-sm ${verificationState[step.key] === 'success'
                       ? 'bg-emerald-green text-white'
                       : 'bg-muted/50 text-primary border border-primary/10 group-hover:bg-primary/5'
                       }`}>
-                      {verificationState[step.key] === 'success' ? "DONE" : step.type}
+                      {verificationState[step.key] === 'success' ? <CheckCircle2 size={18} strokeWidth={2.5} /> : <step.icon size={18} strokeWidth={2.5} />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -102,8 +103,8 @@ const RiderKycVerificationPage = () => {
 
             <div className="p-8 bg-clinical-navy rounded-xl text-white flex items-center gap-6 shadow-xl shadow-clinical-navy/5 relative overflow-hidden group font-sans">
               <div className="absolute top-0 right-0 w-48 h-48 bg-soft-cyan opacity-[0.03] rounded-full blur-[80px] -mr-24 -mt-24"></div>
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur-md font-bold text-[9px] text-soft-cyan">
-                SECURE
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur-md text-soft-cyan">
+                <LockKeyhole size={24} strokeWidth={2.5} />
               </div>
               <div>
                 <h4 className="text-base font-bold font-serif mb-1 leading-tight tracking-tight">Administrative Lock</h4>

@@ -88,6 +88,14 @@
     box-sizing: border-box;
   }
 
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -232,4 +240,13 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--color-border) 50%, transparent);
   border-radius: 10px;
+}
+
+/* Hide scrollbar (for horizontal tab bars) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
 }

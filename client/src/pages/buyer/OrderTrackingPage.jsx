@@ -55,7 +55,7 @@ const OrderTrackingPage = () => {
                 Real-time audit of your pharmaceutical shipment #{(id || "").slice(-8).toUpperCase()}
               </p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-green/10 border border-emerald-green/20 rounded-xl font-sans">
+            <div className="flex items-center self-start md:self-auto gap-2 px-4 py-2 bg-emerald-green/10 border border-emerald-green/20 rounded-xl font-sans">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-green animate-pulse" />
               <span className="text-[9px] font-bold text-emerald-green uppercase tracking-widest">GPRS Active</span>
             </div>

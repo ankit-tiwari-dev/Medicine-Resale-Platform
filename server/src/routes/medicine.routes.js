@@ -7,22 +7,22 @@ const router = express.Router();
 
 // Public routes (or maybe mostly protected?)
 // For now, browsing medicines might be public or user only. Let's keep it open or user based.
-router.get("/", getMedicines);
+// Specific protected routes (Must match before /:id)
+router.get("/my-medicines", verifyJWT, getMyMedicines);
 
-// Protected routes
+// Public routes
+router.get("/", getMedicines);
+router.get("/:id", getMedicineById);
+
+// Globally protected routes
 router.use(verifyJWT);
 
 // AI Scan Image (User)
 router.post("/scan", upload.single("image"), scanMedicineImage);
 
-// Get my uploaded medicines (User)
-router.get("/my-medicines", getMyMedicines);
-
 // Upload medicine (User)
 router.post("/upload", upload.single("image"), uploadMedicine);
 
-// Get single medicine details
-router.get("/:id", getMedicineById);
 
 // Update medicine (User/Admin)
 router.patch("/:id", updateMedicineDetails);

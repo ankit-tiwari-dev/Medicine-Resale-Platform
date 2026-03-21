@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import ThemeSwitcher from "../components/common/ThemeSwitcher";
 
@@ -12,7 +13,9 @@ import {
   ShieldCheck, 
   Gavel, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  X
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -43,9 +46,20 @@ const riderNavGroups = [
 
 
 const RiderLayout = () => {
+  const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="app-shell h-screen overflow-hidden bg-muted/10 flex">
-      <aside className="fixed inset-y-0 left-0 z-50 w-[280px] hidden lg:flex flex-col border-r border-border/40 bg-card/60 backdrop-blur-xl shadow-xl shadow-primary/5 group">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col border-r border-border/40 bg-card/60 backdrop-blur-xl shadow-xl shadow-primary/5 group transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
 
         {/* Terminal Header */}
         <div className="h-24 flex items-center px-8 pt-4 border-b border-border/50 flex-shrink-0">
@@ -107,8 +121,26 @@ const RiderLayout = () => {
         </div>
       </aside>
 
-      {/* Mobile Top Header - Placeholder if needed for responsive, but main target is desktop shell first */}
-      <main className="flex-1 lg:pl-[280px] h-screen overflow-y-auto side-scrollbar w-full transition-all duration-300 flex flex-col">
+      {/* Mobile Top Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-md border-b border-border/50 z-30 flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary border border-primary/20 shadow-inner font-black text-[9px] uppercase tracking-widest">
+            SYS
+          </div>
+          <div>
+            <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] leading-none mb-0.5">Fleet Node</div>
+            <div className="text-xs font-bold text-foreground font-serif tracking-tight leading-none">Logistics <span className="text-primary">v4.8</span></div>
+          </div>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/50 border border-border/50 text-foreground hover:bg-muted transition-colors"
+        >
+          <Menu className="size-5" />
+        </button>
+      </div>
+
+      <main className="flex-1 lg:pl-[280px] pt-16 lg:pt-0 h-screen overflow-y-auto side-scrollbar w-full transition-all duration-300 flex flex-col relative z-10">
         <Outlet />
       </main>
     </div>

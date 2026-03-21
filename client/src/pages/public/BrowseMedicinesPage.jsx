@@ -205,7 +205,7 @@ const BrowseMedicinesPage = () => {
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Verification Layer</h3>
                 <div className="space-y-3">
                   <label className="flex items-center justify-between cursor-pointer group p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
-                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Groq Verified</span>
+                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">AI Verified</span>
                     <input
                       type="checkbox"
                       checked={onlyVerified}

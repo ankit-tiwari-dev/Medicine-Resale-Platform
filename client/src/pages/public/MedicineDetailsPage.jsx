@@ -154,7 +154,7 @@ const MedicineDetailsPage = () => {
                 {adminVerified && (
                   <div className="absolute top-4 right-4">
                     <div className="px-2.5 py-1 rounded-lg bg-emerald-green text-white text-[9px] font-bold uppercase tracking-wider flex items-center gap-2 shadow-sm backdrop-blur-md">
-                      Groq Verified
+                      AI Verified
                     </div>
                   </div>
                 )}
@@ -183,7 +183,7 @@ const MedicineDetailsPage = () => {
                   PASS
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground mb-2 uppercase tracking-tight">Groq Compliance Audit</h3>
+                  <h3 className="text-sm font-bold text-foreground mb-2 uppercase tracking-tight">AI Compliance Audit</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider font-sans opacity-80">
                     <div className="flex items-center gap-1.5">
                       <span className="text-emerald-green font-bold">✓</span> Seal
@@ -320,7 +320,7 @@ const MedicineDetailsPage = () => {
                       "{description || extractedData?.description}"
                     </p>
                     <div className="mt-4 flex items-center gap-4 text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-                        <span className="flex items-center gap-1"><span className="text-emerald-green">✓</span> Groq Audited</span>
+                        <span className="flex items-center gap-1"><span className="text-emerald-green">✓</span> AI Audited</span>
                         <span className="flex items-center gap-1"><span className="text-emerald-green">✓</span> Verified Pharmacology</span>
                     </div>
                   </div>
@@ -408,11 +408,11 @@ const MedicineDetailsPage = () => {
           <div className="lg:col-span-2 bg-card rounded-xl p-8 shadow-sm border border-border">
             <h2 className="text-xl font-bold text-foreground font-serif mb-4 uppercase tracking-tight">Full Product Specification</h2>
             <div className="prose prose-slate max-w-none text-muted-foreground font-sans leading-relaxed text-sm">
-              <p>{description || medicine.description || "No manual description provided. This listing has been verified using Groq metadata extraction from images."}</p>
+              <p>{description || medicine.description || "No manual description provided. This listing has been verified using AI metadata extraction from images."}</p>
               <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-border/40">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 opacity-60">Protcol Advisory</p>
                 <p className="text-xs font-medium opacity-80 leading-relaxed italic">
-                  This listing has been audited for compliance with redistribution protocols. Groq extraction errors are manually corrected by MedAImart admins. Verify the batch ID against the manufacturer database for maximum security.
+                  This listing has been audited for compliance with redistribution protocols. AI extraction errors are manually corrected by MedAImart admins. Verify the batch ID against the manufacturer database for maximum security.
                 </p>
               </div>
             </div>

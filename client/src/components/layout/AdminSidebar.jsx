@@ -41,7 +41,6 @@ const navItems = [
         items: [
             { to: "/admin/stats", label: "System Health", icon: Activity },
             { to: "/admin/logs", label: "Audit Logs", icon: FileText },
-            { to: "/admin/settings", label: "Global Settings", icon: Settings },
         ]
     }
 ];
@@ -95,6 +94,13 @@ export default function AdminSidebar({ onNavItemClick }) {
                         </div>
                     </div>
                 ))}
+                
+                <div className="pt-8 pb-4">
+                    <div className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-border bg-card/50 hover:bg-muted/30 transition-colors">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Theme</span>
+                        <ThemeSwitcher />
+                    </div>
+                </div>
             </nav>
 
             {/* Sidebar Footer */}

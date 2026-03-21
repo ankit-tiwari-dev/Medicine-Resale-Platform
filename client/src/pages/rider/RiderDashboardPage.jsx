@@ -4,6 +4,7 @@ import { useApiQuery } from "../../hooks/useApiQuery";
 
 import Button from "../../components/common/Button";
 import { Link } from "react-router-dom";
+import { Wallet, Package, ShieldCheck, Activity, CreditCard, Shield } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 
@@ -21,7 +22,7 @@ const Badge = ({ children, variant, className = "" }) => {
 };
 
 const RiderDashboardPage = () => {
-  const { data, loading, query } = useApiQuery(getRiderStats, true);
+  const { data, loading, execute: refreshStats } = useApiQuery(getRiderStats, true);
   const { user, logout } = useAuth();
 
   const toggleStatus = async () => {
@@ -29,17 +30,17 @@ const RiderDashboardPage = () => {
       const newStatus = !data?.isActive;
       await updateRiderDutyStatus(newStatus);
       toast.success(newStatus ? "Logistics Node: ACTIVE" : "Logistics Node: OFFLINE");
-      query.execute();
+      refreshStats();
     } catch (err) {
       toast.error("Failed to update operational status.");
     }
   };
 
   const stats = [
-    { label: 'Settled Earnings', value: `₹${data?.earnings || 0}`, type: 'FINANCE' },
-    { label: 'Active Tasks', value: data?.pendingPickups ?? 0, type: 'LOGISTICS' },
-    { label: 'Integrity Rating', value: `${data?.trustScore || 98}%`, type: 'AUDIT' },
-    { label: 'Audit Status', value: data?.verificationStatus === 'verified' ? 'PASSED' : 'PENDING', type: 'STATUS' }
+    { label: 'Settled Earnings', value: `₹${data?.earnings || 0}`, icon: Wallet },
+    { label: 'Active Tasks', value: data?.pendingPickups ?? 0, icon: Package },
+    { label: 'Integrity Rating', value: `${data?.trustScore || 98}%`, icon: ShieldCheck },
+    { label: 'Audit Status', value: data?.verificationStatus === 'verified' ? 'PASSED' : 'PENDING', icon: Activity }
   ];
 
   return (
@@ -93,7 +94,7 @@ const RiderDashboardPage = () => {
             <div key={i} className="bg-card rounded-xl p-6 shadow-sm border border-border hover:border-primary/20 transition-all group">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-10 h-10 bg-foreground text-background rounded-xl flex items-center justify-center font-bold text-[10px] tracking-tight">
-                  {stat.type}
+                  <stat.icon size={18} strokeWidth={2.5} />
                 </div>
               </div>
               <div className="text-xl font-bold text-foreground mb-1 font-sans tracking-tight">{stat.value}</div>
@@ -147,8 +148,8 @@ const RiderDashboardPage = () => {
               <div className="absolute top-0 right-0 w-80 h-80 bg-primary opacity-[0.05] rounded-full blur-[100px] -mr-40 -mt-40"></div>
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md font-bold text-[9px] text-primary">
-                    SECURE
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md text-primary">
+                    <Shield size={24} strokeWidth={2.5} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold font-serif tracking-tight">Compliance Protocol</h3>
@@ -218,8 +219,8 @@ const RiderDashboardPage = () => {
             {/* Payout Notification */}
             <div className="bg-foreground rounded-xl p-8 text-background shadow-lg shadow-black/5 relative overflow-hidden group font-sans">
               <div className="relative z-10 flex gap-5">
-                <div className="w-10 h-10 bg-background text-foreground rounded-xl flex items-center justify-center font-bold text-[9px]">
-                  PAY
+                <div className="w-10 h-10 bg-background text-foreground rounded-xl flex items-center justify-center">
+                  <CreditCard size={18} strokeWidth={2.5} />
                 </div>
                 <div>
                   <h4 className="text-[9px] font-bold uppercase tracking-[0.2em] mb-1 opacity-50">Payout Sync</h4>

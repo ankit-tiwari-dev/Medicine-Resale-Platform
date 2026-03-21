@@ -2,17 +2,13 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import ThemeSwitcher from "../common/ThemeSwitcher";
-import { useTheme } from "../../theme/ThemeContext";
-import blackLogo from "../../assets/black-theme-logo.png";
-import whiteLogo from "../../assets/white-theme-logo.png";
+import { AppLogo } from "../common/AppLogo";
 
 export default function AdminFigmaHeader({ onMenuToggle, isMenuOpen }) {
     const { user, logout } = useAuth();
-    const { isDarkMode } = useTheme();
-    const logoSrc = isDarkMode ? blackLogo : whiteLogo;
 
     return (
-        <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-sm">
+        <header className="lg:hidden sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-sm">
             <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center gap-4">
@@ -26,11 +22,8 @@ export default function AdminFigmaHeader({ onMenuToggle, isMenuOpen }) {
 
                         {/* Logo */}
                         <Link to="/admin" className="flex items-center gap-3 group">
-                            <img src={logoSrc} alt="MedAImart Logo" className="h-8 sm:h-9 w-auto transition-transform group-hover:scale-105" />
-                            <div className="hidden xs:block">
-                                <div className="text-lg sm:text-xl font-bold text-primary font-serif leading-none">
-                                    MedAImart
-                                </div>
+                            <AppLogo className="transition-transform group-hover:scale-105" />
+                            <div className="hidden xs:block border-l border-border/50 pl-3">
                                 <div className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-black mt-0.5">Admin Terminal</div>
                             </div>
                         </Link>

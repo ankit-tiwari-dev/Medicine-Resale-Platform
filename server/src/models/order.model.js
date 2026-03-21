@@ -23,6 +23,10 @@ const orderSchema = new mongoose.Schema(
                     type: Number,
                     required: true
                 },
+                quantity: {
+                    type: Number,
+                    default: 1
+                },
                 isReviewed: {
                     type: Boolean,
                     default: false

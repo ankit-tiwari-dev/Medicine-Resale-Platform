@@ -5,6 +5,7 @@ import Container from "../../components/layout/Container";
 
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck, ShieldPlus, Database } from "lucide-react";
 
 const RiderKycConsentPage = () => {
   const navigate = useNavigate();
@@ -48,22 +49,22 @@ const RiderKycConsentPage = () => {
                 {
                   title: "Document Authenticity",
                   desc: "I swear under clinical oath that all provided identification and certification documents are legitimate and un-tampered.",
-                  type: "AUTH"
+                  icon: ShieldCheck
                 },
                 {
                   title: "Operational Compliance",
                   desc: "I agree to adhere to MedAImart's cold-chain and medical handling protocols during all distribution assignments.",
-                  type: "SAFE"
+                  icon: ShieldPlus
                 },
                 {
                   title: "Data Forensic Authorization",
                   desc: "I consent to the forensic analysis of my identification data through third-party government and financial verification APIs.",
-                  type: "DATA"
+                  icon: Database
                 }
               ].map((point, i) => (
                 <div key={i} className="flex gap-6">
-                  <div className="w-10 h-10 bg-foreground text-background rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-[9px]">
-                    {point.type}
+                  <div className="w-10 h-10 bg-foreground text-background rounded-xl flex items-center justify-center flex-shrink-0">
+                    <point.icon size={18} strokeWidth={2.5} />
                   </div>
                   <div>
                     <h3 className="text-[15px] font-bold text-foreground mb-1 group tracking-tight">{point.title}</h3>

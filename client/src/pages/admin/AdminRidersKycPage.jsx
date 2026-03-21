@@ -70,9 +70,9 @@ const AdminRidersKycPage = () => {
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
-          { id: 'total', label: 'Total Applications', count: riders.length },
-          { id: 'pending', label: 'Pending Audits', count: riders.filter(r => r.verificationStatus === 'pending').length },
-          { id: 'verified', label: 'Certified Partners', count: riders.filter(r => r.verificationStatus === 'approved').length }
+          { id: 'total', label: 'Active Audit Queue', count: riders.length },
+          { id: 'pending', label: 'Pending ID Review', count: riders.filter(r => r.verificationStatus === 'verified_pending_admin').length },
+          { id: 'mismatch', label: 'Risk/Mismatch Flags', count: riders.filter(r => r.verificationStatus === 'document_mismatch').length }
         ].map(stat => (
           <div key={stat.id} className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col justify-center group hover:border-primary/20 transition-all font-sans">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5 opacity-50">{stat.label}</p>
