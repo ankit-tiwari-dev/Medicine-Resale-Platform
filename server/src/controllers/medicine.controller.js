@@ -26,7 +26,7 @@ const extractMedicineDetails = async (file, forceMock = false) => {
 
         const imageBase64 = file.buffer.toString("base64");
 
-        console.log("AI Extraction: Sending request to Groq Llama 3.2 Vision...");
+        console.log("AI Extraction: Sending request to Meta Llama 4 Scout Vision...");
 
         const response = await axios.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -99,7 +99,7 @@ const extractMedicineDetails = async (file, forceMock = false) => {
             imageQuality: data.image_quality || "clear",
             isMedical: data.is_medical !== false,
             rejectionReason: data.rejection_reason || "",
-            aiNote: "Processed via Groq Llama 3.2 Vision"
+            aiNote: "Processed via Meta Llama 4 Scout Vision"
         };
 
         console.log("AI Extraction: Successfully processed image.");
@@ -258,6 +258,14 @@ export const getMedicines = asyncHandler(async (req, res) => {
     // Expiry date filter (medicines expiring after specified date)
     if (expiryAfter) {
         filter['extractedData.expiryDate'] = { $gte: new Date(expiryAfter) };
+    }
+
+    // Advanced Quality Filters
+    if (req.query.verified === 'true') {
+        filter.adminVerified = true;
+    }
+    if (req.query.riderCertified === 'true') {
+        filter.riderVerified = true;
     }
 
     // Build query

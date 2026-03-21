@@ -3,24 +3,52 @@ import ThemeSwitcher from "../components/common/ThemeSwitcher";
 
 
 
-const riderLinks = [
-  { to: "/rider", label: "Dashboard", initial: "DB" },
-  { to: "/rider/tasks", label: "Assigned Tasks", initial: "TSK" },
-  { to: "/rider/confirm-collection", label: "Collection Proof", initial: "COL" },
-  { to: "/rider/stats", label: "Operation Stats", initial: "STS" },
-  { to: "/rider/kyc/upload-docs", label: "KYC Upload", initial: "DOC" },
-  { to: "/rider/kyc/verify-docs", label: "KYC Verification", initial: "VER" },
-  { to: "/rider/kyc/consent", label: "Legal Consent", initial: "LEG" }
+import { 
+  LayoutDashboard, 
+  ClipboardList, 
+  PackageCheck, 
+  BarChart3, 
+  FileUp, 
+  ShieldCheck, 
+  Gavel, 
+  LogOut,
+  ChevronRight
+} from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+
+const riderNavGroups = [
+  {
+    label: "Fleet Tasks",
+    links: [
+      { to: "/rider", label: "Operations Center", icon: LayoutDashboard },
+      { to: "/rider/tasks", label: "Active Shipments", icon: ClipboardList },
+      { to: "/rider/confirm-collection", label: "Collection Proof", icon: PackageCheck },
+    ]
+  },
+  {
+    label: "Compliance & Safety",
+    links: [
+      { to: "/rider/kyc/upload-docs", label: "Identity Upload", icon: FileUp },
+      { to: "/rider/kyc/verify-docs", label: "Verification Gate", icon: ShieldCheck },
+      { to: "/rider/kyc/consent", label: "Legal Protocols", icon: Gavel },
+    ]
+  },
+  {
+    label: "Performance",
+    links: [
+      { to: "/rider/stats", label: "Network Stats", icon: BarChart3 },
+    ]
+  }
 ];
 
 
 const RiderLayout = () => {
   return (
-    <div className="app-shell min-h-screen bg-muted/10 flex overflow-x-hidden">
-      <aside className="fixed inset-y-0 left-0 z-50 w-[280px] hidden lg:flex flex-col border-r border-border/60 bg-card/80 backdrop-blur-xl shadow-xl shadow-primary/5 group">
+    <div className="app-shell h-screen overflow-hidden bg-muted/10 flex">
+      <aside className="fixed inset-y-0 left-0 z-50 w-[280px] hidden lg:flex flex-col border-r border-border/40 bg-card/60 backdrop-blur-xl shadow-xl shadow-primary/5 group">
 
         {/* Terminal Header */}
-        <div className="h-20 flex items-center px-8 border-b border-border/50">
+        <div className="h-24 flex items-center px-8 pt-4 border-b border-border/50 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary border border-primary/20 shadow-inner font-black text-[10px] uppercase tracking-widest">
               SYS
@@ -34,54 +62,53 @@ const RiderLayout = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto side-scrollbar">
-          <div className="px-4 mb-4">
-            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-40">Command Center</div>
-          </div>
-
-          {riderLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              end={link.to === "/rider"}
-              to={link.to}
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold transition-all duration-300 group/item ${isActive
-                  ? "bg-white text-black shadow-lg shadow-white/10"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div className="flex items-center gap-3">
-                    <div className={`text-[10px] font-black uppercase tracking-widest w-6 transition-transform ${isActive ? 'text-black' : 'text-primary'}`}>{link.initial}</div>
-                    <span className="tracking-tight">{link.label}</span>
-                  </div>
-                  <span className={`opacity-0 -translate-x-2 transition-all duration-300 group-hover/item:opacity-40 group-hover/item:translate-x-0 active:opacity-10 font-black`}>&rarr;</span>
-                </>
-              )}
-            </NavLink>
-
+        <nav className="flex-1 px-4 py-6 space-y-8 overflow-y-auto side-scrollbar pr-2">
+          {riderNavGroups.map((group) => (
+            <div key={group.label} className="space-y-2">
+              <h3 className="px-4 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-40">
+                {group.label}
+              </h3>
+              <div className="space-y-1">
+                {group.links.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    end={link.to === "/rider"}
+                    className={({ isActive }) => `
+                      flex items-center gap-3 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all group border
+                      ${isActive
+                        ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
+                        : "text-muted-foreground/80 hover:bg-muted/50 hover:text-foreground border-transparent hover:border-border/20"}
+                    `}
+                  >
+                    <link.icon className={`size-4 transition-transform group-hover:scale-105`} />
+                    <span className="flex-1">{link.label}</span>
+                    <ChevronRight className="size-3 opacity-0 -translate-x-2 transition-all group-hover:opacity-40 group-hover:translate-x-0" />
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
         {/* Sync Status & Theme */}
-        <div className="p-6 mt-auto border-t border-border/40 bg-muted/10 backdrop-blur-md">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-green animate-pulse" />
-              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nodes Synced</div>
-            </div>
+        <div className="p-4 mt-auto border-t border-border/40 bg-muted/5 rounded-2xl mx-2 mb-6 space-y-3 flex-shrink-0">
+          <div className="flex items-center justify-between px-2">
+             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Theme</span>
+             <ThemeSwitcher />
           </div>
-
-          <div className="flex items-center justify-center py-2 bg-card rounded-2xl border border-border shadow-sm">
-            <ThemeSwitcher />
-          </div>
+          <button 
+            onClick={() => logout()}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/10 transition-all group border border-transparent hover:border-red-500/20"
+          >
+            <LogOut className="size-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Logout Session</span>
+          </button>
         </div>
       </aside>
 
       {/* Mobile Top Header - Placeholder if needed for responsive, but main target is desktop shell first */}
-      <main className="flex-1 lg:pl-[280px] min-h-screen w-full transition-all duration-300 flex flex-col">
+      <main className="flex-1 lg:pl-[280px] h-screen overflow-y-auto side-scrollbar w-full transition-all duration-300 flex flex-col">
         <Outlet />
       </main>
     </div>

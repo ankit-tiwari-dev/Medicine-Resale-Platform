@@ -1,13 +1,28 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyMedicines, updateMedicine, deleteMedicine } from "../../api/medicineApi";
-import EmptyState from "../../components/common/EmptyState";
-import Container from "../../components/layout/Container";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import Button from "../../components/common/Button";
-
-import ConfirmationModal from "../../components/common/ConfirmationModal";
 import toast from "react-hot-toast";
+import Container from "../../components/layout/Container";
+import Button from "../../components/common/Button";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
+import { 
+  FileUp, 
+  Microscope, 
+  ShieldCheck, 
+  Truck, 
+  Package, 
+  CheckCircle2, 
+  AlertCircle,
+  Clock,
+  ChevronRight,
+  ClipboardCheck,
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+  PackageX
+} from "lucide-react";
 
 const MyMedicinesPage = () => {
   const { data, loading, error, execute: refreshList } = useApiQuery(getMyMedicines, true);
@@ -17,14 +32,65 @@ const MyMedicinesPage = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const items = data || [];
 
+  const lifecycleSteps = [
+    { id: 'uploaded', label: 'Registered', icon: FileUp },
+    { id: 'pending', label: 'Groq Audit', icon: Microscope },
+    { id: 'verified', label: 'Verified', icon: ShieldCheck },
+    { id: 'pickup_assigned', label: 'Logistics', icon: Truck },
+    { id: 'collected', label: 'Received', icon: Package },
+    { id: 'listed', label: 'Live', icon: CheckCircle2 }
+  ];
+
   const getStatusCfg = (status) => {
     switch (status?.toLowerCase()) {
       case 'listed': return { label: 'Live & Verified', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20' };
-      case 'pending': return { label: 'Under AI Audit', color: 'text-primary bg-primary/5 border-primary/20' };
+      case 'pending': return { label: 'Under Groq Audit', color: 'text-primary bg-primary/5 border-primary/20' };
+      case 'verified': return { label: 'Verified', color: 'text-emerald-green bg-emerald-green/5 border-emerald-green/20' };
+      case 'pickup_assigned': return { label: 'Rider Assigned', color: 'text-soft-cyan bg-soft-cyan/5 border-soft-cyan/20' };
+      case 'collected': return { label: 'Collected', color: 'text-soft-cyan bg-soft-cyan/5 border-soft-cyan/20' };
       case 'rejected': return { label: 'Audit Failed', color: 'text-red-500 bg-red-500/5 border-red-500/20' };
       case 'sold': return { label: 'Sold & Dispatched', color: 'text-soft-cyan bg-soft-cyan/5 border-soft-cyan/20' };
       default: return { label: status, color: 'text-muted-foreground bg-muted/5 border-border' };
     }
+  };
+
+  const getStepIndex = (status) => {
+    const idx = lifecycleSteps.findIndex(s => s.id === status?.toLowerCase());
+    if (idx !== -1) return idx;
+    if (status?.toLowerCase() === 'sold') return 5;
+    return -1;
+  };
+
+  const StatusStepper = ({ currentStatus }) => {
+    const currentIndex = getStepIndex(currentStatus);
+    
+    return (
+      <div className="flex items-center gap-1 w-full max-w-[280px]">
+        {lifecycleSteps.map((step, idx) => {
+          const isCompleted = idx < currentIndex;
+          const isActive = idx === currentIndex;
+          const isPending = idx > currentIndex;
+
+          return (
+            <div key={step.id} className="flex items-center flex-1 last:flex-none">
+              <div 
+                className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all duration-500 ${
+                  isCompleted ? 'bg-emerald-green/10 border-emerald-green/20 text-emerald-green' :
+                  isActive ? 'bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110' :
+                  'bg-muted/30 border-border text-muted-foreground opacity-40'
+                }`}
+                title={`${step.label}: ${isActive ? 'Active' : isCompleted ? 'Completed' : 'Upcoming'}`}
+              >
+                <step.icon size={10} strokeWidth={isCompleted ? 3 : 2.5} />
+              </div>
+              {idx < lifecycleSteps.length - 1 && (
+                <div className={`h-[1.5px] flex-1 mx-0.5 rounded-full ${isCompleted ? 'bg-emerald-green/30' : 'bg-border/30'}`}></div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   const tabs = [
@@ -78,29 +144,26 @@ const MyMedicinesPage = () => {
     <div className="min-h-screen bg-muted/30 pb-20 animate-in fade-in duration-500">
       <Container className="py-8 lg:py-12">
         {/* Header */}
-        <div className="mb-10 lg:mb-12">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
-            <span className="tracking-widest">BACK TO</span> Command Center
+        <div className="mb-10 lg:mb-12 font-sans">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-[9px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-8">
+            <span className="tracking-widest opacity-60">BACK TO</span> Command Center
           </Link>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
-                DB
-
+              <div className="flex items-center gap-2 text-[9px] font-bold text-primary uppercase tracking-[0.2em] mb-1.5 opacity-60">
                 Asset Inventory Registry
               </div>
-              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
+              <h1 className="text-2xl lg:text-3xl font-serif font-bold text-foreground tracking-tight">
                 My <span className="text-primary">Medicines</span>
               </h1>
-              <p className="text-muted-foreground mt-2 font-sans font-medium max-w-2xl">
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-sans font-medium max-w-2xl opacity-70">
                 Auditing and managing your listed pharmaceutical assets within the clinical redistribution network.
               </p>
             </div>
             <Link to="/dashboard/upload-medicine">
-              <Button variant="primary" className="h-16 px-8 rounded-2xl shadow-2xl shadow-primary/20 font-black flex items-center gap-3 text-sm">
+              <Button variant="primary" className="h-14 px-8 rounded-xl shadow-lg shadow-primary/5 font-bold flex items-center gap-3 text-xs tracking-widest">
                 INITIALIZE NEW LISTING
               </Button>
-
             </Link>
           </div>
         </div>
@@ -129,18 +192,18 @@ const MyMedicinesPage = () => {
         </div>
 
         {/* Audit Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mb-8 bg-card p-2 rounded-[2rem] border border-border shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 mb-8 bg-card p-1.5 rounded-xl border border-border shadow-sm font-sans">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
-                ? 'bg-white text-black shadow-lg shadow-white/10 scale-105'
+              className={`flex items-center gap-3 px-5 py-2.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id
+                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/10'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
             >
               {tab.label}
-              <span className={`px-1.5 py-0.5 rounded-md text-[9px] ${activeTab === tab.id ? 'bg-black/10 text-black' : 'bg-muted text-muted-foreground'
+              <span className={`px-1.5 py-0.5 rounded-md text-[8px] ${activeTab === tab.id ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
                 }`}>
                 {tab.count}
               </span>
@@ -162,7 +225,7 @@ const MyMedicinesPage = () => {
             actionLabel="Initialize First Listing"
           />
         ) : (
-          <div className="bg-card rounded-[2.5rem] border border-border shadow-md overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden font-sans">
             {/* Desktop Table View */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -170,6 +233,7 @@ const MyMedicinesPage = () => {
                   <tr>
                     <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Medical Unit Manifest</th>
                     <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Procurement Status</th>
+                    <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Lifecycle Tracking</th>
                     <th className="px-10 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Valuation</th>
                     <th className="px-10 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Governance Controls</th>
                   </tr>
@@ -178,8 +242,8 @@ const MyMedicinesPage = () => {
                   {filteredItems.map((item) => {
                     const statusCfg = getStatusCfg(item.status);
                     return (
-                      <tr key={item._id} className="group hover:bg-muted/10 transition-colors">
-                        <td className="px-10 py-6">
+                      <tr key={item._id} className="group hover:bg-muted/5 transition-colors">
+                        <td className="px-10 py-5">
                           <div className="flex items-center gap-6">
                             <div className="w-16 h-16 rounded-2xl overflow-hidden border border-border bg-muted/50 flex-shrink-0 shadow-sm relative group/img">
                               <img
@@ -200,13 +264,16 @@ const MyMedicinesPage = () => {
                           </div>
                         </td>
                         <td className="px-10 py-6">
+                          <StatusStepper currentStatus={item.status} />
+                        </td>
+                        <td className="px-10 py-6">
                           <div className="font-black text-foreground">₹{Number(item.price || 0).toLocaleString()}</div>
                           <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-[0.1em] mt-0.5">Stock: {item.stock || 0} Units</div>
                         </td>
-                        <td className="px-10 py-6 text-right">
+                        <td className="px-10 py-5 text-right">
                           <div className="flex items-center justify-end gap-3">
                             {(() => {
-                              const isLocked = ['sold', 'collected', 'pickup_assigned'].includes(item.status?.toLowerCase());
+                              const isLocked = ['sold', 'collected', 'pickup_assigned', 'verified'].includes(item.status?.toLowerCase());
                               return (
                                 <>
                                   <Link to={`/browse/${item._id}`}>
@@ -239,7 +306,6 @@ const MyMedicinesPage = () => {
                                   >
                                     DEL
                                   </Button>
-
                                 </>
                               );
                             })()}
@@ -253,7 +319,7 @@ const MyMedicinesPage = () => {
             </div>
 
             {/* Mobile Grid View */}
-            <div className="lg:hidden divide-y divide-border/50 bg-card rounded-[2.5rem] border border-border shadow-md overflow-hidden">
+            <div className="lg:hidden divide-y divide-border/50 bg-card rounded-xl border border-border shadow-sm overflow-hidden font-sans">
               {filteredItems.map((item) => {
                 const statusCfg = getStatusCfg(item.status);
                 return (
@@ -268,8 +334,11 @@ const MyMedicinesPage = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-foreground truncate text-lg">{item.extractedData?.name || "Medicine"}</h3>
-                        <div className={`mt-2 inline-flex px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest items-center gap-2 ${statusCfg.color}`}>
-                          {statusCfg.label}
+                        <div className="mt-3 flex flex-col gap-3">
+                          <div className={`inline-flex self-start px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest items-center gap-2 ${statusCfg.color}`}>
+                            {statusCfg.label}
+                          </div>
+                          <StatusStepper currentStatus={item.status} />
                         </div>
                       </div>
                     </div>
@@ -284,7 +353,7 @@ const MyMedicinesPage = () => {
                       </div>
                     </div>
                     {(() => {
-                      const isLocked = ['sold', 'collected', 'pickup_assigned'].includes(item.status?.toLowerCase());
+                      const isLocked = ['sold', 'collected', 'pickup_assigned', 'verified'].includes(item.status?.toLowerCase());
                       return (
                         <div className="flex gap-3 pt-2">
                           <Link to={`/browse/${item._id}`} className="flex-1">
@@ -306,7 +375,6 @@ const MyMedicinesPage = () => {
                           >
                             DEL
                           </Button>
-
                         </div>
                       );
                     })()}
@@ -328,20 +396,19 @@ const MyMedicinesPage = () => {
 
       {/* Quick Edit Modal */}
       {editItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-300">
-          <div className="bg-card border border-border rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="flex items-center justify-between px-10 py-8 border-b border-border/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-300">
+          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 font-sans">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-border/50">
               <div>
-                <h3 className="text-2xl font-bold text-foreground font-serif tracking-tight">Quick Inventory Edit</h3>
-                <p className="text-[10px] text-primary mt-1 uppercase font-bold tracking-[0.2em]">Update clinical particulars</p>
+                <h3 className="text-xl font-bold text-foreground font-serif tracking-tight">Quick Inventory Edit</h3>
+                <p className="text-[9px] text-primary mt-1 uppercase font-bold tracking-[0.2em] opacity-60">Update clinical particulars</p>
               </div>
               <button
                 onClick={() => setEditItem(null)}
-                className="p-2 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
+                className="p-2 px-4 text-[9px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
               >
                 CLOSE
               </button>
-
             </div>
 
             <form onSubmit={handleUpdate} className="p-10 space-y-8">
@@ -386,7 +453,7 @@ const MyMedicinesPage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 h-14 rounded-2xl font-bold bg-muted/10 border-border hover:bg-muted/20 transition-all"
+                  className="flex-1 h-12 rounded-xl font-bold bg-muted/10 border-border hover:bg-muted/20 transition-all text-[11px] uppercase tracking-widest"
                   onClick={() => setEditItem(null)}
                 >
                   Discard
@@ -394,7 +461,7 @@ const MyMedicinesPage = () => {
                 <Button
                   type="submit"
                   variant="primary"
-                  className="flex-1 h-14 rounded-2xl font-bold shadow-xl shadow-primary/20"
+                  className="flex-1 h-12 rounded-xl font-bold shadow-lg shadow-primary/5 text-[11px] uppercase tracking-widest"
                   loading={actionLoading}
                 >
                   Commit Changes

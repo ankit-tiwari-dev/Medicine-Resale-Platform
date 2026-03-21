@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerLocal, googleAuth, googleAuthCallback, verifyOTP, loginLocal, logoutUser, refreshAccessToken, resendOTP, updateProfile, updateAvatar } from '../controllers/auth.controller.js';
+import { registerLocal, googleAuth, googleAuthCallback, verifyOTP, loginLocal, logoutUser, refreshAccessToken, resendOTP, updateProfile, updateAvatar, forgotPassword, resetPassword } from '../controllers/auth.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 import upload from '../middlewares/upload.middleware.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -14,6 +14,8 @@ router.post('/refresh-token', refreshAccessToken);
 router.post('/logout', verifyJWT, logoutUser);
 router.get('/google', googleAuth);
 router.get('/callback', googleAuthCallback);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 router.get('/me', verifyJWT, (req, res) => {
     res.status(200).json(new ApiResponse(200, req.user, "User profile fetched successfully"));

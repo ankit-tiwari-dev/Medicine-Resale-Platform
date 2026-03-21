@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import TrustBadge from './TrustBadge';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../hooks/useAuth';
+import { ShoppingCart } from 'lucide-react';
 
 /**
  * MedicineCard.jsx
@@ -11,6 +13,10 @@ import { useCart } from '../../context/CartContext';
  */
 export default function MedicineCard({ medicine, onAddToCart, loading = false }) {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const sellerId = medicine.sellerId?._id || medicine.sellerId;
+    const isOwner = user && String(user._id) === String(sellerId);
+
     const {
         extractedData,
         image,
@@ -55,11 +61,9 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
 
                 {/* Verification Status Badge */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 font-sans">
-                    {adminVerified && (
                         <div className="px-2 py-1 rounded-md bg-emerald-green text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                            AI Verified
+                            Groq Verified
                         </div>
-                    )}
                     {riderVerified && (
                         <div className="px-2 py-1 rounded-md bg-soft-cyan text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
                             Rider Certified
@@ -98,7 +102,7 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                     </div>
 
                     <div className="flex items-center" title="Secured by Escrow">
-                        <span className="text-[10px] font-black text-emerald-green uppercase tracking-widest">Escrow Active</span>
+                        <span className="text-[10px] font-bold text-emerald-green uppercase tracking-widest opacity-80">Escrow Active</span>
                     </div>
                 </div>
             </div>
@@ -124,7 +128,7 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                         </button>
 
                         <div className="flex flex-col items-center">
-                            <span className="text-[10px] font-black text-primary uppercase tracking-tighter leading-none">In Cart</span>
+                            <span className="text-[9px] font-bold text-primary uppercase tracking-widest leading-none opacity-70">In Cart</span>
                             <span className="text-sm font-bold text-foreground">{quantity}</span>
                         </div>
 
@@ -135,16 +139,21 @@ export default function MedicineCard({ medicine, onAddToCart, loading = false })
                             +
                         </button>
                     </div>
+                ) : isOwner ? (
+                    <div className="w-full h-10 flex items-center justify-center bg-muted/20 border border-border rounded-xl">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-60">Your Listing</span>
+                    </div>
                 ) : (
                     <Button
                         variant="primary"
-                        className="w-full h-10 font-bold uppercase tracking-widest text-xs rounded-full"
+                        className="w-full h-10 font-bold uppercase tracking-widest text-[10px] rounded-xl shadow-sm flex items-center justify-center gap-2"
                         onClick={(e) => {
                             e.stopPropagation();
                             addItem(medicine);
                         }}
                         loading={loading}
                     >
+                        <ShoppingCart size={14} />
                         Add to Cart
                     </Button>
                 )}

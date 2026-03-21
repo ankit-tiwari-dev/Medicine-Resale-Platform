@@ -71,7 +71,7 @@ const RegisterPage = () => {
           className="font-sans"
         />
 
-        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-sm font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-full mt-4">
+        <Button type="submit" loading={isSubmitting} className="w-full h-11 text-[10px] font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-xl mt-4 shadow-lg shadow-foreground/5">
           Create Account
         </Button>
 

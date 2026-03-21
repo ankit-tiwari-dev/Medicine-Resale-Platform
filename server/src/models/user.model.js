@@ -55,6 +55,12 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String
+    },
+    bankDetails: {
+      accountNumber: String,
+      ifsc: String,
+      bankName: String,
+      holderName: String
     }
   },
   {

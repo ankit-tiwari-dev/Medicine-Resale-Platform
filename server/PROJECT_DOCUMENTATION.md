@@ -6,7 +6,7 @@ Tech Stack
 - Frontend: React.js, Tailwind CSS
 - Backend: Node.js, Express.js
 - Database: MongoDB
-- AI APIs: Google Gemini (OCR + NLP extraction)
+- AI APIs: Groq Meta Llama 4 Scout Vision (OCR + Metadata Extraction)
 - Cloud Storage: Cloudinary
 - Authentication: JWT (access + refresh), Google OAuth
 - Payments: Razorpay
@@ -60,15 +60,15 @@ This platform enables users to upload unused medicines for resale. The system us
   - **Admin Approval Lock**: Riders are restricted from duties until an Admin officially approves their forensic profile.
 
 ## AI Integration
-- Gemini models used to extract structured data from medicine images
-- Fallback behavior when AI quota is exceeded
-- Expiry validation rules enforced on upload/update
+- Groq models used to extract structured data from medicine images
+- Fallback behavior when AI quota or timeout occurs
+- Expiry validation rules (Safety Audit) enforced on upload/update
 
 ## Technology Stack (Implementation)
 - Frontend: React.js, Tailwind CSS
 - Backend: Node.js, Express.js
 - Database: MongoDB
-- AI: Google Gemini API
+- AI: Groq Cloud API (Meta Llama 4 Scout Vision)
 - Cloud Storage: Cloudinary
 - Authentication: JWT, Google OAuth
 - Payments and Wallet: Razorpay

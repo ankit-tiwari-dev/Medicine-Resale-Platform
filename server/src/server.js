@@ -54,6 +54,7 @@ import cartRouter from "./routes/cart.routes.js";
 import kycRouter from "./routes/kyc.routes.js";
 import disputeRouter from "./routes/dispute.routes.js";
 import reviewRouter from "./routes/review.routes.js";
+import dashboardRouter from "./routes/dashboard.routes.js";
 
 app.use('/api/v1/auth', authLimiter, authRouter);
 app.use('/api/v1/medicines', medicineRouter);
@@ -66,6 +67,7 @@ app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/kyc", kycLimiter, kycRouter);
 app.use("/api/v1/disputes", disputeRouter);
 app.use("/api/v1/reviews", reviewRouter);
+app.use("/api/v1/dashboard", dashboardRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

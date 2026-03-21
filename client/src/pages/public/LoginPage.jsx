@@ -84,7 +84,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <Button type="submit" loading={isSubmitting} className="w-full h-12 text-sm font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-full mt-4">
+        <Button type="submit" loading={isSubmitting} className="w-full h-11 text-[10px] font-bold uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 transition-all rounded-xl mt-4 shadow-lg shadow-foreground/5">
           Login
         </Button>
 
@@ -92,13 +92,13 @@ const LoginPage = () => {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border/40"></div>
           </div>
-          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/30">
-            <span className="bg-background px-4 font-black">OR</span>
+          <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/40">
+            <span className="bg-background px-4 font-bold">OR</span>
           </div>
         </div>
 
         <a
-          className="inline-flex w-full items-center justify-center rounded-full border border-border/40 bg-background px-4 py-3 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-muted transition-all active:scale-95"
+          className="inline-flex w-full items-center justify-center rounded-xl border border-border bg-card px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted transition-all active:scale-95"
           href={getGoogleOAuthUrl()}
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="mr-3 h-4 w-4" />

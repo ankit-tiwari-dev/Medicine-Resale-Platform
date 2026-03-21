@@ -13,3 +13,6 @@ export const uploadAvatar = (formData) => axiosInstance.post("/auth/profile-phot
 });
 
 export const getGoogleOAuthUrl = () => `${axiosInstance.defaults.baseURL}/auth/google`;
+
+export const forgotPassword = (payload) => axiosInstance.post("/auth/forgot-password", payload);
+export const resetPassword = (payload) => axiosInstance.post("/auth/reset-password", payload);

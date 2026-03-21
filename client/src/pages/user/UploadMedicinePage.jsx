@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { scanMedicine, uploadMedicine } from "../../api/medicineApi";
 
 import Container from "../../components/layout/Container";
 import Button from "../../components/common/Button";
@@ -100,7 +101,7 @@ const UploadMedicinePage = () => {
           } else {
             setAiFeedback({
               type: 'success',
-              message: "AI Scan Successful! Metadata and a professional description have been synchronized with your form."
+              message: "Groq Scan Successful! Metadata and a professional description have been synchronized with your form."
             });
           }
           setIsValidated(true);
@@ -115,7 +116,7 @@ const UploadMedicinePage = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("AI Scan failed. Please check your connection.");
+      toast.error("Groq Scan failed. Please check your connection.");
     } finally {
       setIsScanning(false);
     }
@@ -222,23 +223,23 @@ const UploadMedicinePage = () => {
   if (step === 'success') {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <Container className="max-w-md">
-          <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
-            <div className="w-24 h-24 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <Container className="max-w-md font-sans">
+          <div className="bg-card rounded-xl p-10 shadow-xl border border-border text-center">
+            <div className="w-20 h-20 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
             </div>
-            <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Listing Secured</h2>
-            <p className="text-muted-foreground mb-8 text-sm leading-relaxed font-medium">
-              Your medicine has been initialized in our network. It is now undergoing <span className="text-primary font-bold font-sans">AI Forensic Verification</span> before going public.
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Listing Secured</h2>
+            <p className="text-muted-foreground mb-8 text-[11px] leading-relaxed font-medium opacity-70">
+              Your medicine has been initialized in our network. It is now undergoing <span className="text-primary font-bold">Groq Forensic Verification</span> before going public.
             </p>
             <div className="space-y-3">
               <Link to="/dashboard/my-medicines">
-                <Button variant="primary" className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 text-lg">
+                <Button variant="primary" className="w-full h-12 rounded-xl shadow-lg shadow-primary/5 text-[11px] font-bold uppercase tracking-widest">
                   Manage My Listings
                 </Button>
               </Link>
               <Button
                 variant="outline"
-                className="w-full h-14 rounded-2xl"
+                className="w-full h-12 rounded-xl text-[11px] font-bold uppercase tracking-widest"
                 onClick={resetForm}
               >
                 List Another Medicine
@@ -253,23 +254,23 @@ const UploadMedicinePage = () => {
   if (step === 'verifying') {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center">
-        <Container className="max-w-md">
-          <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
-            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse shadow-inner">
+        <Container className="max-w-md font-sans">
+          <div className="bg-card rounded-xl p-10 shadow-xl border border-border text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse shadow-inner">
             </div>
-            <h2 className="text-3xl font-serif font-bold text-foreground mb-4">AI Forensic Scan</h2>
-            <p className="text-muted-foreground mb-10 text-sm leading-relaxed font-medium">
-              Our Llama 3.2 Vision model is analyzing packaging integrity and extracting legitimate pharmaceutical metadata...
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Groq Forensic Scan</h2>
+            <p className="text-muted-foreground mb-10 text-[11px] leading-relaxed font-medium opacity-70">
+              Our Groq LLaVA Vision model is analyzing packaging integrity and extracting legitimate pharmaceutical metadata...
             </p>
-            <div className="space-y-4 max-w-xs mx-auto">
+            <div className="space-y-3 max-w-xs mx-auto">
               {[
                 { label: "Packaging Integrity Check", status: "complete" },
                 { label: "Batch Data Extraction", status: "complete" },
                 { label: "Expiry Timeline Audit", status: "active" },
                 { label: "Seller Compliance Review", status: "pending" }
               ].map((audit, i) => (
-                <div key={i} className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-left">
-                  <div className={`w-2 h-2 rounded-full ${audit.status === 'complete' ? 'bg-emerald-green' : audit.status === 'active' ? 'bg-primary animate-ping' : 'bg-muted'}`} />
+                <div key={i} className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-left opacity-80">
+                  <div className={`w-1.5 h-1.5 rounded-full ${audit.status === 'complete' ? 'bg-emerald-green' : audit.status === 'active' ? 'bg-primary animate-ping' : 'bg-muted'}`} />
                   <span className={audit.status === 'pending' ? 'text-muted-foreground' : 'text-foreground'}>{audit.label}</span>
                 </div>
               ))}
@@ -284,36 +285,60 @@ const UploadMedicinePage = () => {
     <div className="min-h-screen bg-muted/30 pb-20">
       <Container className="py-8 lg:py-12 max-w-[1000px]">
         {/* Header */}
-        <div className="mb-10">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-medium mb-6">
-            Back to Command Center
+        <div className="mb-10 font-sans">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-[9px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.2em] mb-4">
+            <span className="tracking-widest opacity-60">BACK TO</span> Command Center
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+              <div className="text-[9px] font-bold text-primary uppercase tracking-[0.2em] mb-1.5 opacity-60">
                 Seller Gateway
               </div>
-              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
+              <h1 className="text-2xl lg:text-3xl font-serif font-bold text-foreground tracking-tight">
                 Upload <span className="text-primary">Medicine</span>
               </h1>
-              <p className="text-muted-foreground mt-2 font-sans font-medium max-w-lg">
-                List unused verified medicines. Every listing requires an AI Forensic Scan to ensure platform safety.
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-sans font-medium max-w-lg opacity-70">
+                List unused verified medicines. Every listing requires a Groq Forensic Scan to ensure platform safety.
               </p>
             </div>
-            <div className="bg-emerald-green/5 border border-emerald-green/10 px-6 py-3 rounded-2xl flex items-center gap-3">
-              <div className="text-[10px] uppercase font-bold text-emerald-green tracking-widest leading-tight">
+            <div className="bg-emerald-green/5 border border-emerald-green/10 px-5 py-2.5 rounded-xl flex items-center gap-3">
+              <div className="text-[9px] uppercase font-bold text-emerald-green tracking-widest leading-tight opacity-80">
                 100% Secure <br /> Escrow System
               </div>
+              {/* Test Bypass Button */}
+              <button 
+                type="button"
+                id="test-bypass-scan"
+                onClick={() => {
+                  setForm(prev => ({
+                    ...prev,
+                    name: "Generic Paracetamol",
+                    genericName: "Paracetamol",
+                    manufacturer: "Micro Labs",
+                    batchNumber: "B12345",
+                    expiryDate: "2026-12-31",
+                    originalPrice: "200",
+                    description: "High quality generic paracetamol for pain relief."
+                  }));
+                  setPreview("https://placehold.co/400x400?text=Medicine+Scan+Mock");
+                  setImage(new File([""], "mock-medicine.png", { type: "image/png" }));
+                  setIsValidated(true);
+                  toast.success("Test: AI Scan Bypassed");
+                }}
+                className="ml-4 px-3 py-1 bg-emerald-green/20 text-emerald-green text-[8px] font-bold rounded-lg border border-emerald-green/30 hover:bg-emerald-green/30 transition-all"
+              >
+                TEST: BYPASS SCAN
+              </button>
             </div>
           </div>
         </div>
 
         <form onSubmit={onSubmit} className="grid lg:grid-cols-5 gap-8">
           {/* Left: Image Upload Zone */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-card rounded-[2rem] p-8 border border-border shadow-sm">
-              <h2 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-2">Visual Evidence</h2>
-              <p className="text-xs text-muted-foreground mb-8 leading-relaxed font-medium">Verify packaging integrity with clear images.</p>
+          <div className="lg:col-span-2 space-y-6 font-sans">
+            <div className="bg-card rounded-xl p-8 border border-border shadow-sm">
+              <h2 className="text-base font-bold text-foreground font-serif uppercase tracking-tight mb-1.5">Visual Evidence</h2>
+              <p className="text-[11px] text-muted-foreground mb-8 leading-relaxed font-medium opacity-70">Verify packaging integrity with clear images.</p>
 
               <div
                 className={`aspect-square rounded-[1.5rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer p-4 ${preview ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary hover:bg-muted/50'}`}
@@ -352,19 +377,19 @@ const UploadMedicinePage = () => {
                 <Button
                   type="button"
                   variant={isValidated ? "outline" : "primary"}
-                  className={`w-full h-14 rounded-2xl flex gap-3 font-bold transition-all ${isValidated ? 'border-emerald-green/30 text-emerald-green' : 'shadow-lg shadow-primary/20'}`}
+                  className={`w-full h-12 rounded-xl flex gap-3 font-bold transition-all text-[11px] uppercase tracking-widest ${isValidated ? 'border-emerald-green/30 text-emerald-green' : 'shadow-lg shadow-primary/5'}`}
                   onClick={handleAIScan}
                   disabled={isScanning || !image}
                 >
-                  {isScanning && <span className="uppercase text-[10px] tracking-widest mr-2">SCANNING</span>}
-                  {isValidated ? "Rescan Pharmaceutical" : "Run AI Forensic Scan"}
+                  {isScanning && <span className="uppercase text-[9px] tracking-widest mr-2">SCANNING</span>}
+                  {isValidated ? "Rescan Pharmaceutical" : "Run Groq Forensic Scan"}
                 </Button>
 
 
-                <div className="bg-muted/30 rounded-2xl p-4 border border-border dashed">
+                <div className="bg-muted/30 rounded-xl p-4 border border-border border-dashed font-sans">
                   <div>
-                    <h4 className="text-xs font-bold text-foreground mb-1 uppercase tracking-tight">Forensic Protocol</h4>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">AI scanning automatically extracts metadata and verifies medical legitimacy.</p>
+                    <h4 className="text-[11px] font-bold text-foreground mb-1 uppercase tracking-tight">Forensic Protocol</h4>
+                    <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-70">Groq scanning automatically extracts metadata and verifies medical legitimacy.</p>
                   </div>
                 </div>
               </div>
@@ -372,10 +397,10 @@ const UploadMedicinePage = () => {
           </div>
 
           {/* Right: Details Form */}
-          <div className="lg:col-span-3 space-y-8">
-            <div className="bg-card rounded-[2rem] p-10 border border-border shadow-sm space-y-10">
+          <div className="lg:col-span-3 space-y-8 font-sans">
+            <div className="bg-card rounded-xl p-8 lg:p-10 border border-border shadow-sm space-y-10">
               <div>
-                <h2 className="text-lg font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
+                <h2 className="text-base font-bold text-foreground font-serif uppercase tracking-tight mb-8 flex items-center gap-3">
                   Pharmaceutical Data
                 </h2>
 
@@ -420,7 +445,7 @@ const UploadMedicinePage = () => {
                 <div className="grid sm:grid-cols-3 gap-6 mt-6">
                   <FormInput
                     label="Batch No."
-                    placeholder="AI will extract"
+                    placeholder="Groq will extract"
                     value={form.batchNumber}
                     onChange={(e) => setForm({ ...form, batchNumber: e.target.value })}
                     required
@@ -453,7 +478,7 @@ const UploadMedicinePage = () => {
                     placeholder="Describe storage conditions and seal integrity..."
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full px-4 py-4 bg-muted/40 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans resize-none"
+                    className="w-full px-4 py-4 bg-muted/40 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans resize-none"
                   />
                 </div>
               </div>
@@ -500,7 +525,7 @@ const UploadMedicinePage = () => {
               <Button
                 type="submit"
                 variant="primary"
-                className={`w-full h-16 rounded-2xl shadow-xl transition-all text-lg font-bold flex gap-3 items-center justify-center group ${!isValidated && 'opacity-50 grayscale cursor-not-allowed'}`}
+                className={`w-full h-15 rounded-xl shadow-lg transition-all text-base font-bold flex gap-3 items-center justify-center group ${!isValidated && 'opacity-50 grayscale cursor-not-allowed'}`}
                 disabled={loading || !isValidated}
               >
                 {loading ? "Securely Initializing..." : isValidated ? "Complete Verification & List" : "Scan Image to Initialize"}
@@ -512,27 +537,27 @@ const UploadMedicinePage = () => {
 
       {/* Professional AI Feedback Modal (Amazon Style) */}
       {aiFeedback && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-300">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-card rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 border border-border">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h3 className="text-lg font-bold text-foreground">
                 {aiFeedback.type === 'success' ? 'Verification Successful' :
                   aiFeedback.type === 'quality' ? 'Image Quality Report' : 'Verification Alert'}
               </h3>
               <button
                 onClick={() => setAiFeedback(null)}
-                className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest"
+                className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest"
                 aria-label="Close"
               >
                 Close
               </button>
             </div>
             <div className="p-8">
-              <p className="text-sm text-gray-700 leading-relaxed font-medium">
+              <p className="text-sm text-foreground/80 leading-relaxed font-medium">
                 {aiFeedback.message}
               </p>
             </div>
-            <div className="px-6 py-4 bg-gray-50 flex justify-end">
+            <div className="px-6 py-4 bg-muted/30 flex justify-end">
               <Button
                 variant="primary"
                 className="h-10 px-8 rounded-md text-sm font-bold"

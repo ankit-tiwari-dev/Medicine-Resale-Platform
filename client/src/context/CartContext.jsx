@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import api from '../services/api';
+import * as cartApi from '../api/cartApi';
 import toast from 'react-hot-toast';
 
 const CartContext = createContext();
@@ -43,7 +43,7 @@ export const CartProvider = ({ children }) => {
             const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
             if (guestCart.length > 0) {
                 try {
-                    await Promise.all(guestCart.map(item => api.post('/cart/add', { medicineId: item._id || item.medicineId, quantity: item.quantity })));
+                    await Promise.all(guestCart.map(item => cartApi.addToCart({ medicineId: item._id || item.medicineId, quantity: item.quantity })));
                     localStorage.removeItem('guestCart');
                 } catch (err) {
                     console.error('Failed to sync guest cart', err);
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }) => {
 
             // User: Fetch from API
             try {
-                const response = await api.get('/cart');
+                const response = await cartApi.getCart();
                 setCartItems(response.data.data?.items || []);
             } catch (error) {
                 console.error('Failed to fetch user cart', error);
@@ -68,6 +68,13 @@ export const CartProvider = ({ children }) => {
     const addToCart = async (medicine, quantityToAdd = 1) => {
         const qty = Number(quantityToAdd);
         if (user) {
+            // Self-Purchase Prevention Check
+            const sellerId = medicine.sellerId?._id || medicine.sellerId;
+            if (String(sellerId) === String(user._id)) {
+                toast.error('Protocol Violation: You cannot purchase your own clinical listing.');
+                return;
+            }
+
             // User: API Call
             try {
                 // Optimistic UI update
@@ -87,7 +94,7 @@ export const CartProvider = ({ children }) => {
                     setCartItems(prev => [...prev, { ...medicine, medicineId: medicine._id, quantity: qty }]);
                 }
 
-                await api.post('/cart/add', { medicineId: medicine._id, quantity: qty });
+                await cartApi.addToCart({ medicineId: medicine._id, quantity: qty });
                 fetchCart(); // Sync to be safe
             } catch (error) {
                 toast.error('Failed to add to cart');
@@ -116,7 +123,7 @@ export const CartProvider = ({ children }) => {
                     const currentId = item?.medicineId?._id || item.medicineId || item._id;
                     return String(currentId) !== String(medicineId);
                 }));
-                await api.delete(`/cart/remove/${medicineId}`);
+                await cartApi.removeFromCart(medicineId);
             } catch (error) {
                 toast.error('Failed to remove item');
                 fetchCart();
@@ -150,7 +157,7 @@ export const CartProvider = ({ children }) => {
 
             debounceTimers.current[medicineId] = setTimeout(async () => {
                 try {
-                    await api.patch('/cart/update-quantity', { medicineId, quantity: newQty });
+                    await cartApi.updateCartItemQuantity({ medicineId, quantity: newQty });
                     delete debounceTimers.current[medicineId];
                 } catch (error) {
                     toast.error('Failed to sync quantity with server');
@@ -171,7 +178,7 @@ export const CartProvider = ({ children }) => {
     const clearCart = async () => {
         if (user) {
             try {
-                await api.delete('/cart/clear');
+                await cartApi.clearCart();
                 setCartItems([]);
             } catch (e) {
                 console.error(e);

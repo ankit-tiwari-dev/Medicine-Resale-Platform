@@ -56,6 +56,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const bootstrapAuth = useCallback(async () => {
+    // If we already have a user from saveAuthState (e.g. just logged in), 
+    // we don't want a lagging bootstrapAuth to wipe it out.
+    const currentToken = storage.getAccessToken();
+    if (!currentToken) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await getCurrentUser();
       const nextUser = response?.data?.data || response?.data?.user || null;
@@ -63,9 +71,13 @@ export const AuthProvider = ({ children }) => {
         storage.setUser(nextUser);
         setUser(nextUser);
       }
-    } catch {
-      storage.clearAuth();
-      setUser(null);
+    } catch (error) {
+      // Only clear if it's a 401 and we hasn't just logged in 
+      // (though 401 usually means token is bad anyway)
+      if (error?.response?.status === 401) {
+        storage.clearAuth();
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -130,6 +142,21 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       updateRateLimitState(error);
       return { success: false, message: extractErrorMessage(error, "OTP verification failed") };
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetPassword = async (payload) => {
+    setIsSubmitting(true);
+    try {
+      const { resetPassword: apiResetPassword } = await import("../api/authApi");
+      const response = await apiResetPassword(payload);
+      saveAuthState(response?.data);
+      const loggedInUser = response?.data?.data?.user || response?.data?.user;
+      return { success: true, user: loggedInUser };
+    } catch (error) {
+      return { success: false, message: extractErrorMessage(error, "Password reset failed") };
     } finally {
       setIsSubmitting(false);
     }
@@ -212,9 +239,10 @@ export const AuthProvider = ({ children }) => {
       updateProfile,
       uploadUserAvatar,
       refreshUser: bootstrapAuth,
-      setOtpSession
+      setOtpSession,
+      resetPassword
     }),
-    [user, loading, isSubmitting, otpSession, rateLimit]
+    [user, loading, isSubmitting, otpSession, rateLimit, bootstrapAuth]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

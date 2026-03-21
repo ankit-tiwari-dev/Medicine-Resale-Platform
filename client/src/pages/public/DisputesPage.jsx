@@ -67,7 +67,7 @@ const DisputesPage = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap border ${activeTab === tab.id
-                ? 'bg-primary text-white border-primary shadow-lg shadow-primary/10'
+                ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/10'
                 : 'bg-card text-muted-foreground border-border hover:border-primary/20'
                 }`}
             >

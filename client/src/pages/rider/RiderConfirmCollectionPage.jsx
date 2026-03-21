@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { confirmCollection } from "../../api/riderApi";
 import Button from "../../components/common/Button";
 import Container from "../../components/layout/Container";
@@ -6,15 +6,22 @@ import { FormInput } from "../../components/forms/FormInput";
 import { extractErrorMessage } from "../../utils/errors";
 import toast from "react-hot-toast";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const RiderConfirmCollectionPage = () => {
   const navigate = useNavigate();
-  const [medicineId, setMedicineId] = useState("");
+  const location = useLocation();
+  const [medicineId, setMedicineId] = useState(location.state?.medicineId || "");
   const [proof, setProof] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (location.state?.medicineId) {
+      setMedicineId(location.state.medicineId);
+    }
+  }, [location.state]);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -49,17 +56,16 @@ const RiderConfirmCollectionPage = () => {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Container className="max-w-md">
-          <div className="bg-card rounded-[2.5rem] p-10 shadow-xl border border-border text-center">
-            <div className="w-24 h-24 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <div className="text-[10px] font-black tracking-widest uppercase text-emerald-green">SECURE</div>
-
+          <div className="bg-card rounded-xl p-8 lg:p-10 shadow-lg shadow-black/5 border border-border text-center font-sans">
+            <div className="w-16 h-16 bg-emerald-green/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+              <div className="text-[8px] font-bold tracking-[0.2em] uppercase text-emerald-green">SECURE</div>
             </div>
-            <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Collection Validated</h2>
-            <p className="text-muted-foreground mb-8 text-sm leading-relaxed font-medium">
-              Unit lot #{medicineId.slice(-6).toUpperCase()} is now officially in your possession. Real-time tracking is active. Proceed to handover coordinates.
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-3 tracking-tight">Collection Validated</h2>
+            <p className="text-[11px] text-muted-foreground mb-8 leading-relaxed font-medium opacity-70 px-4">
+              Unit lot is now in your possession. tracking is active. Proceed to handover.
             </p>
             <Link to="/rider/tasks">
-              <Button variant="primary" className="w-full h-14 rounded-2xl shadow-lg shadow-primary/20 text-lg font-bold">
+              <Button variant="primary" className="w-full h-11 rounded-xl shadow-lg shadow-primary/5 text-[9px] font-bold uppercase tracking-widest">
                 View Next Assignment
               </Button>
             </Link>
@@ -72,30 +78,27 @@ const RiderConfirmCollectionPage = () => {
   return (
     <div className="min-h-screen bg-muted/30 pb-20">
       <Container className="py-8 lg:py-12 max-w-[800px]">
-        {/* Header */}
-        <div className="mb-10">
-          <Link to="/rider/tasks" className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-primary transition-colors font-black uppercase tracking-[0.2em] mb-6">
-            <span className="tracking-widest">BACK TO</span> Assignments
+        <div className="mb-10 font-sans">
+          <Link to="/rider/tasks" className="inline-flex items-center gap-2 text-[9px] text-muted-foreground hover:text-primary transition-colors font-bold uppercase tracking-[0.2em] mb-6">
+            <span className="tracking-widest opacity-60">BACK TO</span> ASSIGNMENTS
           </Link>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
-                DOC
-
+              <div className="flex items-center gap-2 text-[9px] font-bold text-primary uppercase tracking-[0.2em] mb-1.5 opacity-60">
                 Handover Protocol
               </div>
-              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-foreground">
-                Verify <span className="text-primary">Collection</span>
+              <h1 className="text-2xl lg:text-3xl font-serif font-bold text-foreground tracking-tight">
+                Verify <span className="text-primary font-sans lowercase italic">Collection</span>
               </h1>
-              <p className="text-muted-foreground mt-2 font-sans font-medium">
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-sans font-medium opacity-70">
                 Formalize possession of medical units by uploading clinical proof.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-card rounded-[2.5rem] p-8 lg:p-12 border border-border shadow-sm">
+        <div className="bg-card rounded-xl p-8 lg:p-10 border border-border shadow-sm font-sans">
           <form onSubmit={onSubmit} className="space-y-8">
             <div className="grid md:grid-cols-2 gap-8 items-start">
               <div className="space-y-6">
@@ -108,17 +111,17 @@ const RiderConfirmCollectionPage = () => {
                   required
                 />
 
-                <div className="p-5 bg-muted/20 border border-border rounded-2xl space-y-4">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Compliance Checklist</p>
+                <div className="p-5 bg-muted/20 border border-border rounded-xl space-y-4">
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest pl-1 opacity-60">Compliance Checklist</p>
                   {[
                     "Verify SEAL integrity.",
                     "Check EXPIRY against label.",
                     "Inspect for lot contamination.",
                     "Secure unit in thermal bag."
                   ].map((check, i) => (
-                    <div key={i} className="flex gap-3 items-center text-xs font-bold text-foreground italic">
-                      <div className="w-5 h-5 bg-white border border-border rounded-md flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                    <div key={i} className="flex gap-3 items-center text-[10px] font-bold text-foreground italic opacity-70">
+                      <div className="w-3.5 h-3.5 bg-white border border-border rounded flex items-center justify-center">
+                        <div className="w-1 h-1 bg-primary rounded-full" />
                       </div>
                       {check}
                     </div>
@@ -127,23 +130,21 @@ const RiderConfirmCollectionPage = () => {
               </div>
 
               <div className="space-y-4">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Capture Presence Proof</p>
-                <div className="border-2 border-dashed border-border rounded-[2rem] h-64 flex flex-col items-center justify-center relative overflow-hidden bg-muted/10 group hover:border-primary/30 transition-all">
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest pl-1 opacity-60">Capture Presence Proof</p>
+                <div className="border border-dashed border-border rounded-xl h-64 flex flex-col items-center justify-center relative overflow-hidden bg-muted/10 group hover:border-primary/30 transition-all font-sans">
                   {preview ? (
                     <>
                       <img src={preview} alt="Proof" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button type="button" variant="outline" className="bg-white border-none h-10 px-4 rounded-xl font-black uppercase tracking-widest text-[10px] flex gap-2">
+                        <Button type="button" variant="outline" className="bg-white border-none h-10 px-4 rounded-xl font-bold uppercase tracking-widest text-[9px] flex gap-2">
                           CAM Retake Photo
                         </Button>
-
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="text-muted-foreground mb-4 group-hover:scale-110 transition-transform font-black text-xl tracking-widest uppercase text-[10px]">APP</div>
-
-                      <p className="text-xs font-bold text-muted-foreground">Click to Open Camera</p>
+                      <div className="text-muted-foreground mb-4 group-hover:scale-110 transition-transform font-bold text-xl tracking-widest uppercase text-[9px]">APP</div>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">Click to Open Camera</p>
                     </>
                   )}
                   <input
@@ -154,32 +155,28 @@ const RiderConfirmCollectionPage = () => {
                     required
                   />
                 </div>
-                <div className="flex gap-2 text-[10px] text-muted-foreground font-black tracking-widest uppercase bg-muted/30 p-3 rounded-xl">
-                  <div className="flex-shrink-0 mt-0.5 text-primary">INFO</div>
-
-                  Image must contain the unit and the seller's handover location for validity.
+                <div className="flex gap-2 text-[8px] text-muted-foreground font-bold tracking-widest uppercase bg-muted/30 p-3 rounded-xl opacity-40">
+                  Image must contain the unit and the location.
                 </div>
               </div>
             </div>
 
             <div className="pt-6 border-t border-border border-dashed flex items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <div className="text-[10px] font-black text-muted-amber uppercase">BOND</div>
-
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+                <div className="text-[9px] font-bold text-muted-amber uppercase opacity-40">BOND</div>
+                <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-tight opacity-70">
                   Posession Bond <br />
-                  <span className="text-foreground">Active upon submission</span>
+                  <span className="text-foreground opacity-100">Active upon submission</span>
                 </div>
               </div>
               <Button
                 type="submit"
                 variant="primary"
-                className="h-16 px-10 rounded-2xl font-bold shadow-xl shadow-primary/20 flex gap-3 items-center group"
+                className="h-11 px-10 rounded-xl font-bold text-[9px] uppercase tracking-widest shadow-lg shadow-primary/5 flex gap-3 items-center group"
                 loading={loading}
               >
                 AUTHORIZE POSSESSION
               </Button>
-
             </div>
           </form>
         </div>

@@ -132,6 +132,23 @@
   input {
     @apply text-base font-normal leading-relaxed;
   }
+
+  /* ── Selection ── */
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  /* ── Hide Number Spinners ── */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+  }
 }
 
 /* =============================================
@@ -164,4 +181,55 @@
 
 .shadow-high {
   box-shadow: var(--shadow-high);
+}
+
+/* =============================================
+   CUSTOM SCROLLBARS — according to theme
+   ============================================= */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-border) 40%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-border) 40%, transparent);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Sidebar Specific Scrollbar */
+.side-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.side-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.side-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+/* Custom Scrollbar for specific sections */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-border) 50%, transparent);
+  border-radius: 10px;
 }

@@ -6,6 +6,18 @@ import MedicineCard from "../../components/common/MedicineCard";
 import Button from "../../components/common/Button";
 import { MEDICINE_CATEGORIES } from "../../utils/constants";
 import { useCart } from "../../context/CartContext";
+import { 
+  Search, 
+  Filter, 
+  CheckCircle2, 
+  RotateCcw, 
+  ShoppingCart, 
+  ArrowRight, 
+  ShieldCheck,
+  AlertCircle,
+  Package,
+  Activity
+} from "lucide-react";
 
 const BrowseMedicinesPage = () => {
   const { addToCart, cartItems, cartCount } = useCart();
@@ -18,18 +30,31 @@ const BrowseMedicinesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState(2000);
   const [onlyVerified, setOnlyVerified] = useState(false);
+  const [onlyRiderCertified, setOnlyRiderCertified] = useState(false);
+  const [expiryRange, setExpiryRange] = useState('any'); // 'any', '3m', '6m', '1y'
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const fetchMedicines = async () => {
       setLoading(true);
       try {
+        let expiryAfter = undefined;
+        if (expiryRange !== 'any') {
+          const date = new Date();
+          if (expiryRange === '3m') date.setMonth(date.getMonth() + 3);
+          if (expiryRange === '6m') date.setMonth(date.getMonth() + 6);
+          if (expiryRange === '1y') date.setFullYear(date.getFullYear() + 1);
+          expiryAfter = date.toISOString();
+        }
+
         const params = {
           status: "listed",
           search: searchQuery || undefined,
           category: selectedCategory === 'All Categories' ? undefined : selectedCategory,
           maxPrice: priceRange,
-          verified: onlyVerified || undefined
+          verified: onlyVerified || undefined,
+          riderCertified: onlyRiderCertified || undefined,
+          expiryAfter
         };
         const response = await medicineService.getAll(params);
         setItems(response?.data || []);
@@ -43,13 +68,15 @@ const BrowseMedicinesPage = () => {
 
     const debounceTimer = setTimeout(fetchMedicines, 500);
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, selectedCategory, priceRange, onlyVerified]);
+  }, [searchQuery, selectedCategory, priceRange, onlyVerified, onlyRiderCertified, expiryRange]);
 
   const resetFilters = () => {
     setSelectedCategory('All Categories');
     setSearchQuery('');
     setPriceRange(2000);
     setOnlyVerified(false);
+    setOnlyRiderCertified(false);
+    setExpiryRange('any');
   };
 
   const subtotal = cartItems.reduce((acc, item) => {
@@ -77,20 +104,24 @@ const BrowseMedicinesPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative w-full md:w-80 group text-[10px] font-black uppercase tracking-widest text-primary mb-2 md:mb-0">
+            <div className="relative w-full md:w-80 group text-[10px] font-bold uppercase tracking-widest text-primary mb-2 md:mb-0">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors">
+                <Search size={16} />
+              </div>
               <input
                 type="text"
                 placeholder="Search by name or generic..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans"
+                className="w-full pl-11 pr-4 py-2.5 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-sans"
               />
             </div>
             <Button
               variant="outline"
-              className="lg:hidden gap-2 bg-card h-[46px] rounded-xl px-4 font-black text-[10px] uppercase tracking-widest"
+              className="lg:hidden gap-2 bg-card h-[42px] rounded-xl px-4 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center"
               onClick={() => setShowMobileFilters(true)}
             >
+              <Filter size={14} />
               Filters
             </Button>
           </div>
@@ -98,13 +129,15 @@ const BrowseMedicinesPage = () => {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters (Desktop) */}
-          <aside className="hidden lg:block w-72 flex-shrink-0">
-            <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-24 space-y-8">
+          <aside className="hidden lg:block w-70 flex-shrink-0">
+            <div className="bg-card rounded-xl p-6 shadow-sm border border-border sticky top-24 space-y-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                  <Filter size={14} className="text-primary" />
                   <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">Filters</h2>
                 </div>
-                <button onClick={resetFilters} className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight">
+                <button onClick={resetFilters} className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight flex items-center gap-1">
+                  <RotateCcw size={10} />
                   Reset
                 </button>
               </div>
@@ -155,18 +188,41 @@ const BrowseMedicinesPage = () => {
 
               <div className="h-px bg-border"></div>
 
-              {/* Premium Filters */}
+              {/* Quality & Expiry Filters */}
               <div>
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Quality Control</h3>
-                <label className="flex items-center justify-between cursor-pointer group p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
-                  <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">AI Verified Only</span>
-                  <input
-                    type="checkbox"
-                    checked={onlyVerified}
-                    onChange={(e) => setOnlyVerified(e.target.checked)}
-                    className="w-4 h-4 rounded border-border text-emerald-green focus:ring-emerald-green"
-                  />
-                </label>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Clinical Expiry</h3>
+                <select 
+                  value={expiryRange}
+                  onChange={(e) => setExpiryRange(e.target.value)}
+                  className="w-full bg-muted/40 border-border rounded-xl p-3 text-sm font-medium focus:ring-primary focus:border-primary cursor-pointer mb-6"
+                >
+                  <option value="any">Minimum Duration (Any)</option>
+                  <option value="3m">At least 3 months</option>
+                  <option value="6m">At least 6 months</option>
+                  <option value="1y">At least 1 year</option>
+                </select>
+
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Verification Layer</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center justify-between cursor-pointer group p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
+                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Groq Verified</span>
+                    <input
+                      type="checkbox"
+                      checked={onlyVerified}
+                      onChange={(e) => setOnlyVerified(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-emerald-green focus:ring-emerald-green"
+                    />
+                  </label>
+                  <label className="flex items-center justify-between cursor-pointer group p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
+                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Rider Certified</span>
+                    <input
+                      type="checkbox"
+                      checked={onlyRiderCertified}
+                      onChange={(e) => setOnlyRiderCertified(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-soft-cyan focus:ring-soft-cyan"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </aside>
@@ -176,25 +232,28 @@ const BrowseMedicinesPage = () => {
             {loading && items.length === 0 ? (
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-96 rounded-2xl border border-border bg-card animate-pulse" />
+                  <div key={i} className="h-96 rounded-xl border border-border bg-card animate-pulse" />
                 ))}
               </div>
             ) : error ? (
-              <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-12 text-center">
+              <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-12 text-center">
                 <div className="text-destructive font-bold mb-2">Error Connection</div>
                 <p className="text-muted-foreground text-sm">{error}</p>
                 <Button variant="outline" size="sm" className="mt-6" onClick={() => window.location.reload()}>Retry Search</Button>
               </div>
             ) : items.length === 0 ? (
-              <div className="bg-card border border-border rounded-2xl p-20 text-center shadow-sm">
-                <div className="w-20 h-20 bg-muted text-muted-foreground rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-black uppercase">
-                  ZERO
+              <div className="bg-card border border-border rounded-xl p-16 text-center shadow-sm">
+                <div className="w-16 h-16 bg-muted/30 text-muted-foreground/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Package size={32} />
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">No medicines found</h3>
-                <p className="text-muted-foreground max-w-xs mx-auto text-sm leading-relaxed mb-8">
+                <p className="text-muted-foreground max-w-xs mx-auto text-sm leading-relaxed mb-8 font-sans">
                   We couldn't find any verified listings matching your specific filters. Try adjusting your search or budget.
                 </p>
-                <Button variant="primary" onClick={resetFilters}>Clear All Filters</Button>
+                <Button variant="primary" onClick={resetFilters} className="flex items-center gap-2 mx-auto uppercase tracking-widest text-[10px] font-bold">
+                  <RotateCcw size={14} />
+                  Clear All Filters
+                </Button>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in duration-500">
@@ -210,8 +269,8 @@ const BrowseMedicinesPage = () => {
           </main>
 
           {/* Right Sidebar: Mini Cart (Desktop Only) */}
-          <aside className="hidden xl:block w-72 flex-shrink-0">
-            <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-24 space-y-6">
+          <aside className="hidden xl:block w-70 flex-shrink-0">
+            <div className="bg-card rounded-xl p-6 shadow-sm border border-border sticky top-24 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-foreground font-sans">Subtotal</h2>
                 <span className="text-lg font-bold text-primary italic">₹{subtotal.toLocaleString('en-IN')}</span>
@@ -249,14 +308,16 @@ const BrowseMedicinesPage = () => {
 
               <Button
                 variant="primary"
-                className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 font-bold"
+                className="w-full h-12 rounded-xl shadow-lg shadow-primary/10 font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 group"
                 onClick={() => window.location.href = '/cart'}
               >
+                <ShoppingCart size={14} />
                 Go to Cart
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              <div className="flex items-center gap-2 p-3 bg-emerald-green/5 border border-emerald-green/20 rounded-xl">
-                <span className="text-[10px] font-black uppercase text-emerald-green tracking-widest flex-shrink-0">SECURE:</span>
+              <div className="flex items-center gap-3 p-3 bg-emerald-green/5 border border-emerald-green/20 rounded-xl">
+                <ShieldCheck size={18} className="text-emerald-green flex-shrink-0" />
                 <p className="text-[10px] font-medium text-emerald-green italic leading-tight">
                   Secured by Escrow Architecture. Listed medicines are AI-Verified.
                 </p>
@@ -270,11 +331,11 @@ const BrowseMedicinesPage = () => {
       {showMobileFilters && (
         <div className="fixed inset-0 z-[60] lg:hidden animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobileFilters(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[2.5rem] p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-400">
+          <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-2xl p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-400">
             <div className="w-12 h-1 bg-border rounded-full mx-auto mb-8" />
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-serif font-bold text-foreground">Advanced Filters</h2>
-              <button onClick={() => setShowMobileFilters(false)} className="px-4 h-10 bg-muted rounded-xl flex items-center justify-center text-foreground ring-1 ring-border text-[10px] font-black uppercase tracking-widest">
+              <h2 className="text-2xl font-serif font-bold text-foreground font-serif">Advanced Filters</h2>
+              <button onClick={() => setShowMobileFilters(false)} className="px-4 h-9 bg-muted rounded-xl flex items-center justify-center text-foreground ring-1 ring-border text-[10px] font-bold uppercase tracking-widest">
                 CLOSE
               </button>
             </div>
@@ -287,7 +348,7 @@ const BrowseMedicinesPage = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border ${selectedCategory === cat ? 'bg-primary text-white border-primary shadow-lg' : 'bg-card text-muted-foreground border-border'}`}
+                    className={`px-4 py-3 rounded-xl text-xs font-bold transition-all border ${selectedCategory === cat ? 'bg-primary text-primary-foreground border-primary shadow-lg' : 'bg-card text-muted-foreground border-border'}`}
                   >
                     {cat}
                   </button>
@@ -315,8 +376,8 @@ const BrowseMedicinesPage = () => {
             </div>
 
             <div className="flex gap-4">
-              <Button variant="outline" className="flex-1 h-14 rounded-xl" onClick={resetFilters}>Reset</Button>
-              <Button variant="primary" className="flex-1 h-14 rounded-xl shadow-lg shadow-primary/20" onClick={() => setShowMobileFilters(false)}>Show Results</Button>
+              <Button variant="outline" className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase tracking-widest" onClick={resetFilters}>Reset</Button>
+              <Button variant="primary" className="flex-1 h-12 rounded-xl shadow-lg shadow-primary/20 text-[10px] font-bold uppercase tracking-widest" onClick={() => setShowMobileFilters(false)}>Show Results</Button>
             </div>
           </div>
         </div>

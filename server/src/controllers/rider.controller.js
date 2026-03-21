@@ -39,7 +39,7 @@ export const confirmCollection = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Medicine not found");
     }
 
-    if (medicine.riderId.toString() !== req.user._id.toString()) {
+    if (!medicine.riderId || medicine.riderId.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You are not assigned to this medicine");
     }
 
@@ -50,8 +50,8 @@ export const confirmCollection = asyncHandler(async (req, res) => {
     await medicine.save();
 
     const rider = await Rider.findOne({ userId: req.user._id });
-    if (rider) {
-        rider.assignedTasks = rider.assignedTasks.filter(id => id.toString() !== medicineId.toString());
+    if (rider && rider.assignedTasks) {
+        rider.assignedTasks = rider.assignedTasks.filter(id => id && id.toString() !== medicineId?.toString());
         rider.completedTasks.push(medicineId);
         await rider.save();
     }

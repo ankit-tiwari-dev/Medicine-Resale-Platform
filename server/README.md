@@ -2,7 +2,7 @@
 
 ![Medicine AI Mart](https://img.shields.io/badge/Status-In--Development-orange)
 ![Tech Stack](https://img.shields.io/badge/Stack-MERN-blue)
-![AI Powered](https://img.shields.io/badge/AI-Gemini%20Included-green)
+![AI Powered](https://img.shields.io/badge/AI-Groq%20Powered-green)
 
 A state-of-the-art MERN platform designed for the safe resale of unused medicines. The system integrates advanced AI for data extraction and a **Zero-Tolerance, AI-powered forensic document verification system** to ensure rider authenticity.
 
@@ -12,7 +12,7 @@ A state-of-the-art MERN platform designed for the safe resale of unused medicine
 
 ### 1. Medicine Resale Lifecycle
 1.  **Selection & Upload**: Users upload medicine photos.
-2.  **AI Extraction**: Google Gemini AI automatically extracts Name, Expiry, Batch No, and price from the image.
+2.  **AI Extraction**: Groq Cloud API using Meta Llama 4 Scout Vision automatically extracts Name, Expiry, Batch No, and price from the image.
 3.  **Admin Verification**: Admins review the AI-extracted data against the photo.
 4.  **Rider Collection**: Admin assigns a rider. The rider collects the medicine and uploads proof.
 5.  **Wallet Credit**: Upon successful collection, the seller's wallet is credited.
@@ -68,7 +68,7 @@ We maintain a strict zero-tolerance policy towards fraudulent identity documents
 - **Frontend**: React.js, Tailwind CSS
 - **Backend**: Node.js (Express)
 - **Database**: MongoDB (Mongoose)
-- **AI Engine**: Google Gemini (OCR + NLP)
+- **AI Engine**: Groq Cloud (Meta Llama 4 Scout Vision)
 - **Identity Engine**: Tesseract.js & Aadhaar V4 Decoder
 - **Storage**: Cloudinary
 - **Payments**: Razorpay

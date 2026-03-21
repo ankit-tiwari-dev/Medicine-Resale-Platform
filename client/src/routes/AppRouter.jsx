@@ -20,6 +20,7 @@ import DisputesPage from "../pages/public/DisputesPage";
 import RaiseDisputePage from "../pages/public/RaiseDisputePage";
 import SellerReviewsPage from "../pages/public/SellerReviewsPage";
 import MedicineReviewsPage from "../pages/public/MedicineReviewsPage";
+import ForgotPasswordPage from "../pages/public/ForgotPasswordPage";
 
 import DashboardHomePage from "../pages/user/DashboardHomePage";
 import MyMedicinesPage from "../pages/user/MyMedicinesPage";
@@ -52,6 +53,7 @@ import AdminWithdrawalsPage from "../pages/admin/AdminWithdrawalsPage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
 import AdminLogsPage from "../pages/admin/AdminLogsPage";
 import AdminStatsPage from "../pages/admin/AdminStatsPage";
+import AdminDisputesPage from "../pages/admin/AdminDisputesPage";
 
 const AppRouter = () => {
   return (
@@ -74,6 +76,7 @@ const AppRouter = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/register-rider" element={<RiderRegisterPage />} />
           <Route path="/verify-otp" element={<OtpVerificationPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
 
         <Route
@@ -91,6 +94,7 @@ const AppRouter = () => {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailsPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="cart" element={<CartPage />} />
         </Route>
 
         <Route
@@ -139,6 +143,7 @@ const AppRouter = () => {
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="withdrawals" element={<AdminWithdrawalsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
+          <Route path="disputes" element={<AdminDisputesPage />} />
           <Route path="logs" element={<AdminLogsPage />} />
           <Route path="stats" element={<AdminStatsPage />} />
         </Route>
