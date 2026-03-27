@@ -16,8 +16,31 @@ import {
 
 const app = express();
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN
+]
+  .flatMap((value) => (value ? value.split(",") : []))
+  .map((value) => value.trim())
+  .filter(Boolean);
+
+logger.info(
+  `Configured CORS origins: ${allowedOrigins.length ? allowedOrigins.join(", ") : "none"}`
+);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    logger.warn(`Blocked by CORS: ${origin}`);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true
 }));
 
