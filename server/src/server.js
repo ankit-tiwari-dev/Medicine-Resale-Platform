@@ -16,6 +16,8 @@ import {
 
 const app = express();
 
+// Trust proxy required for express-rate-limit behind reverse proxies (like Render)
+app.set('trust proxy', 1);
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN
