@@ -23,7 +23,7 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN
 ]
   .flatMap((value) => (value ? value.split(",") : []))
-  .map((value) => value.trim())
+  .map((value) => value.trim().replace(/\/+$/, ""))
   .filter(Boolean);
 
 logger.info(
