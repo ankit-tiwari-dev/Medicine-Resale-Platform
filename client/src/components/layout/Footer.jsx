@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-6 py-14 lg:py-16">
                 <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
                     <div className="lg:col-span-5 space-y-4">
-                        <Link to="/" className="inline-block text-lg font-black tracking-tighter text-foreground uppercase">
+                        <Link to="/" className="inline-block text-lg font-black tracking-tighter text-foreground normal-case">
                             MedAImart
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">

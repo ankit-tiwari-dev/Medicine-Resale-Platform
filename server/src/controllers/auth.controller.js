@@ -127,7 +127,11 @@ export const verifyOTP = asyncHandler(async (req, res) => {
         await user.save();
     }
 
-    await sendWelcome(user.email, user.name);
+    try {
+        await sendWelcome(user.email, user.name);
+    } catch (welcomeError) {
+        logger.error(`Failed to send welcome email to ${user.email}: ${welcomeError.message}`);
+    }
 
     const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
 
@@ -278,7 +282,11 @@ export const googleAuthCallback = asyncHandler(async (req, res) => {
                 isVerified: true,
                 googleId: profile.id
             });
-            await sendWelcome(user.email, user.name);
+            try {
+                await sendWelcome(user.email, user.name);
+            } catch (welcomeError) {
+                logger.error(`Failed to send welcome email to ${user.email}: ${welcomeError.message}`);
+            }
         }
 
         const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);

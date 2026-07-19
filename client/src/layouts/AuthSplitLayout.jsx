@@ -20,7 +20,7 @@ export default function AuthSplitLayout() {
               <AppLogo className="text-white" />
             </Link>
 
-            <h1 className="text-6xl font-black tracking-tighter uppercase leading-[0.85]">
+            <h1 className="text-6xl font-black tracking-tighter normal-case leading-[0.85]">
               MedAImart
             </h1>
 

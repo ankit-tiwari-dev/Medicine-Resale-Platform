@@ -129,7 +129,7 @@ export const sendKycSubmissionEmail = (email, name) => {
                 <p style="margin: 5px 0 0;">If any violation or fraud is detected during review, your documents and account may be permanently blacklisted. Please ensure all provided details are correct and match your original documents.</p>
             </div>
             <p>Before the final admin review starts, you can double-check your uploaded documents in the app.</p>
-            <p>Regards,<br>Team Medicine Resale Platform</p>
+            <p>Regards,<br>Team MedAImart</p>
         </div>
     `;
     return sendEmail(email, 'KYC Verification - Application Under Review', html);
@@ -143,7 +143,7 @@ export const sendKycApprovalEmail = (email, name) => {
             <p>We are pleased to inform you that your identity documents have been successfully verified by our team.</p>
             <p><strong>Your account is now fully active.</strong> You can now log in as a Rider and start accepting delivery tasks.</p>
             <p>Welcome aboard!</p>
-            <p>Regards,<br>Team Medicine Resale Platform</p>
+            <p>Regards,<br>Team MedAImart</p>
         </div>
     `;
     return sendEmail(email, 'KYC Verification - Approved', html);
@@ -160,7 +160,7 @@ export const sendKycRejectionEmail = (email, name, reason) => {
                 <p style="margin: 5px 0 0;">${reason || "Your documents did not meet our verification standards."}</p>
             </div>
             <p>If you believe this was an error, you can re-upload clear, original photos of your documents in the app.</p>
-            <p>Regards,<br>Team Medicine Resale Platform</p>
+            <p>Regards,<br>Team MedAImart</p>
         </div>
     `;
     return sendEmail(email, 'KYC Verification - Rejected', html);

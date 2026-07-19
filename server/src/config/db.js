@@ -4,11 +4,19 @@ import logger from "../utils/logger.js";
 
 const connectDB = async (uri = process.env.MONGODB_URI) => {
     try {
-        // Ensure URI doesn't end with a slash before appending DB_NAME
-        const cleanUri = uri.endsWith('/') ? uri.slice(0, -1) : uri;
-        const connectionUri = `${cleanUri}/${DB_NAME}`;
+        let connectionUri;
+        try {
+            const parsedUrl = new URL(uri);
+            if (!parsedUrl.pathname || parsedUrl.pathname === '/') {
+                parsedUrl.pathname = `/${DB_NAME}`;
+            }
+            connectionUri = parsedUrl.toString();
+        } catch (e) {
+            const cleanUri = uri.endsWith('/') ? uri.slice(0, -1) : uri;
+            connectionUri = `${cleanUri}/${DB_NAME}`;
+        }
 
-        logger.info(`Connecting to MongoDB: ${cleanUri.split('@')[1] || cleanUri} ...`);
+        logger.info(`Connecting to MongoDB: ${connectionUri.split('@')[1] || connectionUri} ...`);
 
         const connectionInstance = await mongoose.connect(connectionUri, {
             writeConcern: { w: 1 },

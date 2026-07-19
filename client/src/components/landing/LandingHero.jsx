@@ -5,22 +5,21 @@ const LandingHero = () => {
   return (
     <div className="relative py-32 lg:py-56 overflow-hidden bg-background flex flex-col items-center text-center px-6">
       <div className="max-w-4xl space-y-10">
-        <p className="text-xs font-bold uppercase tracking-[0.35em] text-primary">
+        <p className="text-xs font-bold tracking-[0.35em] text-primary normal-case">
           MedAImart
         </p>
 
-        <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.05] uppercase font-serif">
+        <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.05] normal-case font-serif">
           MedAImart
         </h1>
 
-        <p className="text-xl lg:text-2xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed">
-          Secure marketplace for buying and selling verified medicines.
+        <p className="text-xl lg:text-2xl text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed">
+          A secure peer-to-peer marketplace for buying, selling, and redistributing verified surplus medicines.
         </p>
 
         <p className="text-base lg:text-lg text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed">
-          MedAImart is a web application that connects buyers, sellers, and delivery partners to
-          trade verified medical supplies safely. List medicines, browse verified inventory,
-          place orders, and manage payments in one trusted platform.
+          MedAImart is a web application and technology platform that connects verified buyers, sellers, and delivery partners.
+          It provides a structured environment to list unexpired, surplus medicines, browse quality-checked inventory, complete transactions via secure wallet escrows, and coordinate deliveries with registered logistics riders, thereby reducing pharmaceutical waste and improving access to affordable healthcare.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">

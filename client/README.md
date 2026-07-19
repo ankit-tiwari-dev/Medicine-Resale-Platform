@@ -1,16 +1,51 @@
-# React + Vite
+# MedAImart Client Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the React + Vite frontend for **MedAImart**, a secure peer-to-peer marketplace for buying, selling, and redistributing verified surplus medicines.
 
-Currently, two official plugins are available:
+## Google Search Console Site Verification
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+To verify ownership of the home page URL (`https://medicine-resale-platform.vercel.app`) in Google Search Console, you can use either of the following two options:
 
-## React Compiler
+### Option A: Via Meta Tag (Recommended)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Log in to your [Google Search Console](https://search.google.com/search-console).
+2. Add your website property: `https://medicine-resale-platform.vercel.app`.
+3. Choose the **HTML tag** verification method.
+4. Copy the unique verification string from the `content="..."` attribute of the provided meta tag.
+   - *Example:* If Google gives you `<meta name="google-site-verification" content="ABC_123_xyz..." />`, your token is `ABC_123_xyz...`.
+5. Go to your hosting dashboard (e.g., Vercel / Netlify / AWS).
+6. Under **Environment Variables**, add:
+   ```env
+   VITE_GOOGLE_SITE_VERIFICATION=your_token_here
+   ```
+7. Re-deploy the application. The build system will automatically inject this token into the home page's `<meta name="google-site-verification" content="..." />` tag.
+8. Click **Verify** in the Google Search Console dashboard.
 
-## Expanding the ESLint configuration
+### Option B: Via HTML File Upload
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Log in to [Google Search Console](https://search.google.com/search-console).
+2. Choose the **HTML file** verification method and download the verification file (e.g., `googlee0b7a8d5b8830113.html`).
+3. Place this downloaded file directly into the `client/public/` folder of this repository:
+   ```bash
+   client/public/googlee0b7a8d5b8830113.html
+   ```
+4. Commit and push the file to redeploy. Because the `public` directory is served at the root in Vite, Vercel will host this file directly at:
+   `https://medicine-resale-platform.vercel.app/googlee0b7a8d5b8830113.html`
+5. Click **Verify** in the Google Search Console dashboard.
+
+---
+
+## Development Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Run local development server:
+   ```bash
+   npm run dev
+   ```
+3. Build for production:
+   ```bash
+   npm run build
+   ```
