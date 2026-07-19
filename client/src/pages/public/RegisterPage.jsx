@@ -76,7 +76,15 @@ const RegisterPage = () => {
         </Button>
 
         <p className="text-[10px] text-muted-foreground/60 text-center font-bold uppercase tracking-widest px-4">
-          By creating an account, you agree to our terms.
+          By creating an account, you agree to our{" "}
+          <Link to="/terms" className="text-foreground hover:text-primary transition-colors underline underline-offset-2">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="text-foreground hover:text-primary transition-colors underline underline-offset-2">
+            Privacy Policy
+          </Link>
+          .
         </p>
 
         <div className="pt-6 border-t border-border/40 mt-2">

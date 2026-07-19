@@ -15,12 +15,12 @@ export default function Footer() {
                         <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
                             Home
                         </Link>
-                        <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                        <Link to="/terms" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
                             Terms
-                        </a>
-                        <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                        </Link>
+                        <Link to="/privacy" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
                             Privacy
-                        </a>
+                        </Link>
                     </nav>
 
                     <p className="text-[10px] font-bold text-muted-foreground/40 tracking-widest uppercase">

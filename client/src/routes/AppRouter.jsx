@@ -21,6 +21,8 @@ import RaiseDisputePage from "../pages/public/RaiseDisputePage";
 import SellerReviewsPage from "../pages/public/SellerReviewsPage";
 import MedicineReviewsPage from "../pages/public/MedicineReviewsPage";
 import ForgotPasswordPage from "../pages/public/ForgotPasswordPage";
+import PrivacyPolicyPage from "../pages/public/PrivacyPolicyPage";
+import TermsOfServicePage from "../pages/public/TermsOfServicePage";
 
 import DashboardHomePage from "../pages/user/DashboardHomePage";
 import MyMedicinesPage from "../pages/user/MyMedicinesPage";
@@ -69,6 +71,8 @@ const AppRouter = () => {
           <Route path="/disputes/raise" element={<ProtectedRoute><RaiseDisputePage /></ProtectedRoute>} />
           <Route path="/reviews/seller/:sellerId" element={<SellerReviewsPage />} />
           <Route path="/reviews/medicine/:medicineId" element={<MedicineReviewsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
         </Route>
 
         <Route element={<AuthSplitLayout />}>
