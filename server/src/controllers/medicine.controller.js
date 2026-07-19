@@ -33,7 +33,7 @@ const extractMedicineDetails = async (file, forceMock = false) => {
             "https://api.groq.com/openai/v1/chat/completions",
             {
                 // Explicitly targeting the deployment model identifier string
-                model: "qwen-3.6-27b",
+                model: "qwen/qwen3.6-27b",
                 messages: [
                     {
                         role: "user",
