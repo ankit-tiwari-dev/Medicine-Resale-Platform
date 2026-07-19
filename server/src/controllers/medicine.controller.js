@@ -3,35 +3,37 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Medicine } from "../models/medicine.model.js";
 import { MIN_EXPIRY_DAYS } from "../utils/constants.js";
-
 import { uploadToCloudinary } from "../utils/cloudinary.helper.js";
 import axios from "axios";
-
-
 
 const extractMedicineDetails = async (file, forceMock = false) => {
     try {
         const apiKey = process.env.GROQ_API_KEY;
 
-        if (!apiKey || forceMock) {
+        // Ensure forceMock behaves correctly as a strict boolean check
+        if (!apiKey || forceMock === true || forceMock === "true") {
             console.log("AI Extraction: Falling back to Mock data (API Key missing or forceMock enabled)");
             return {
                 name: "Mock Medicine " + Math.floor(Math.random() * 100),
                 expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
                 batchNumber: "MOCK-BATCH",
                 mrp: 100,
+                isMedical: true,
+                imageQuality: "clear",
+                description: "Mock medicine summary for safe distribution testing.",
+                rejectionReason: "",
                 aiNote: forceMock ? "Manual Mock Mode" : "Groq API Key missing (Mock Fallback)"
             };
         }
 
         const imageBase64 = file.buffer.toString("base64");
-
-        console.log("AI Extraction: Sending request to Meta Llama 4 Scout Vision...");
+        console.log("AI Extraction: Sending request to Qwen Vision via Groq...");
 
         const response = await axios.post(
             "https://api.groq.com/openai/v1/chat/completions",
             {
-                model: "qwen/qwen3.6-27b",
+                // Explicitly targeting the deployment model identifier string
+                model: "qwen-3.6-27b",
                 messages: [
                     {
                         role: "user",
@@ -99,7 +101,7 @@ const extractMedicineDetails = async (file, forceMock = false) => {
             imageQuality: data.image_quality || "clear",
             isMedical: data.is_medical !== false,
             rejectionReason: data.rejection_reason || "",
-            aiNote: "Processed via Meta Llama 4 Scout Vision"
+            aiNote: "Processed via Qwen 3.6 Vision Model"
         };
 
         console.log("AI Extraction: Successfully processed image.");
@@ -112,27 +114,26 @@ const extractMedicineDetails = async (file, forceMock = false) => {
             expiryDate: null,
             batchNumber: "N/A",
             mrp: 0,
+            isMedical: true,
+            imageQuality: "clear",
+            description: "AI extraction failed. Please check parameters.",
+            rejectionReason: "",
             aiError: error.message,
             aiNote: "AI extraction failed. Please enter details manually."
         };
     }
 };
 
-
-
-
 const getExpiryValidationError = (expiryDate) => {
     if (!expiryDate) return null;
     const date = new Date(expiryDate);
 
-    // Check for Invalid Date
     if (isNaN(date.getTime())) {
         console.error(`Invalid expiry date received: ${expiryDate}`);
         return "Invalid expiry date format";
     }
 
     const now = new Date();
-    // Use start of day for both to be fair and avoid small negative diffs
     const dateClone = new Date(date);
     dateClone.setHours(0, 0, 0, 0);
 
@@ -172,7 +173,6 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         try {
             extractedData = typeof clientExtractedData === 'string' ? JSON.parse(clientExtractedData) : clientExtractedData;
             console.log("AI Extraction: Validating pre-extracted data from client.");
-            // Handle different key naming/mismatch
             const rawExpiry = extractedData.expiryDate || extractedData.expiry_date || extractedData.expiry;
             if (rawExpiry) {
                 extractedData.expiryDate = new Date(rawExpiry);
@@ -183,7 +183,14 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
     }
 
     if (!extractedData) {
-        extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
+        // Enforce strict casting evaluation for form-data string inputs
+        const isMockForced = forceMock === 'true' || forceMock === true;
+        extractedData = await extractMedicineDetails(req.file, isMockForced);
+    }
+
+    // Business Logic Validation Block
+    if (extractedData?.isMedical === false) {
+        throw new ApiError(400, extractedData.rejectionReason || "Verification Alert: This product does not appear to be a medical item.");
     }
 
     const expiryError = getExpiryValidationError(extractedData?.expiryDate);
@@ -201,8 +208,8 @@ export const uploadMedicine = asyncHandler(async (req, res) => {
         extractedData,
         stock: Number(stock) || 1,
         description,
-        price: (extractedData.mrp || 0) * 0.7, // Mandatory 30% discount
-        status: 'pending', // Initialize as pending for AI Audit tab
+        price: (extractedData.mrp || 0) * 0.7, 
+        status: 'pending', 
         pickupLocation,
         pickupCoordinates
     });
@@ -218,7 +225,15 @@ export const scanMedicineImage = asyncHandler(async (req, res) => {
     }
 
     const { forceMock } = req.body;
-    const extractedData = await extractMedicineDetails(req.file, forceMock === 'true' || forceMock === true);
+    const isMockForced = forceMock === 'true' || forceMock === true;
+    const extractedData = await extractMedicineDetails(req.file, isMockForced);
+
+    // Provide immediate error fallback response structure if AI filters it out
+    if (extractedData?.isMedical === false) {
+        return res.status(200).json(
+            new ApiResponse(200, extractedData, "Product failed pharmaceutical verification metrics.")
+        );
+    }
 
     return res.status(200).json(
         new ApiResponse(200, extractedData, "AI Scan completed successfully")
@@ -229,38 +244,32 @@ export const getMedicines = asyncHandler(async (req, res) => {
     const { status, search, minPrice, maxPrice, expiryAfter, sort } = req.query;
     const filter = {};
 
-    // Status filter
     if (status) {
         filter.status = status;
     } else {
         filter.status = 'listed';
     }
 
-    // Exclude reserved items (if reserved by someone else and reservation hasn't expired)
     filter.$or = [
         { reservedUntil: { $exists: false } },
         { reservedUntil: { $lte: new Date() } },
-        { reservedBy: req.user?._id } // Allow the person who reserved it to still see/buy it
+        { reservedBy: req.user?._id } 
     ];
 
-    // Search by medicine name (using Text Index for fuzzy match)
     if (search) {
         filter.$text = { $search: search };
     }
 
-    // Price range filter
     if (minPrice || maxPrice) {
         filter.price = {};
         if (minPrice) filter.price.$gte = parseFloat(minPrice);
         if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
     }
 
-    // Expiry date filter (medicines expiring after specified date)
     if (expiryAfter) {
         filter['extractedData.expiryDate'] = { $gte: new Date(expiryAfter) };
     }
 
-    // Advanced Quality Filters
     if (req.query.verified === 'true') {
         filter.adminVerified = true;
     }
@@ -268,10 +277,8 @@ export const getMedicines = asyncHandler(async (req, res) => {
         filter.riderVerified = true;
     }
 
-    // Build query
     let query;
     if (search) {
-        // Sort by text search score if searching
         query = Medicine.find(filter, { score: { $meta: "textScore" } })
             .sort({ score: { $meta: "textScore" } });
     } else {
@@ -280,7 +287,6 @@ export const getMedicines = asyncHandler(async (req, res) => {
 
     query = query.populate("sellerId", "name email");
 
-    // Sorting
     if (sort) {
         switch (sort) {
             case 'price_asc':
@@ -308,7 +314,7 @@ export const getMedicines = asyncHandler(async (req, res) => {
 
 export const updateMedicineDetails = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, expiryDate, batchNumber, price, description, stock } = req.body;
+    const { name, expiryDate, batchNumber, description, stock } = req.body;
 
     const medicine = await Medicine.findById(id);
 
@@ -320,7 +326,6 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized to update this medicine");
     }
 
-    // Strict Protection: Block updates if status is locked
     const lockedStatuses = ['sold', 'collected', 'pickup_assigned'];
     if (lockedStatuses.includes(medicine.status?.toLowerCase()) && req.user.role !== 'admin') {
         throw new ApiError(400, `Cannot update listing as it is currently in '${medicine.status}' status`);
@@ -338,14 +343,13 @@ export const updateMedicineDetails = asyncHandler(async (req, res) => {
     if (description) medicine.description = description;
     if (stock !== undefined) medicine.stock = Number(stock);
 
-    // Enforce 30% discount even on technical updates
     if (medicine.extractedData.mrp) {
         medicine.price = (medicine.extractedData.mrp || 0) * 0.7;
     }
 
     if (name || expiryDate || batchNumber) {
         medicine.adminVerified = false;
-        medicine.status = 'pending'; // Keep in verification gate
+        medicine.status = 'pending'; 
     }
 
     await medicine.save();
@@ -386,12 +390,10 @@ export const deleteMedicine = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Medicine not found");
     }
 
-    // Authorization check
     if (medicine.sellerId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
         throw new ApiError(403, "Unauthorized to delete this listing");
     }
 
-    // Strict Protection: block deletion if medicine is SOLD, COLLECTED or PICKUP_ASSIGNED
     const lockedStatuses = ['sold', 'collected', 'pickup_assigned'];
     if (lockedStatuses.includes(medicine.status?.toLowerCase()) && req.user.role !== 'admin') {
         throw new ApiError(400, `Cannot delete a listing that is ${medicine.status}`);
