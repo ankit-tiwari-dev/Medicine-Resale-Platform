@@ -12,6 +12,7 @@ export default function Header() {
 
     const navLinks = [
         { name: "Home", path: "/", icon: Home },
+        { name: "About", path: "/#about", isHash: true, icon: Info },
         { name: "How It Works", path: "/#how-it-works", isHash: true, icon: Info },
         { name: "Sell Medicines", path: "/register", icon: PlusCircle },
     ];

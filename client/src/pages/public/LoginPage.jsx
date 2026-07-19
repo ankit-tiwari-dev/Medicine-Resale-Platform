@@ -46,8 +46,8 @@ const LoginPage = () => {
 
   return (
     <AuthCard
-      title="Login"
-      subtitle="Login to your account."
+      title="Login to MedAImart"
+      subtitle="Sign in to your MedAImart account with email or Google."
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {error && <AlertMessage variant="destructive" message={error} />}
@@ -102,7 +102,7 @@ const LoginPage = () => {
           href={getGoogleOAuthUrl()}
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="mr-3 h-4 w-4" />
-          Google Account
+          Continue with Google
         </a>
 
         <div className="pt-6 space-y-4 border-t border-border/40 mt-2">

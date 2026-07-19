@@ -5,14 +5,22 @@ const LandingHero = () => {
   return (
     <div className="relative py-32 lg:py-56 overflow-hidden bg-background flex flex-col items-center text-center px-6">
       <div className="max-w-4xl space-y-10">
+        <p className="text-xs font-bold uppercase tracking-[0.35em] text-primary">
+          MedAImart
+        </p>
+
         <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.05] uppercase font-serif">
-          Buy and sell <br />
-          <span className="text-primary font-serif">verified medicines.</span>
+          MedAImart
         </h1>
 
-        <p className="text-lg lg:text-xl text-muted-foreground font-medium max-w-xl mx-auto leading-relaxed">
-          A secure platform to trade medical supplies with trust.
-          Every item is verified for quality.
+        <p className="text-xl lg:text-2xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed">
+          Secure marketplace for buying and selling verified medicines.
+        </p>
+
+        <p className="text-base lg:text-lg text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed">
+          MedAImart is a web application that connects buyers, sellers, and delivery partners to
+          trade verified medical supplies safely. List medicines, browse verified inventory,
+          place orders, and manage payments in one trusted platform.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">

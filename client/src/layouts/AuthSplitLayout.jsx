@@ -21,14 +21,14 @@ export default function AuthSplitLayout() {
             </Link>
 
             <h1 className="text-6xl font-black tracking-tighter uppercase leading-[0.85]">
-              Buy and sell <br />
-              <span className="text-white/20">verified medicines.</span>
+              MedAImart
             </h1>
 
             <div className="h-px w-12 bg-white/20" />
 
-            <p className="text-xs font-bold uppercase tracking-widest text-white/40">
-              Secure Session Active
+            <p className="text-sm font-medium leading-relaxed text-white/60">
+              MedAImart is a secure web application for buying and selling verified medicines.
+              Sign in with your Google account or email to access your dashboard.
             </p>
           </div>
         </aside>
